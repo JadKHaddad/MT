@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    participant AA as Alarmanlage
+    participant MARC as MARC
+    participant DB as Datenbank
+    participant MA as Mitarbeiter
+
+    AA->>MARC: Alarmmeldung (erste Übertragung)
+    MARC->>DB: Alarmmeldung wird persistiert
+    DB-->>MARC: Bestätigung
+    Note over AA,MARC: Netzwerkfehler
+    MARC--xAA: Keine Bestätigung
+
+    AA->>MARC: Alarmmeldung (zweite Übertragung)
+    MARC->>DB: Alarmmeldung wird persistiert
+    DB-->>MARC: Bestätigung
+    MARC-->>AA: Bestätigung
+
+    MA->>DB: Verarbeitung der Alarmmeldung
+    MA->>DB: Verarbeitung derselben Alarmmeldung
+    Note over DB,MA: Exactly-Once-Delivery verletzt

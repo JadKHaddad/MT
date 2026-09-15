@@ -1,0 +1,27 @@
+sequenceDiagram
+    autonumber
+    participant AA as Alarmanlage
+    participant NET as Netzwerk
+    participant MARC as MARC
+    participant DB as Datenbank
+    participant MA as Mitarbeiter
+
+    Note over NET: Hohe Latenz
+    AA->>NET: Alarm
+    AA->>NET: Entwarnung
+
+    NET->>MARC: Entwarnung
+    MARC->>DB: Entwarnung wird persistiert
+    DB-->>MARC: Bestätigung der Entwarnung
+    MARC-->>NET: Bestätigung der Entwarnung
+    NET-->>AA: Bestätigung der Entwarnung
+
+    NET->>MARC: Alarm (verspätet)
+    MARC->>DB: Alarm wird persistiert
+    DB-->>MARC: Bestätigung des Alarms
+    MARC-->>NET: Bestätigung des Alarms
+    NET-->>AA: Bestätigung des Alarms
+
+    MA->>DB: Verarbeitung der Entwarnung
+    MA->>DB: Verarbeitung des Alarms
+    Note over DB,MA: In-Order-Delivery verletzt

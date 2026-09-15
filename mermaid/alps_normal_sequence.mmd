@@ -1,0 +1,23 @@
+%%{init: { 'themeVariables': { 'actorLineColor': '#EAEAEA', 'signalTextColor': '#000000' } } }%%
+sequenceDiagram
+    autonumber
+    participant L1 as ALP 1
+    participant QA as Queue A
+    participant QB as Queue B
+    participant L2A as ALP 2 Instanz A
+    participant L2B as ALP 2 Instanz B
+    participant S2 as SRV 2
+
+    L1->>QA: Alarmmeldung A
+    QA-->>L1: Bestätigung A
+    QA->>L2A: Alarmmeldung A
+    L2A->>S2: Weiterleitung A
+    S2-->>L2A: Bestätigung A
+    L2A-->>QA: Bestätigung A
+    
+    L1->>QB: Alarmmeldung B
+    QB-->>L1: Bestätigung B
+    QB->>L2B: Alarmmeldung B
+    L2B->>S2: Weiterleitung B
+    S2-->>L2B: Bestätigung B
+    L2B-->>QB: Bestätigung B

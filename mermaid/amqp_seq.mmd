@@ -1,0 +1,12 @@
+sequenceDiagram
+    autonumber
+    participant P as Producer
+    participant E as Exchange
+    participant Q as Queue
+    participant C as Consumer
+
+    P->>E: PUBLISH
+    E->>Q: Nachricht wird eingereiht
+    Q->>C: DELIVER
+    C->>Q: ACK
+    Note over Q: Nachricht wird aus dem Queue entfernt

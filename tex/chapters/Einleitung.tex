@@ -1,0 +1,19 @@
+\chapter{Einleitung}
+\label{ch:einleitung}
+
+Viele geschäftskritische Legacy-Systeme werden weit über ihren ursprünglich geplanten Lebenszyklus hinaus betrieben und stetig weiterentwickelt. % Review-Punkt 3: „der Technik“
+Obwohl die zugrunde liegenden Programmstrukturen und der Stand der Technik oft nicht mehr aktuell sind, bilden diese Systeme weiterhin ein unverzichtbares Rückgrat in produktiven Umgebungen~\citep{363157}. Solche Systeme weisen häufig Architekturmerkmale auf, die Skalierbarkeit, Wartbarkeit und Performance negativ beeinflussen. % Review-Punkt 2: Formulierung glätten (Weiterentwicklung; aus historischen Gründen)
+Historisch bedingt konzentriert sich ihre Weiterentwicklung meist auf die Erfüllung funktionaler Anforderungen und ließ zukünftige Herausforderungen bezüglich Skalierbarkeit und Wartbarkeit außer Acht~\citep{refactoring_for_software_architecture_smells}. Dieser Prozess begünstigt die Entstehung sogenannter Design Smells.
+
+Im Gegensatz zu direkten Programmfehlern sind diese Smells Indikatoren für tiefere strukturelle Mängel, die die Verständlichkeit, Wartbarkeit und Testbarkeit eines Systems beeinträchtigen~\citep{software_design_smell_detection}. Sie entstehen oft durch bewusste Abkürzungen zugunsten einer schnelleren Auslieferung. Design Smells wirken sich negativ auf die weitere Entwicklung aus, verschlechtern die Wartbarkeit und erschweren die Erfüllung wachsender funktionaler Anforderungen~\citep{sharma2020}.
+
+Die Bewältigung dieser angesammelten technischen Herausforderungen erfordert Reengineering und Refactoring, um die Codebasis wieder an aktuelle funktionale sowie nicht-funktionale Qualitätsansprüche anzupassen~\citep{laguna_systematic_2013, majthoub_software_2018}.
+
+Ein Reengineering kann tiefgreifende Änderungen am Quellcode umfassen oder sich auf die Neustrukturierung der zugrunde liegenden Architektur konzentrieren~\citep{laguna_systematic_2013}. % Review-Punkt 15: einheitlich „klassisch“ statt „traditionell“
+% Review-Punkt 4: kein „traditionell“ im Refactoring-Kontext
+% Review-Punkt 5: Abgrenzung Reengineering vs. Code-Refactoring; Risiko nicht nur beim Code-Refactoring
+Während klassisches \textit{Code-Refactoring} darauf abzielt, die interne Codestruktur ohne Änderung des beobachtbaren Verhaltens zu verbessern, erweisen sich sowohl tiefgreifende Code-Eingriffe als auch architektonische Reengineering-Maßnahmen im industriellen Umfeld häufig als zeitaufwändig und riskant~\citep{stevens_systems_1998, matthiesen_why_2015}. Code-Refactoring bleibt dabei lokal auf den Codebestand bezogen; Reengineering kann darüber hinaus Modelle und Architektur umfassen.
+
+Diese Masterarbeit betrachtet eine spezifische Klasse verteilter Legacy-Sys\-te\-me mit den folgenden Eigenschaften: Es handelt sich um langlebige, geschäfts\-kritische Systeme im Produktivbetrieb mit einer umfangreichen, jedoch kaum dokumentierten Codebasis. Aufgrund der fehlenden Dokumentation wird das interne Systemverhalten nicht mehr im Detail verstanden. Zudem steht die Expertise der ursprünglichen Entwickler nicht mehr zur Verfügung. Dadurch stellt jede Code-Änderung ein erhebliches Risiko dar, weil Änderungen an einer Stelle unvorhersehbare Seiteneffekte in anderen Teilen des Systems auslösen können.
+
+Aus diesem Grund konzentriert sich diese Masterarbeit auf die strukturelle Optimierung der Systemarchitektur, um die Auswirkungen der Design Smells zu reduzieren, ohne den bestehenden Quellcode anzupassen. Ziel ist es, die Systemarchitektur so zu transformieren, dass sie aktuellen Anforderungen an Skalierbarkeit, Wartbarkeit und Antwortzeiten gerecht wird, während die bestehenden funktionalen Anforderungen erhalten bleiben.

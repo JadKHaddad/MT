@@ -1,0 +1,21 @@
+{
+    "theme": "base",
+    "themeVariables": {
+        "actorBkg": "#ffffff",
+        "actorBorder": "#333333",
+        "actorTextColor": "#000000",
+        "actorLineColor": "#333333",
+        "signalColor": "#333333",
+        "signalTextColor": "#000000",
+        "labelBoxBkgColor": "#ffffff",
+        "labelBoxBorderColor": "#333333",
+        "labelTextColor": "#000000",
+        "loopTextColor": "#000000",
+        "noteBkgColor": "#fff5ad",
+        "noteBorderColor": "#aaaa33",
+        "noteTextColor": "#000000",
+        "activationBkgColor": "#f4f4f4",
+        "activationBorderColor": "#666666",
+        "sequenceNumberColor": "#ffffff"
+    }
+}

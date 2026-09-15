@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant Client as Publisher
+    participant Broker as Broker
+
+    alt Normalbetrieb
+        Client->>Broker: PUBLISH
+        Broker-->>Client: PUBACK
+    else Fehlerfall
+        Client->>Broker: PUBLISH
+        Note over Broker: Nachricht wird gespeichert
+        Note over Client,Broker: Netzwerkfehler
+        Broker--xClient: Kein PUBACK
+        Note over Client: Timeout
+        Client->>Broker: PUBLISH (erneute Übertagung)
+        Note over Broker: Duplikat erkannt
+        Broker-->>Client: PUBACK
+    end

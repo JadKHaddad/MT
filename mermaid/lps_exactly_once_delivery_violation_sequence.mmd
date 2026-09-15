@@ -1,0 +1,19 @@
+%%{init: { 'themeVariables': { 'actorLineColor': '#EAEAEA', 'signalTextColor': '#000000' } } }%%
+sequenceDiagram
+    autonumber
+    participant B as Broker
+    participant L1 as LP 2 Instanz A
+    participant L2 as LP 2 Instanz B
+    participant S as SRV 2
+
+    B->>L1: Alarmmeldung wird konsumiert
+    L1->>S: Weiterleitung
+    S-->>L1: Bestätigung
+    Note over B,L1: Netzwerkfehler
+    L1--xB: Keine Bestätigung
+
+    B->>L2: Gleiche Alarmmeldung wird konsumiert
+    L2->>S: Weiterleitung
+    S-->>L2: Bestätigung
+    Note over L2,S: Exactly-Once-Delivery verletzt
+    L2-->>B: Bestätigung

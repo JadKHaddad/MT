@@ -1,0 +1,94 @@
+
+%---------------------------------------------------------------------------
+%
+%                      Vorlage für Abschlussarbeiten der Informatik der Universität Münster
+%   Aufbauend auf den Vorlagen der CVPR Arbeitsgruppe und der DS Arbeitsgruppe
+%
+%---------------------------------------------------------------------------
+% Geeignet für:
+%  - Seminararbeiten
+%  - Bachelorarbeiten
+%  - Masterarbeiten
+%---------------------------------------------------------------------------
+% Autoren:
+%  - Daniel Tenbrinck
+%  - Fabian Gigengack
+%  - Michael Schmeing
+%  - Lucas Franek
+%  - Andreas Nienkötter
+%  - Tanya Braun
+%  - Carina da Silva
+%---------------------------------------------------------------------------
+% Version:
+%  -  2.1.0 (22.04.2025)
+%      - Anpassungen für Informatik allgemein (im Rahmen des Oberseminars 'Wissenschaftliches Arbeiten für Informatiker*innen')
+%      - Ergänzungen für deutsche Version
+%  - 2.0.0 (18.07.2022)
+%      - Änderung auf AG DS
+%  - 1.0.3 (05.10.2016)
+%	 - Ersetzung von veralteten Befehlen durch Aktuelle
+%	 - Einige ausführlichere Beispiele
+%    - Einführung von listings
+%    - Aktuelle Version der Eidesstattlichen Erklärung
+%  - 1.0.2 (09.09.2011)
+%    - Titelblatt um Matrikelnummer und Studiengang ergänzt
+%  - 1.0.1 (05.07.2011)
+%---------------------------------------------------------------------------
+% 
+% "THE BEER-WARE LICENSE" (Revision 42):
+% The above mentioned authors wrote this file. As long as you retain this
+% notice you can do whatever you want with this stuff. If we meet some day,
+% and you think this stuff is worth it, you can buy us a beer in return.
+%  --------------------------------------------------------------------------
+
+\documentclass[a4paper, twoside, openright, 12pt, bibliography=totoc, listof=totoc, numbers=noenddot]{scrbook} % Layout-Einstellungen für das Dokument / layout settings
+
+\raggedbottom
+
+\usepackage{ifthen}
+\newboolean{en}
+\setboolean{en}{false} % auf false setzen für deutsch, / set to true for english
+
+\input{tex/packages}
+\input{tex/glossaries}
+
+\begin{document}
+\pagenumbering{roman}
+
+% Titelblatt / title page
+\begin{titlepage}
+    \ifthenelse{\boolean{en}}{
+        \include{tex/titlepage}
+    }{
+        \include{tex/Titelblatt}
+    }
+\end{titlepage}
+
+%Danksagung (falls gewünscht) / acknowledgement (if desired)
+%\include{tex/acks} 
+
+% Inhaltsverzeichnis / Table of Contents
+\cleardoublepage\pdfbookmark{\contentsname}{toc} % Fügt eine Marke für das Inhaltsverzeichnis im pdf hinzu / adds a tag for the TOC in the pdf
+\tableofcontents
+
+% Abbildungs- und Tabellenverzeichnis; wenn nötig, anpassen / Lists of figures and tables; adjust if required
+\listoffigures
+\listoftables
+% \listofalgorithms
+% \lstlistoflistings
+\printnoidxglossaries
+
+% \cleardoublepage
+\pagenumbering{arabic}
+
+\include{tex/chapters/Abstrakt}
+\include{tex/chapters/Einleitung}
+\include{tex/chapters/Fallstudie}
+
+% Literaturverzeichnis / bibliography
+\bibliographystyle{plainnat}
+\bibliography{cites}
+
+\include{tex/Eidesstattliche-Erklaerung}
+
+\end{document}

@@ -1,0 +1,34 @@
+%%{init: { 'themeVariables': { 'actorLineColor': '#EAEAEA', 'signalTextColor': '#000000' } } }%%
+sequenceDiagram
+    autonumber
+    participant B as Broker
+    participant L1 as LP 2 Instanz A
+    participant L2 as LP 2 Instanz B
+    participant NET as Netzwerk
+    participant S as SRV 2
+    participant DB as Datenbank
+    
+    Note over NET: Hohe Latenz
+
+    B->>L1: Alarmmeldung A wird konsumiert
+    L1->>NET: Weiterleitung A
+
+    B->>L2: Alarmmeldung B wird konsumiert
+    L1->>NET: Weiterleitung B
+
+    NET->>S: Weiterleitung B
+    S->>DB: Alarmmeldung B wird persistiert
+
+    NET->>S: Weiterleitung A
+    S->>DB: Alarmmeldung A wird persistiert
+
+    Note over S,DB: In-Order-Delivery verletzt
+
+    DB-->>S: Bestätigung B
+    DB-->>S: Bestätigung A
+    S-->>NET: Bestätigung B
+    S-->>NET: Bestätigung A
+    NET-->>L2: Bestätigung B
+    NET-->>L1: Bestätigung A
+    L2-->>B: Bestätigung B
+    L1-->>B: Bestätigung A

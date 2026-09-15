@@ -1,0 +1,12 @@
+{
+    "version": "0.2",
+    "language": "en,de-DE",
+    "dictionaries": [
+        "de-de"
+    ],
+    "words": [
+        "Gebr",
+        "Schönweitz"
+    ],
+    "ignorePaths": []
+}

@@ -1,0 +1,20 @@
+%%{init: { 'themeVariables': { 'actorLineColor': '#EAEAEA', 'signalTextColor': '#000000' } } }%%
+sequenceDiagram
+    autonumber
+    participant L1 as ALP 1
+    participant Q as Queue
+    participant L2A as ALP 2 Instanz A
+    participant L2B as ALP 2 Instanz B
+    participant S2 as SRV 2
+
+    L1->>Q: Alarmmeldung
+    Q-->>L1: Bestätigung
+    Q->>L2A: Alarmmeldung
+    L2A->>S2: Weiterleitung
+    S2--xL2A: Negative Bestätigung
+    L2A--xQ: Negative Bestätigung
+ 
+    Q->>L2B: Alarmmeldung
+    L2B->>S2: Weiterleitung
+    S2-->>L2B: Bestätigung
+    L2B-->>Q: Bestätigung

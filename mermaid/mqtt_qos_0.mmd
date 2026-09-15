@@ -1,0 +1,7 @@
+sequenceDiagram
+    participant P as Publisher
+    participant B as Broker
+
+    P->>B: PUBLISH
+    B--xP: Keine Bestätigung
+    Note over P,B: Bei Netzwerkfehlern geht<br/>die Nachricht verloren

@@ -1,0 +1,64 @@
+%---------------------------------------------------------------------------
+%
+%                      Vorlage für Abschlussarbeiten der Informatik der Universität Münster
+%   Aufbauend auf den Vorlagen der CVPR Arbeitsgruppe und der DS Arbeitsgruppe
+%
+
+%!TEX root = ../main.tex
+
+\usepackage[utf8]{inputenc} % UTF-8 Codierung / utf-8 coding
+\ifthenelse{\boolean{en}}{}{
+\usepackage[ngerman]{babel} % Deutsche Beschriftung / for german language
+}
+
+\usepackage{graphicx} % Um Bilder einzufügen / to insert figures
+\usepackage{caption} 
+\usepackage{subcaption} % Um mehrere Bilder in eine figure einzufügen / to include subfigures into one figure
+\usepackage{amssymb, amsmath} % für verschiedene mathematische Darstellungen / for various mathematical representations
+\usepackage{verbatim} % Um Quellcode einzufügen / to add source code
+\usepackage{xcolor} % Für Farben / for colors
+\usepackage[linkbordercolor=blue]{hyperref} % Für Links / for hyperlinks %\usepackage[hidelinks]{hyperref}
+\usepackage[noend]{algpseudocode} % Für Pseudo-Code / for pseude-code
+\usepackage[chapter]{algorithm} % Wrapper für Pseudo-Code / wrapper for pseudo-code
+\usepackage[font={small}, labelfont=bf]{caption} % kleine Bildunterschriften / small figure captions
+\usepackage{geometry} % Für Feinanpassungen des Layouts / fine-tuning of the layout
+\usepackage{booktabs} % Für Tabellen / for tables
+\usepackage[numbers, square, sort&compress]{natbib} % Für vernünftiges Zitieren
+\usepackage{float}
+\usepackage{listings} % Für Code-Listings / for code listings
+\usepackage{scrhack}
+\usepackage{xurl}
+
+\usepackage{csquotes}
+\usepackage[acronym]{glossaries}
+
+\ifthenelse{\boolean{en}}{
+\usepackage[capitalise]{cleveref} %for references: \Cref{} at the beginning of a sentence; \cref{} everywhere else
+}{
+\usepackage[capitalise,german]{cleveref} % \Cref{} für Großschreibung
+}
+
+%Einstellungen für Quelltexte und Algorithmen / setttings for listings
+\newfloat{listing}{tbhp}{lop}
+\crefname{algorithm}{Alg.}{Algs.}
+\ifthenelse{\boolean{en}}{
+\renewcommand{\lstlistingname}{Listing}  
+\renewcommand{\lstlistlistingname}{List of Listings}
+\crefname{listing}{Listing}{Listings}
+\Crefname{listing}{Listing}{Listings}
+\Crefname{algorithm}{Algorithm}{Algorithms}
+}{
+\renewcommand{\lstlistingname}{Quelltext} 
+\renewcommand{\lstlistlistingname}{Quelltextverzeichnis} 
+\crefname{listing}{Quelltext}{Quelltexte}
+\Crefname{listing}{Quelltext}{Quelltexte}
+\floatname{algorithm}{Algorithmus}
+\renewcommand{\listalgorithmname}{Algorithmenverzeichnis} 
+\Crefname{algorithm}{Algorithmus}{Algorithmen}
+}
+
+
+
+% Einstellungen für Abstand an den Rändern / settings for margins
+\geometry{a4paper,left=35mm,right=35mm,top=20mm,bottom=20mm, includeheadfoot}
+

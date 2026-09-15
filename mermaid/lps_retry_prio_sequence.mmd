@@ -1,0 +1,24 @@
+%%{init: { 'themeVariables': { 'actorLineColor': '#EAEAEA', 'signalTextColor': '#000000' } } }%%
+sequenceDiagram
+    autonumber
+    participant LP1 as LP 1
+    participant B as Broker
+    participant P as Broker-Plugin
+    participant LP2 as LP 2
+    participant S as SRV 2
+
+    LP1->>B: Alarmmeldung wird in Main-Topic publiziert
+    B-->>LP1: Bestätigung
+
+    B->>LP2: Alarmmeldung wird aus dem Main-Topic konsumiert
+    LP2->>S: Weiterleitung
+    S--xLP2: Negative Bestätigung
+    LP2->>B: Alarmmeldung wird in Retry-Topic publiziert
+    Note over B,P: Retry-Topic enthält Nachrichten
+    P-->>B: Reguläre Auslieferung aus dem Main-Topic wird pausiert
+    B->>LP2: Alarmmeldung wird aus dem Retry-Topic konsumiert
+    LP2->>S: Weiterleitung
+    S-->>LP2: Positive Bestätigung
+    LP2-->>B: Bestätigung
+    Note over B,P: Retry-Topic enthält keine Nachrichten
+    P-->>B: Reguläre Auslieferung aus dem Main-Topic wird fortgesetzt

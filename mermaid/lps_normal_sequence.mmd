@@ -1,0 +1,17 @@
+sequenceDiagram
+    autonumber
+    participant S1 as SRV 1
+    participant LP1 as LP 1
+    participant B as Broker
+    participant LP2 as LP 2
+    participant S2 as SRV 2
+
+    S1->>LP1: Alarmmeldung
+    LP1->>B: Alarmmeldung wird publiziert
+    B-->>LP1: Bestätigung
+    LP1-->>S1: Bestätigung
+
+    B->>LP2: Alarmmeldung wird konsumiert
+    LP2->>S2: Weiterleitung 
+    S2-->>LP2: Bestätigung
+    LP2-->>B: Bestätigung

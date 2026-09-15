@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant Client as Publisher
+    participant Broker as Broker
+
+    Client->>Broker: PUBLISH
+    Note over Broker: Nachricht wird gespeichert
+    Broker-->>Client: PUBREC
+    
+    alt Normalbetrieb
+        Client->>Broker: PUBREL
+        Broker-->>Client: PUBCOMP
+    else Fehlerfall
+        Note over Client,Broker: Netzwerkfehler
+        Client--xBroker: Kein PUBREL
+        Note over Client: Timeout
+        Client->>Broker: PUBREL (erneute Übertagung)
+        Note over Broker: Duplikat erkannt
+        Broker-->>Client: PUBCOMP
+    end
