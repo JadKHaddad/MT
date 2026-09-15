@@ -5,7 +5,7 @@ Als Fallstudie betrachtet diese Masterarbeit das in~\citep{liebig_2025_architect
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/drawio/marc_simple.pdf}
+    \includegraphics[width=\textwidth]{./img/drawio/marc_simple.pdf}
     \caption{Vereinfachte Gesamtarchitektur des Legacy-Systems \acrshort{marc}.}
     \label{fig:marc_simple_architektur}
 \end{figure}
@@ -19,7 +19,7 @@ Nach dem Empfang einer Alarmmeldung durchläuft sie eine synchrone \textit{Reque
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/drawio/ars.pdf}
+    \includegraphics[width=\textwidth]{./img/drawio/ars.pdf}
     \caption{Interne Service-Architektur der Alarm Receiving Software (\acrshort{ars}).}
     \label{fig:ars_architektur}
 \end{figure}
@@ -28,7 +28,7 @@ Nach dem Empfang einer Alarmmeldung durchläuft sie eine synchrone \textit{Reque
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/drawio/marc.pdf}
+    \includegraphics[width=\textwidth]{./img/drawio/marc.pdf}
     \caption{Replizierte \acrshort{marc}-Architektur über drei Rechenzentren mit Aktiv-Aktiv- und Aktiv-Passiv-Betrieb.}
     \label{fig:marc_architektur}
 \end{figure}
@@ -54,7 +54,7 @@ Abbildung~\ref{fig:exactly_once_diagram} zeigt einen beispielhaften Kommunikatio
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/mermaid/marc_exactly_once_delivery_violation_sequence.pdf}
+    \includegraphics[width=\textwidth]{./img/mermaid/marc_exactly_once_delivery_violation_sequence.pdf}
     \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{Exactly-Once-Delivery} im \acrshort{marc}-System führt.}
     \label{fig:exactly_once_diagram}
 \end{figure}
@@ -63,7 +63,7 @@ Abbildung~\ref{fig:ein_order_diagram} zeigt einen beispielhaften Kommunikationsa
 
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/mermaid/marc_in_order_delivery_violation_sequence.pdf}
+    \includegraphics[width=\textwidth]{./img/mermaid/marc_in_order_delivery_violation_sequence.pdf}
     \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{In-Order-Delivery} im \acrshort{marc}-System führt.}
     \label{fig:ein_order_diagram}
 \end{figure}
@@ -78,7 +78,7 @@ Nachdem in vorherigen Abschnitten das \gls{marc}-System beschrieben wurde, betra
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/drawio/lps.pdf}
+    \includegraphics[width=\textwidth]{./img/drawio/lps.pdf}
     \caption{\acrshort{marc} nach Einfügung von \acrshort{lps} zwischen \acrshort{srv}~1 und \acrshort{srv}~2.}
     \label{fig:lps_architektur}
 \end{figure}
@@ -87,7 +87,7 @@ In der Proof-of-Concept-Implementierung der Arbeit~\citep{liebig_2025_architectu
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/mermaid/lps_normal_sequence.pdf}
+    \includegraphics[width=\textwidth]{./img/mermaid/lps_normal_sequence.pdf}
     \caption{Sequenzdiagramm eines beispielhaften Verarbeitungsablaufs einer Alarmmeldung innerhalb von \gls{lps} im Normalbetrieb.}
     \label{fig:lps_normalfluss}
 \end{figure}
@@ -106,7 +106,7 @@ Abbildung~\ref{fig:lps_retry_priorisierung} zeigt einen beispielhaften Verarbeit
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/mermaid/lps_retry_prio_sequence.pdf}
+    \includegraphics[width=\textwidth]{./img/mermaid/lps_retry_prio_sequence.pdf}
     \caption{Sequenzdiagramm eines beispielhaften Verarbeitungsablaufs einer Alarmmeldung innerhalb von \gls{lps} im Fehlerfall.}
     \label{fig:lps_retry_priorisierung}
 \end{figure}
@@ -173,7 +173,7 @@ Für die Durchführung der Experimente wird die originale Implementierung von \g
 % TODO: fix diagram
 \begin{figure}[hbtp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/drawio/exp_lps.pdf}
+    \includegraphics[width=\textwidth]{./img/drawio/exp_lps.pdf}
     \caption{Architektur der Experimente von \acrshort{lps} und Kommunikationspfade der beteiligten Komponenten.}
     \label{fig:exp_setup}
 \end{figure}
@@ -188,7 +188,7 @@ In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzu
     \centering
     \caption{Konfiguration des Experiments zur Verletzung der Exactly-Once-Delivery in \gls{lps}.}
     \label{tab:exp_lps_eod_config}
-    \begin{tabular}{ll}
+    \begin{tabular}{|l|l|}
         \hline
         Parameter                                    & Wert \\
         \hline
@@ -207,17 +207,21 @@ In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzu
     \centering
     \caption{Ergebnisse des Experiments zur Verletzung der Exactly-Once-Delivery in \gls{lps}.}
     \label{tab:exp_lps_eod_result}
-    \begin{tabular}{ll}
-        Wiederholte Durchführung des Experiments & 1 \\
-        Gesamtanzahl empfangener Alarmmeldungen  & 5 \\
-        Eindeutige empfangene Alarmmeldungen     & 1 \\
-        Mehrfach empfangene Alarmmeldungen       & 4 \\
+    \begin{tabular}{|l|l|}
+        \hline
+        Metrik                                   & Wert \\
+        \hline
+        Wiederholte Durchführung des Experiments & 1    \\
+        Gesamtanzahl empfangener Alarmmeldungen  & 5    \\
+        Eindeutige empfangene Alarmmeldungen     & 1    \\
+        Mehrfach empfangene Alarmmeldungen       & 4    \\
+        \hline
     \end{tabular}
 \end{table}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/mermaid/lps_exactly_once_delivery_violation_sequence.pdf}
+    \includegraphics[width=\textwidth]{./img/mermaid/lps_exactly_once_delivery_violation_sequence.pdf}
     \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Exactly-Once-Delivery in \gls{lps}.}
     \label{fig:lps_exactly_once_delivery_violation_sequence}
 \end{figure}
@@ -231,7 +235,7 @@ Die Auswahl der quantitativen Parameter wie \textit{Anzahl \gls{lpone} Instanzen
     \centering
     \caption{Konfiguration des Experiments zur Verletzung der In-Order-Delivery in \gls{lps}.}
     \label{tab:exp_lps_iod_config}
-    \begin{tabular}{ll}
+    \begin{tabular}{|l|l|}
         \hline
         Parameter                                            & Wert    \\
         \hline
@@ -250,17 +254,21 @@ Die Auswahl der quantitativen Parameter wie \textit{Anzahl \gls{lpone} Instanzen
     \centering
     \caption{Ergebnisse des Experiments zur Verletzung der In-Order-Delivery in \gls{lps}.}
     \label{tab:exp_lps_iod_result}
-    \begin{tabular}{ll}
-        Wiederholte Durchführung des Experiments    & 2 \\
-        Gesamtanzahl empfangener Alarmmeldungen     & 2 \\
-        Eindeutige empfangene Alarmmeldungen        & 2 \\
-        Außer Reihenfolge empfangene Alarmmeldungen & 2 \\
+    \begin{tabular}{|l|l|}
+        \hline
+        Metrik                                      & Wert \\
+        \hline
+        Wiederholte Durchführung des Experiments    & 2    \\
+        Gesamtanzahl empfangener Alarmmeldungen     & 2    \\
+        Eindeutige empfangene Alarmmeldungen        & 2    \\
+        Außer Reihenfolge empfangene Alarmmeldungen & 2    \\
+        \hline
     \end{tabular}
 \end{table}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]{./img/mermaid/lps_in_order_delivery_violation_sequence.pdf}
+    \includegraphics[width=\textwidth]{./img/mermaid/lps_in_order_delivery_violation_sequence.pdf}
     \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen zur Verletzung der In-Order-Delivery in \gls{lps}.}
     \label{fig:lps_in_order_delivery_violation_sequence}
 \end{figure}
