@@ -1,3 +1,5 @@
+.build/*.pdf
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
@@ -184,7 +186,7 @@ acs-*.bib
 *.maf
 *.mlf
 *.mlt
-*.mtc[0-9]*
+*.mtc[0-9]*b
 *.slf[0-9]*
 *.slt[0-9]*
 *.stc[0-9]*

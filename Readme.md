@@ -17,3 +17,7 @@ sudo npm install -g @mermaid-js/mermaid-cli
 ```bash
 ./create-mermaid.sh
 ```
+
+## Note on build
+
+We set `"latex-workshop.latex.outDir": "%DIR%/.build"` in `.vscode/settings.json` but latex does not create the `.build/tex/chapters` folder. So we have to create it manually.
