@@ -16,3 +16,25 @@ Die Anforderung an \gls{alps} lassen sich direkt aus den Vorteilen und Limitatio
     \item \textbf{In-Order-Delivery pro Alarmanlage garantieren}: Alarmmeldungen einzelner Alarmanlagen sollen in der richtigen Reihenfolge verarbeitet werden.
     \item \textbf{Vendor-Neutralität}: \gls{alps} soll nicht von einem bestimmten Vendor abhängig sein, um die Portabilität und Flexibilität von \gls{alps} zu ge\-währ\-leis\-ten.
 \end{itemize}
+
+\section{Architektur}
+\label{sec:alps-architektur}
+
+Die Erfüllung der beschriebeben Anforderungen erfordert Modifikationen an der bestehenden Architektur von \gls{lps}. Dafür übernimmt \gls{alps} die gleiche vorteilhafte asynchrone Architektur von \gls{lps} mit Modifikationen an den benutzten Technologien sowie Transportprotokollen, um Kontrolle über den Fluss der Alarmmeldungen zu gewährleisten und Koordination zwischen den Komponenten zu ermöglichen. Zusätzlich werden fehlende Funktionalitäten bei \gls{lps} wie \textit{Idempotenz} durch weitere Komponenten ergänzt. Als Resultat ergibt sich eine neue modifizierte Architektur, die aus vier Kernkomponenten besteht:
+
+\begin{itemize}
+    \item \textbf{\gls{alpone}}: Übernimmt die Aufgaben von \gls{lpone}. Wird hinter \gls{srv}~1 positioniert. Empfängt Alarmmeldungen von \gls{srv}~1 und leitet sie an den Message Broker weiter.
+    \item \textbf{Message Broker}: Speichert die eingehenden Alarmmeldungen zwischen und verteilt sie an \acrshort{alptwo}.
+    \item \textbf{\gls{alptwo}}: Übernimmt die Aufgaben von \gls{lptwo}. Wird vor \gls{srv}~2 positioniert. Konsumiert Alarmmeldungen vom Message Broker und leitet sie an \gls{srv}~2 weiter.
+    \item \textbf{\gls{alpdedup}}: Implementiert die Deduplizierungslogik von Alarmmeldungen. Wird unmittelbar vor dem letzten Service in der Verarbeitungskette positioniert (\gls{srv}~3 im \gls{marc}-System). Empfängt Alarmmeldungen von vorgelagerten Services und leitet nur die eindeutigen Alarmmeldungen an den nachgelagerten Service weiter.
+\end{itemize}
+
+Als Transportprotokoll zwischen den Komponenten wird \gls{amqp} verwendet, da \gls{amqp} die benötigten Mechanismen bietet, die die Kontrolle über den Fluss der Nachrichten bzw.~Alarmmeldungen und die Koordination zwischen den Komponenten ermöglichen. Konkret sollen mithilfe von \gls{amqp} Mechanismen folgende Anforderungen erfüllt werden:
+
+\begin{itemize}
+    \item Alarmmeldungen pro Alarmanlage sollen immer von einer bestimmten \gls{lptwo} Instanz verarbeitet werden: Beliebige Verteilung von Alarmmeldungen auf beliebige \gls{lptwo} Instanzen soll unterbunden werden.
+    \item Alarmmeldungen pro Alarmanlage sollen immer sequentiell von einer einzigen \gls{lptwo} Instanz verarbeitet werden: Parallele Verarbeitung von Alarmmeldungen einer einzelnen Alarmanlage soll unterbunden werden. Jedoch ist die parallele Verarbeitung von Alarmmeldungen verschiedener Alarmanlagen weiterhin erlaubt.
+    \item Übertragungsfehler in \gls{lptwo} Instanzen sollen nicht zu einer Verlust führen: Alarmmeldungen, die von einer \gls{lptwo} Instanz nicht verarbeitet werden können, sollen neu übertragen werden, bis sie erfolgreich verarbeitet wurden. Dabei soll die Reihenfolge der Alarmmeldungen pro Alarmanlage beibehalten werden.
+\end{itemize}
+
+Die Erfüllung dieser Anforderungen garantiert die \textit{In-Order-Delivery} pro Alarmanlage.

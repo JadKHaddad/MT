@@ -31,7 +31,7 @@ docker pull jadkhaddad/lps-mqtt-hivemq
 \begin{itemize}
     \item \texttt{rabbitmq:4-management}: RabbitMQ-Broker für das \gls{amqp}-Szenario.
     \item \texttt{jadkhaddad/lps-rs}: Enthält die Simulation-Runner sowie die Kern-Komponenten (u.\,a. Alarmanlagen-Simulator, \gls{alpone}, \gls{lptwo}, Server-Simulator, Validator, \gls{tcp}-Proxy).
-    \item \texttt{jadkhaddad/lps-gleam}: Enthält die Deduplizierungs-Komponente (\gls{alpthree}) für \gls{alps}.
+    \item \texttt{jadkhaddad/lps-gleam}: Enthält die Deduplizierungs-Komponente (\gls{alpdedup}) für \gls{alps}.
     \item \texttt{jadkhaddad/lps-scripts}: Enthält Auswertungsskripte zur Plot-Erzeugung.
     \item \texttt{jadkhaddad/lps-mqtt-python}: Enthält die \gls{mqtt}-bezogenen Proxy-Skripte (u.\,a. \gls{srv}~1, \gls{srv}~2, \gls{lpone}, \gls{lptwo}).
     \item \texttt{jadkhaddad/lps-mqtt-hivemq}: Enthält den HiveMQ-Broker mit den verwendeten Plugins für das \gls{mqtt}-Szenario.
@@ -127,7 +127,7 @@ mqtt:
     \item \texttt{simulation\_docker\_network}: Externes Docker-Netzwerk, in dem die Services gestartet werden.
     \item \texttt{lps\_rust\_image}: Image-Name für die Simulation-Runner und Kernkomponenten.
     \item \texttt{lps\_scripts\_image}: Image-Name für die Auswertungsskripte.
-    \item \texttt{lps\_gleam\_image}: Image-Name für die Deduplizierungs-Komponente (\gls{alpthree}).
+    \item \texttt{lps\_gleam\_image}: Image-Name für die Deduplizierungs-Komponente (\gls{alpdedup}).
     \item \texttt{lps\_mqtt\_python\_image}: Image-Name für die Python-basierten \gls{mqtt}-Proxy-Komponenten.
     \item \texttt{lps\_mqtt\_hivemq\_image}: Image-Name für den HiveMQ-Broker im \gls{mqtt}-Szenario.
 \end{itemize}
