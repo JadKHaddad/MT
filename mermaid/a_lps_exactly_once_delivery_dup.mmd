@@ -8,8 +8,8 @@ sequenceDiagram
 
     B->>L1: Alarmmeldung wird konsumiert
     L1->>S: Weiterleitung
-    S-->>L1: Bestätigung
     Note over B,L1: Netzwerkfehler
+    S-->>L1: Bestätigung
     L1--xB: Keine Bestätigung
 
     B->>L2: Gleiche Alarmmeldung wird konsumiert
