@@ -68,7 +68,7 @@ Die Masterarbeit ist wie folgt strukturiert: Kapitel~\ref{ch:einleitung} motivie
 \label{ch:grundlagen}
 
 \section{Design Smells}
-\label{sec:grundlagen_design_smells}
+\label{sec:grundlagen_design-smells}
 
 Design Smells bezeichnen strukturelle Auffälligkeiten in einem Softwaresystem, die nicht zwingend zu unmittelbaren Laufzeit- oder Übersetzungsfehlern führen, aber Qualitätsattribute wie Verständlichkeit, Testbarkeit, Erweiterbarkeit und Wartbarkeit negativ beeinflussen können~\citep{software_design_smell_detection}. Sie dienen damit als Hinweise auf Wartbarkeitsprobleme und mögliche Ansatzpunkte für Refactoring oder Reengineering.
 
@@ -96,7 +96,7 @@ Damit unterscheidet sich \gls{lps} von klassischem Code-Refactoring: Nicht die i
 % Review-Punkt 16: aktive Formulierung der Proxy-Schicht
 Hierzu fügt \gls{lps} eine zusätzliche Proxy-Schicht zwischen bestehenden Service-Komponenten des Legacy-Systems ein. Diese Zwischenschicht entkoppelt synchrone Kommunikation und überführt sie über einen Message Broker in eine asynchrone Verarbeitung~\citep{liebig_2025_architectural_refactoring}. Auf diese Weise können insbesondere Design Smells adressiert werden, die aus synchronen Request-Response-Ketten, Redundanzentscheidungen oder fehlender Entkopplung entstehen.
 
-Die konkrete Architektur, die einzelnen Komponenten des \gls{lps} sowie die Art, wie dadurch die Design Smells des betrachteten Legacy-Systems adressiert werden, werden in Abschnitt~\ref{sec:lps_loesung} beschrieben.
+Die konkrete Architektur, die einzelnen Komponenten des \gls{lps} sowie die Art, wie dadurch die Design Smells des betrachteten Legacy-Systems adressiert werden, werden in Abschnitt~\ref{sec:lps} beschrieben.
 
 % \section{Asynchrone Architektur}
 
@@ -273,17 +273,17 @@ Als Fallstudie betrachtet diese Masterarbeit das in~\citep{liebig_2025_architect
     \centering
     \includegraphics[width=0.95\textwidth]{./img/marc_simple.pdf}
     \caption{Vereinfachte Gesamtarchitektur des Legacy-Systems \acrshort{marc}.}
-    \label{fig:marc_simple_architektur}
+    \label{fig:marc-simple-architektur}
 \end{figure}
 
-Abbildung~\ref{fig:marc_simple_architektur} zeigt eine vereinfachte Architektur von \gls{marc} sowie seine zentrale Komponente \textit{\enquote{\gls{ars}}} zur Verarbeitung von Alarmmeldungen. Ist \gls{ars} nicht verfügbar, können keine Alarmmeldungen bearbeitet werden.
+Abbildung~\ref{fig:marc-simple-architektur} zeigt eine vereinfachte Architektur von \gls{marc} sowie seine zentrale Komponente \textit{\enquote{\gls{ars}}} zur Verarbeitung von Alarmmeldungen. Ist \gls{ars} nicht verfügbar, können keine Alarmmeldungen bearbeitet werden.
 
 \section{Architektur}
-\label{sec:architektur}
+\label{sec:marc-architektur}
 
 Wie im vorherigen Abschnitt beschrieben, bildet die \gls{ars} die zentrale Komponente des \gls{marc}-Systems. Ihre Hauptaufgabe besteht darin, eingehende Alarmmeldungen zu empfangen, zu verarbeiten und in einer Datenbank zu persistieren.
 
-Intern setzt sich die \gls{ars} aus mehreren Services zusammen, die im Folgenden als \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 bezeichnet werden~\ref{fig:ars_architektur}. \gls{srv}~1 stellt dabei die primäre \gls{http}-Schnittstelle bereit, über die Alarmmeldungen von den externen Alarmanlagen entgegengenommen werden.
+Intern setzt sich die \gls{ars} aus mehreren Services zusammen, die im Folgenden als \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 bezeichnet werden~\ref{fig:ars-architektur}. \gls{srv}~1 stellt dabei die primäre \gls{http}-Schnittstelle bereit, über die Alarmmeldungen von den externen Alarmanlagen entgegengenommen werden.
 
 % Review-Punkt 42: Request-Response-Kette als Arbeitsbegriff definieren
 Nach dem Empfang durchlaufen die Meldungen eine synchrone \textit{Request-Response-Kette}\footnote{Unter einer Request-Response-Kette wird in dieser Arbeit eine sequentielle Folge synchroner Request-Response-Interaktionen über mehrere Services verstanden, bei der jeder nachgelagerte Schritt erst nach erfolgreicher Antwort des vorherigen Schritts fortgesetzt wird.} über alle beteiligten Services bis hin zu \gls{srv}~3, welcher die finale Verarbeitung und die Persistierung der Alarmmeldungen in einer Datenbank übernimmt. % Review-Punkt 35: proprietäres TCP-Protokoll statt proprietäre Verbindungen
@@ -295,30 +295,30 @@ Erst nachdem \gls{srv}~3 die Verarbeitung der Alarmmeldung erfolgreich abgeschlo
 
 Bei negativen Antworten, Netzstörungen oder Timeouts senden Alarmanlagen Meldungen erneut.
 
-Abbildung~\ref{fig:ars_architektur} veranschaulicht diese interne Verarbeitungskette der \gls{ars}. Eine eingehende Alarmmeldung wird von \gls{srv}~1 angenommen, synchron über \gls{srv}~2 an \gls{srv}~3 weitergereicht und erst nach erfolgreicher Verarbeitung entlang desselben Pfads bestätigt.
+Abbildung~\ref{fig:ars-architektur} veranschaulicht diese interne Verarbeitungskette der \gls{ars}. Eine eingehende Alarmmeldung wird von \gls{srv}~1 angenommen, synchron über \gls{srv}~2 an \gls{srv}~3 weitergereicht und erst nach erfolgreicher Verarbeitung entlang desselben Pfads bestätigt.
 
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.95\textwidth]{./img/ars.pdf}
     \caption{Interne Service-Architektur der Alarm Receiving Software (\acrshort{ars}).}
-    \label{fig:ars_architektur}
+    \label{fig:ars-architektur}
 \end{figure}
 
 \gls{marc} ist über drei Rechenzentren repliziert, wobei in jedem Replikat eine eigene Instanz von \gls{ars} betrieben wird. Während die Services \gls{srv}~1 und \gls{srv}~2 in allen \gls{ars}-Instanzen zur Lastverteilung im Aktiv-Aktiv-Modus operieren, ist \gls{srv}~3 im Aktiv-Passiv-Modus ausgelegt. Folglich ist zu jedem Zeitpunkt nur eine Instanz von \gls{srv}~3 aktiv und für die Verarbeitung von Alarmmeldungen zuständig.
 
-Abbildung~\ref{fig:marc_architektur} erweitert diese Sicht auf die Gesamtarchitektur über drei Rechenzentren. Während \gls{srv}~1 und \gls{srv}~2 im Aktiv-Aktiv-Modus horizontal verteilt betrieben werden, bleibt \gls{srv}~3 als Aktiv-Passiv-Komponente zu jedem Zeitpunkt nur einmal aktiv.
+Abbildung~\ref{fig:marc-architektur} erweitert diese Sicht auf die Gesamtarchitektur über drei Rechenzentren. Während \gls{srv}~1 und \gls{srv}~2 im Aktiv-Aktiv-Modus horizontal verteilt betrieben werden, bleibt \gls{srv}~3 als Aktiv-Passiv-Komponente zu jedem Zeitpunkt nur einmal aktiv.
 
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.95\textwidth]{./img/marc.pdf}
     \caption{Replizierte \acrshort{marc}-Architektur über drei Rechenzentren mit Aktiv-Aktiv- und Aktiv-Passiv-Betrieb.}
-    \label{fig:marc_architektur}
+    \label{fig:marc-architektur}
 \end{figure}
 
-Abbildung~\ref{fig:marc_architektur} zeigt die Architektur von \gls{marc} und wie die verschiedenen Services miteinander interagieren.
+Abbildung~\ref{fig:marc-architektur} zeigt die Architektur von \gls{marc} und wie die verschiedenen Services miteinander interagieren.
 
 \section{Design Smells im Legacy-System}
-\label{sec:design_smells}
+\label{sec:design-smells}
 
 Die im vorherigen Abschnitt beschriebene Architektur von \gls{marc} führt zu mehreren strukturellen Problemen. Die Analyse in \citep{liebig_2025_architectural_refactoring} identifiziert diese grundlegenden Mängel und klassifiziert sie in die folgenden Design Smells:
 \begin{itemize}
@@ -334,53 +334,53 @@ Die im vorherigen Abschnitt beschriebene Architektur von \gls{marc} führt zu me
     \item \textbf{Smell~5}: \textit{Strikte Reihenfolgeabhängigkeit (In-Order-Delivery)}. Das System ist auf die korrekte zeitliche Abfolge angewiesen, da Alarmmeldungen zustandsbehaftet sind. Aufgrund fehlender Mechanismen zur Neuordnung führen Paketverluste oder hohe Latenzen dazu, dass Alarmmeldungen in der falschen Reihenfolge verarbeitet werden. Ein kritisches Beispiel ist der Empfang einer Entwarnung vor dem eigentlichen Alarm: Wird der verspätete Alarm zuletzt verarbeitet, überschreibt er den Status der Entwarnung. Dies führt zu einer fehlerhaften Interpretation und provoziert unnötige Notfalleinsätze.
 \end{itemize}
 
-Abbildung~\ref{fig:exactly_once_diagram} illustriert eine Verletzung der \textit{Exactly-Once-Delivery}: Eine fachlich bereits weitergeleitete Alarmmeldung wird nach Timeout oder Kommunikationsfehler erneut übertragen und dadurch mehrfach verarbeitet. Obwohl die einzelnen Übertragungsschritte technisch korrekt ablaufen können, trifft dieselbe fachliche Meldung mehr als einmal im Zielsystem ein.
+Abbildung~\ref{fig:exactly-once-diagram} illustriert eine Verletzung der \textit{Exactly-Once-Delivery}: Eine fachlich bereits weitergeleitete Alarmmeldung wird nach Timeout oder Kommunikationsfehler erneut übertragen und dadurch mehrfach verarbeitet. Obwohl die einzelnen Übertragungsschritte technisch korrekt ablaufen können, trifft dieselbe fachliche Meldung mehr als einmal im Zielsystem ein.
 
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.95\textwidth]{./diagram/marc_exactly_once_delivery_violation_sequence.png}
     % Review-Punkt 38
     \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{Exactly-Once-Delivery} im \acrshort{marc}-System führt.}
-    \label{fig:exactly_once_diagram}
+    \label{fig:exactly-once-diagram}
 \end{figure}
 
-Abbildung~\ref{fig:ein_order_diagram} zeigt eine Verletzung der \textit{In-Order-Delivery}. Eine später erzeugte Meldung, etwa eine Entwarnung, wird vor einer früheren Alarmmeldung verarbeitet, weil Retries und variable Verzögerungen die Reihenfolge auf dem Transportpfad verändern. Die daraus resultierende Umkehr der fachlichen Ereignisfolge führt zu inkonsistenten Zuständen und kann fehlerhafte operative Entscheidungen auslösen.
+Abbildung~\ref{fig:in-order-diagram} zeigt eine Verletzung der \textit{In-Order-Delivery}. Eine später erzeugte Meldung, etwa eine Entwarnung, wird vor einer früheren Alarmmeldung verarbeitet, weil Retries und variable Verzögerungen die Reihenfolge auf dem Transportpfad verändern. Die daraus resultierende Umkehr der fachlichen Ereignisfolge führt zu inkonsistenten Zuständen und kann fehlerhafte operative Entscheidungen auslösen.
 
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.95\textwidth]{./diagram/marc_in_order_delivery_violation_sequence.png}
     % Review-Punkt 38
     \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{In-Order-Delivery} im \acrshort{marc}-System führt.}
-    \label{fig:ein_order_diagram}
+    \label{fig:in-order-diagram}
 \end{figure}
 
 
 \section{\acrfull{lps}}
-\label{sec:lps_loesung}
+\label{sec:lps}
 
 % Review-Punkt 39: LPS in MARC integriert klar formulieren
 Während die vorherigen Abschnitte das Originalsystem \gls{marc} beschreiben, betrachtet dieser Abschnitt das in~\citep{liebig_2025_architectural_refactoring} vorgeschlagene originale \gls{lps}. Auf Basis der zuvor identifizierten Design Smells schlägt die Arbeit ein Ar\-chi\-tek\-tur-Reengineering vor, das ohne Modifikationen am Quellcode der Legacy-Services auskommt. Der Kern dieses Ansatzes ist die Integration des \gls{lps} in \gls{marc}: Das \gls{lps} wird transparent zwischen die bestehenden Services geschaltet.
 
 Die Grundidee des \gls{lps} besteht in der Entkopplung der synchronen Kommunikationskette zwischen den Services \gls{ars} \gls{srv}~1 und \gls{ars} \gls{srv}~2 durch eine Proxy-Broker-Proxy-Architektur\footnote{Eine Proxy-Broker-Proxy-Architektur bezeichnet ein Integrationsmuster, bei dem ein Message Broker von zwei Proxies gekapselt wird. Dies ermöglicht es, synchrone Kommunikationspfade transparent in eine asynchrone Verarbeitung zu überführen, ohne die bestehenden Schnittstellen der ursprünglichen Endpunkte anzupassen~\citep{hohpe2004enterprise}.}. Das \gls{lps} wird an dieser Stelle positioniert und setzt sich aus drei Komponenten zusammen: dem \gls{lpone}, einem Message Broker und dem \gls{lptwo}.
 
-Abbildung~\ref{fig:lps_architektur} zeigt die transparente Einfügung des Legacy Proxy Systems zwischen \gls{srv}~1 und \gls{srv}~2. Die zuvor direkte synchrone Kopplung wird durch die Kette \gls{lpone}--Broker--\gls{lptwo} ersetzt, sodass eingehende Meldungen zunächst entgegengenommen und im Broker gepuffert werden, bevor sie asynchron weiterverarbeitet werden. Die bestehende Legacy-Schnittstelle bleibt dabei nach außen unverändert, weil die Proxies die ursprünglichen Kommunikationsrollen beibehalten.
+Abbildung~\ref{fig:lps-architektur} zeigt die transparente Einfügung des Legacy Proxy Systems zwischen \gls{srv}~1 und \gls{srv}~2. Die zuvor direkte synchrone Kopplung wird durch die Kette \gls{lpone}--Broker--\gls{lptwo} ersetzt, sodass eingehende Meldungen zunächst entgegengenommen und im Broker gepuffert werden, bevor sie asynchron weiterverarbeitet werden. Die bestehende Legacy-Schnittstelle bleibt dabei nach außen unverändert, weil die Proxies die ursprünglichen Kommunikationsrollen beibehalten.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{./img/lps.pdf}
     \caption{\acrshort{marc} nach Einfügung des Legacy Proxy Systems (\acrshort{lps}) zwischen \acrshort{srv}~1 und \acrshort{srv}~2.}
-    \label{fig:lps_architektur}
+    \label{fig:lps-architektur}
 \end{figure}
 
 In der Proof-of-Concept-Implementierung der Arbeit wird das Protokoll \gls{mqtt}~v5 genutzt, um das \gls{lps} zu realisieren, wobei HiveMQ~\citep{hivemq_2025} als Broker zum Einsatz kommt. Im Normalbetrieb nimmt \gls{lpone} die Requests von \gls{ars} \gls{srv}~1 entgegen und publiziert sie auf einem entsprechenden Broker-Topic. Sobald der Broker den Eingang bestätigt, sendet \gls{lpone} unmittelbar eine Antwort an das vorgelagerte System zurück. Dadurch wird die synchrone Wartezeit der ursprünglichen Verarbeitungskette reduziert. Parallel dazu konsumiert \gls{lptwo} die Nachrichten aus dem Broker und leitet sie asynchron an \gls{ars} \gls{srv}~2 weiter.
 
-Abbildung~\ref{fig:lps_normalfluss} beschreibt den Normalfall der Verarbeitung im \gls{lps}. \gls{lpone} nimmt die Meldung entgegen, publiziert sie am Broker und kann nach Broker-Bestätigung frühzeitig an das vorgelagerte System antworten, während \gls{lptwo} die nachgelagerte Weiterleitung asynchron ausführt. Dadurch wird die synchrone Warteabhängigkeit entlang der ursprünglichen Request-Response-Kette reduziert, ohne die fachliche Weiterverarbeitung zu verlieren.
+Abbildung~\ref{fig:lps-normalfluss} beschreibt den Normalfall der Verarbeitung im \gls{lps}. \gls{lpone} nimmt die Meldung entgegen, publiziert sie am Broker und kann nach Broker-Bestätigung frühzeitig an das vorgelagerte System antworten, während \gls{lptwo} die nachgelagerte Weiterleitung asynchron ausführt. Dadurch wird die synchrone Warteabhängigkeit entlang der ursprünglichen Request-Response-Kette reduziert, ohne die fachliche Weiterverarbeitung zu verlieren.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{./diagram/lps_normal_sequence.png}
     \caption{Sequenz einer Alarmverarbeitung im \acrshort{lps}-Normalbetrieb.}
-    \label{fig:lps_normalfluss}
+    \label{fig:lps-normalfluss}
 \end{figure}
 
 Um die strengen Delivery-Garantien des Systems zu wahren, kombiniert der Ansatz mehrere Mechanismen. Die Kommunikation zwischen \gls{lpone}, Broker und \gls{lptwo} erfolgt über \gls{mqtt} \gls{qos}~2, was eine \textit{Exactly-Once-Delivery} auf diesem Teilpfad garantiert. Um die \textit{In-Order-Delivery} der Alarmmeldungen zu gewährleisten, werden die \gls{lptwo}-Instanzen so konfiguriert, dass Alarmmeldungen innerhalb derselben Instanz sequentiell verarbeitet werden.
@@ -397,13 +397,13 @@ Der Ablauf zur Einhaltung dieser Systemgarantien gestaltet sich demnach wie folg
     \item Nach einem erfolgreichen Retry wird die normale Auslieferung fortgesetzt.
 \end{enumerate}
 
-Abbildung~\ref{fig:lps_retry_priorisierung} verdeutlicht das Verhalten im Fehlerfall. Schlägt die Weiterleitung fehl, wird die betroffene Meldung in das Retry-Topic verschoben und durch das Plugin gegenüber regulären Nachrichten priorisiert erneut zugestellt. Damit soll verhindert werden, dass nachfolgende Meldungen eine zuvor fehlgeschlagene Meldung überholen und dadurch die Reihenfolge innerhalb eines Alarmverlaufs verletzt wird.
+Abbildung~\ref{fig:lps-retry-priorisierung} verdeutlicht das Verhalten im Fehlerfall. Schlägt die Weiterleitung fehl, wird die betroffene Meldung in das Retry-Topic verschoben und durch das Plugin gegenüber regulären Nachrichten priorisiert erneut zugestellt. Damit soll verhindert werden, dass nachfolgende Meldungen eine zuvor fehlgeschlagene Meldung überholen und dadurch die Reihenfolge innerhalb eines Alarmverlaufs verletzt wird.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{./diagram/lps_retry_prio_sequence.png}
     \caption{Sequenz einer Alarmverarbeitung im \acrshort{lps}-Fehlerfall mit priorisiertem Retry-Topic.}
-    \label{fig:lps_retry_priorisierung}
+    \label{fig:lps-retry-priorisierung}
 \end{figure}
 
 Durch die Integration des \gls{lps} werden die Auswirkungen der zuvor identifizierten Design Smells reduziert:
@@ -483,16 +483,16 @@ Für die Auswertung speichern der Alarmanlagen-Simulator und der Server-Simulato
 \subsection{Setup}
 \label{sub-sec:setup}
 
-Für die Durchführung der Experimente wird die originale Implementierung des \gls{lps} aus dem offiziellen GitHub-Repository~\citep{legacy_proxy_pattern_repo} herangezogen. Diese Implementierung umfasst die Komponenten \textit{\gls{srv}~1 PROXY} und \textit{\gls{srv}~2 PROXY}, welche die ursprünglichen Services \gls{srv}~1 und \gls{srv}~2 von \gls{marc} simulieren. Darüber hinaus kommen die bereits in Abschnitt~\ref{sec:lps_loesung} beschriebenen Kernkomponenten des Proxys, \textit{\gls{lpone}} (Producer) und \textit{\gls{lptwo}} (Consumer), sowie das eigens entwickelte Broker-Plugin für den Retry-Mechanismus zum Einsatz.
+Für die Durchführung der Experimente wird die originale Implementierung des \gls{lps} aus dem offiziellen GitHub-Repository~\citep{legacy_proxy_pattern_repo} herangezogen. Diese Implementierung umfasst die Komponenten \textit{\gls{srv}~1 PROXY} und \textit{\gls{srv}~2 PROXY}, welche die ursprünglichen Services \gls{srv}~1 und \gls{srv}~2 von \gls{marc} simulieren. Darüber hinaus kommen die bereits in Abschnitt~\ref{sec:lps} beschriebenen Kernkomponenten des Proxys, \textit{\gls{lpone}} (Producer) und \textit{\gls{lptwo}} (Consumer), sowie das eigens entwickelte Broker-Plugin für den Retry-Mechanismus zum Einsatz.
 
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.95\textwidth]{./img/exp_lps.pdf}
     \caption{Experimentelles \acrshort{lps}-Test-Setup und Kommunikationspfade der beteiligten Komponenten.}
-    \label{fig:exp_setup}
+    \label{fig:exp-setup}
 \end{figure}
 
-Abbildung~\ref{fig:exp_setup} veranschaulicht den experimentellen Versuchsaufbau sowie die Interaktionen der einzelnen Services. Der Ablauf einer Alarmmeldung gestaltet sich dabei wie folgt: Der \textit{Alarmanlagen-Simulator} generiert kontinuierlich Meldungen und sendet sie per \gls{http} an den \textit{\gls{srv}~1 PROXY}. Dieser nimmt die Anfragen entgegen und leitet sie an die Instanz \textit{\gls{lpone}} weiter. \textit{\gls{lpone}} publiziert die empfangenen Meldungen an den Message Broker. Sobald der Broker den Eingang bestätigt, sendet \textit{\gls{lpone}} umgehend ein \gls{ack} zurück, das über den \textit{\gls{srv}~1 PROXY} wieder beim Alarmanlagen-Simulator ankommt und die erfolgreiche Übertragung signalisiert.
+Abbildung~\ref{fig:exp-setup} veranschaulicht den experimentellen Versuchsaufbau sowie die Interaktionen der einzelnen Services. Der Ablauf einer Alarmmeldung gestaltet sich dabei wie folgt: Der \textit{Alarmanlagen-Simulator} generiert kontinuierlich Meldungen und sendet sie per \gls{http} an den \textit{\gls{srv}~1 PROXY}. Dieser nimmt die Anfragen entgegen und leitet sie an die Instanz \textit{\gls{lpone}} weiter. \textit{\gls{lpone}} publiziert die empfangenen Meldungen an den Message Broker. Sobald der Broker den Eingang bestätigt, sendet \textit{\gls{lpone}} umgehend ein \gls{ack} zurück, das über den \textit{\gls{srv}~1 PROXY} wieder beim Alarmanlagen-Simulator ankommt und die erfolgreiche Übertragung signalisiert.
 
 Auf der Consumer-Seite konsumieren die \textit{\gls{lptwo}}-Instanzen die Meldungen aus dem Broker. Um die im vorherigen Abschnitt definierten Netzwerkfehler systematisch untersuchen zu können, wird die \gls{tcp}-Verbindung zwischen dem Broker und den \textit{\gls{lptwo}}-Instanzen gezielt über die \textit{\gls{tcp}-Proxies} geroutet. Nach dem erfolgreichen Empfang einer Nachricht leitet \textit{\gls{lptwo}} diese an den \textit{\gls{srv}~2 PROXY} weiter. Dieser übergibt die Meldung abschließend an den \textit{Server-Simulator}. Der Server-Simulator bildet den Endpunkt der Verarbeitungskette und übernimmt die Rolle des ursprünglichen Services \gls{srv}~3 von \gls{marc}. Er verarbeitet die Meldungen entsprechend der konfigurierten Latenzen und speichert die Ergebnisse.
 
