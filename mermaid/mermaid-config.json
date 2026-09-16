@@ -17,5 +17,9 @@
         "activationBkgColor": "#f4f4f4",
         "activationBorderColor": "#666666",
         "sequenceNumberColor": "#ffffff"
+    },
+    "sequence": {
+        "diagramMarginX": 1,
+        "diagramMarginY": 1
     }
 }

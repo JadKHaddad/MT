@@ -12,6 +12,12 @@ sudo apt install texlive-science texlive-latex-extra texlive-extra-utils texlive
 sudo npm install -g @mermaid-js/mermaid-cli
 ```
 
+## Install librsvg2-bin (Convert svg to pdf)
+
+```bash
+sudo apt install librsvg2-bin
+```
+
 ## Create mermaid diagrams
 
 ```bash

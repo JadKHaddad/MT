@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    participant S as SRV
+    participant L as ALP D
+    participant T as T SRV
+    
+
+    S->>L: Alarmmeldung
+    Note over L: Alarmmeldung eindeutig
+    L->>T: Weiterleitung
+    Note over L,T: Netzwerkfehler
+    T--xL: Keine Bestätigung
+    Note over L: Alarmmeldung wird nicht gespeichert
+    L-->>S: Negative Bestätigung
+    
+    S->>L: Gleiche Alarmmeldung
+    Note over L: Alarmmeldung eindeutig
+    L->>T: Weiterleitung
+    Note over L,T: Idempotenz verletzt
+    T-->>L: Bestätigung
+    L-->>S: Bestätigung
