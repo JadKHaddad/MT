@@ -266,7 +266,8 @@ Wie diese Mnesia-basierten Replikations- und Deduplizierungsmechanismen konkret 
 \chapter{Fallstudie: Verteiltes Legacy-System}
 \label{ch:fallstudie}
 
-Als Fallstudie betrachtet diese Masterarbeit das in~\citep{liebig_2025_architectural_refactoring} untersuchte verteilte Legacy-System \textit{\enquote{\gls{marc}}}~\footnote{Das reale \gls{marc} umfasst mehr als 30 Komponenten; in dieser Masterarbeit wird eine für die Analyse reduzierte Sicht auf die relevanten Kommunikations- und Servicepfade verwendet.} der Firma GS electronic Gebr. Schönweitz GmbH~\citep{gselectronic}. \gls{marc} ist ein verteiltes Alarmempfangssystem, das externe Alarmanlagen überwacht sowie Alarmmeldungen empfängt, verarbeitet und in einer Datenbank persistiert, um sie für die anschließende Bearbeitung durch Mitarbeiter in einer Leitstelle bereitzustellen. Abbildung~\ref{fig:marc_simple_architektur} zeigt eine vereinfachte Architektur von \gls{marc} sowie seine zentrale Komponente \textit{\enquote{\gls{ars}}} zur Verarbeitung von Alarmmeldungen. Ist \gls{ars} nicht verfügbar, können keine Alarmmeldungen bearbeitet werden.
+% Review-Punkt 34: reale MARC-Komplexität als Fußnote
+Als Fallstudie betrachtet diese Masterarbeit das in~\citep{liebig_2025_architectural_refactoring} untersuchte verteilte Legacy-System \textit{\enquote{\gls{marc}}} der Firma GS electronic Gebr. Schönweitz GmbH~\citep{gselectronic}\footnote{Das reale \gls{marc} umfasst mehr als 30 Komponenten; in dieser Arbeit wird eine für die Analyse reduzierte Sicht auf die relevanten Kommunikations- und Servicepfade verwendet.}. \gls{marc} ist ein verteiltes Alarmempfangssystem, das externe Alarmanlagen überwacht sowie Alarmmeldungen empfängt, verarbeitet und in einer Datenbank persistiert, um sie für die anschließende Bearbeitung durch Mitarbeiter in einer Leitstelle bereitzustellen.
 
 \begin{figure}[hbtp]
     \centering
@@ -275,12 +276,26 @@ Als Fallstudie betrachtet diese Masterarbeit das in~\citep{liebig_2025_architect
     \label{fig:marc_simple_architektur}
 \end{figure}
 
+Abbildung~\ref{fig:marc_simple_architektur} zeigt eine vereinfachte Architektur von \gls{marc} sowie seine zentrale Komponente \textit{\enquote{\gls{ars}}} zur Verarbeitung von Alarmmeldungen. Ist \gls{ars} nicht verfügbar, können keine Alarmmeldungen bearbeitet werden.
+
 \section{Architektur}
 \label{sec:architektur}
 
-Wie im vorherigen Abschnitt beschrieben, bildet die \gls{ars} die zentrale Komponente des \gls{marc}-Systems. Ihre Hauptaufgabe besteht darin, eingehende Alarmmeldungen zu empfangen, zu verarbeiten und in einer Datenbank zu persistieren. Intern setzt sich die \gls{ars} aus mehreren Services zusammen, die im Folgenden als \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 bezeichnet werden~\ref{fig:ars_architektur}. \gls{srv}~1 stellt dabei die primäre \gls{http}-Schnittstelle bereit, über die Alarmmeldungen von den externen Alarmanlagen entgegengenommen werden.
+Wie im vorherigen Abschnitt beschrieben, bildet die \gls{ars} die zentrale Komponente des \gls{marc}-Systems. Ihre Hauptaufgabe besteht darin, eingehende Alarmmeldungen zu empfangen, zu verarbeiten und in einer Datenbank zu persistieren.
 
-Nach dem Empfang einer Alarmmeldung durchläuft sie eine synchrone \textit{Request-Response-Kette}~\footnote{Unter einer Request-Response-Kette wird in dieser Masterarbeit eine sequentielle Folge synchroner Request-Response-Interaktionen über mehrere Services verstanden, bei der jeder nachgelagerte Schritt erst nach erfolgreicher Antwort des vorherigen Schritts fortgesetzt wird.} über alle beteiligten Services bis hin zu \gls{srv}~3, welcher die finale Verarbeitung und die Persistierung der Alarmmeldung in einer Datenbank übernimmt. Die Kommunikation innerhalb dieser Kette erfolgt über eine Kombination aus \gls{http}-Requests und einem proprietären \gls{tcp}-Protokoll. Erst nachdem \gls{srv}~3 die Verarbeitung der Alarmmeldung erfolgreich abgeschlossen hat, wird eine Bestätigung über die VerarbeitungsKette an die sendende Alarmanlage zurückgeleitet. Die Antworten der einzelnen Services dienen ausschließlich als Bestätigung des erfolgreichen Empfangs beziehungsweise der erfolgreichen Verarbeitung und enthalten keine zusätzlichen Nutzdaten. Bei negativen Antworten, Netzstörungen oder Timeouts senden die Alarmanlagen die Alarmmeldungen erneut. Abbildung~\ref{fig:ars_architektur} veranschaulicht die interne Verarbeitungskette der \gls{ars}. Eine eingehende Alarmmeldung wird von \gls{srv}~1 angenommen, synchron über \gls{srv}~2 an \gls{srv}~3 weitergereicht und erst nach erfolgreicher Verarbeitung bestätigt.
+Intern setzt sich die \gls{ars} aus mehreren Services zusammen, die im Folgenden als \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 bezeichnet werden~\ref{fig:ars_architektur}. \gls{srv}~1 stellt dabei die primäre \gls{http}-Schnittstelle bereit, über die Alarmmeldungen von den externen Alarmanlagen entgegengenommen werden.
+
+% Review-Punkt 42: Request-Response-Kette als Arbeitsbegriff definieren
+Nach dem Empfang durchlaufen die Meldungen eine synchrone \textit{Request-Response-Kette}\footnote{Unter einer Request-Response-Kette wird in dieser Arbeit eine sequentielle Folge synchroner Request-Response-Interaktionen über mehrere Services verstanden, bei der jeder nachgelagerte Schritt erst nach erfolgreicher Antwort des vorherigen Schritts fortgesetzt wird.} über alle beteiligten Services bis hin zu \gls{srv}~3, welcher die finale Verarbeitung und die Persistierung der Alarmmeldungen in einer Datenbank übernimmt. % Review-Punkt 35: proprietäres TCP-Protokoll statt proprietäre Verbindungen
+% Review-Punkt 53: einheitlich HTTP-Requests
+Die Kommunikation innerhalb dieser Kette erfolgt über eine Kombination aus \gls{http}-Requests und einem proprietären \gls{tcp}-Protokoll.
+
+% Review-Punkt 36: Bestätigung/ACK synonym einführen (ohne globalen Massentausch)
+Erst nachdem \gls{srv}~3 die Verarbeitung der Alarmmeldung erfolgreich abgeschlossen hat, wird eine Bestätigung über die Kette an die sendende Alarmanlage zurückgeleitet. Die Antworten der einzelnen Services dienen ausschließlich als Bestätigung des erfolgreichen Empfangs beziehungsweise der erfolgreichen Verarbeitung und enthalten keine zusätzlichen Nutzdaten.
+
+Bei negativen Antworten, Netzstörungen oder Timeouts senden Alarmanlagen Meldungen erneut.
+
+Abbildung~\ref{fig:ars_architektur} veranschaulicht diese interne Verarbeitungskette der \gls{ars}. Eine eingehende Alarmmeldung wird von \gls{srv}~1 angenommen, synchron über \gls{srv}~2 an \gls{srv}~3 weitergereicht und erst nach erfolgreicher Verarbeitung entlang desselben Pfads bestätigt.
 
 \begin{figure}[hbtp]
     \centering
@@ -289,7 +304,9 @@ Nach dem Empfang einer Alarmmeldung durchläuft sie eine synchrone \textit{Reque
     \label{fig:ars_architektur}
 \end{figure}
 
-\gls{marc} ist über drei Rechenzentren repliziert, wobei in jedem Replikat eine eigene Instanz von \gls{ars} betrieben wird. Während die Services \gls{srv}~1 und \gls{srv}~2 in allen \gls{ars}-Instanzen zur Lastverteilung im Aktiv-Aktiv-Modus operieren, ist \gls{srv}~3 im Aktiv-Passiv-Modus ausgelegt. Folglich ist zu jedem Zeitpunkt nur eine Instanz von \gls{srv}~3 aktiv und für die Verarbeitung von Alarmmeldungen zuständig. Abbildung~\ref{fig:marc_architektur} zeigt die replizierte \gls{marc}-Architektur über drei Rechenzentren und wie die verschiedenen Services miteinander interagieren.
+\gls{marc} ist über drei Rechenzentren repliziert, wobei in jedem Replikat eine eigene Instanz von \gls{ars} betrieben wird. Während die Services \gls{srv}~1 und \gls{srv}~2 in allen \gls{ars}-Instanzen zur Lastverteilung im Aktiv-Aktiv-Modus operieren, ist \gls{srv}~3 im Aktiv-Passiv-Modus ausgelegt. Folglich ist zu jedem Zeitpunkt nur eine Instanz von \gls{srv}~3 aktiv und für die Verarbeitung von Alarmmeldungen zuständig.
+
+Abbildung~\ref{fig:marc_architektur} erweitert diese Sicht auf die Gesamtarchitektur über drei Rechenzentren. Während \gls{srv}~1 und \gls{srv}~2 im Aktiv-Aktiv-Modus horizontal verteilt betrieben werden, bleibt \gls{srv}~3 als Aktiv-Passiv-Komponente zu jedem Zeitpunkt nur einmal aktiv.
 
 \begin{figure}[hbtp]
     \centering
@@ -298,147 +315,410 @@ Nach dem Empfang einer Alarmmeldung durchläuft sie eine synchrone \textit{Reque
     \label{fig:marc_architektur}
 \end{figure}
 
+Abbildung~\ref{fig:marc_architektur} zeigt die Architektur von \gls{marc} und wie die verschiedenen Services miteinander interagieren.
+
 \section{Design Smells im Legacy-System}
 \label{sec:design_smells}
 
-Die im vorherigen Abschnitt beschriebene Architektur von \gls{marc} führt laut~\citep{liebig_2025_architectural_refactoring} zu mehreren strukturellen Problemen. Die Analyse von~\citep{liebig_2025_architectural_refactoring} identifiziert diese strukturellen Problemen und klassifiziert sie in die folgenden Design Smells:
-
+Die im vorherigen Abschnitt beschriebene Architektur von \gls{marc} führt zu mehreren strukturellen Problemen. Die Analyse in \citep{liebig_2025_architectural_refactoring} identifiziert diese grundlegenden Mängel und klassifiziert sie in die folgenden Design Smells:
 \begin{itemize}
-    \item \textbf{Smell~1}: \textit{Synchrone Request-Response-Ketten}. Die sequentielle Kopplung der \gls{ars}-Services; \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 führt zu einer Akkumulation der Latenzen. Die Gesamtantwortzeit der Verarbeitung einer Alarmmeldung ergibt sich aus der Summe der Latenzen der Einzelkomponenten.
+    \item \textbf{Smell~1}: \textit{Synchrone Request-Response-Ketten}. Die sequentielle Kopplung der \gls{ars}-Services \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 führt zu einer Akkumulation der Latenzen. Die Gesamtantwortzeit ergibt sich aus der Summe der Latenzen der Einzelkomponenten.
 
-    \item \textbf{Smell~2}: \textit{Heterogene Redundanzmodi}. Der parallele Einsatz von Aktiv-Aktiv für die \gls{ars}-Services; \gls{srv}~1 und \gls{srv}~2 sowie Aktiv-Passiv für \gls{srv}~3 innerhalb derselben Verarbeitungskette verursacht einen Flaschenhals. Dadurch wird der Gesamtdurchsatz des Systems auf die Kapazität einer einzelnen aktiven \gls{srv}~3-Instanz begrenzt.
+    \item \textbf{Smell~2}: \textit{Heterogene Redundanzmodi}. Der parallele Einsatz von Aktiv-Aktiv für die \gls{ars}-Services \gls{srv}~1 und \gls{srv}~2 sowie Aktiv-Passiv für \gls{srv}~3 innerhalb derselben Verarbeitungskette verursacht einen Flaschenhals. Dadurch wird der Gesamtdurchsatz des Systems auf die Kapazität einer einzelnen aktiven Instanz begrenzt.
 
     \item \textbf{Smell~3}: \textit{Manuelles Ausfall-Management}. Das System kann Ausfälle nicht autonom beheben, sondern erfordert eine manuelle Überwachung und Intervention durch Mitarbeiter. Dieser manuelle Arbeitsschritt dauert oft Minuten, während Sicherheitsnormen wie die \textit{EN 50136}~\citep{din_en_50136-12012-08_alarm_2012} Reaktionen innerhalb weniger Sekunden fordern. Dadurch ist das System im Ernstfall zu langsam und fehleranfällig.
 
-    \item \textbf{Smell~4}: \textit{Abhängigkeit von Exactly-Once-Delivery}. Das System ist auf eine \textit{Exactly-Once-Delivery} angewiesen, da der Verarbeitung von Alarmmeldungen die \textit{Idempotenz}~\footnote{Idempotenz im Kontext verteilter Systeme bedeutet, dass eine Operation (wie das Verarbeiten einer Nachricht) beliebig oft wiederholt werden kann, ohne dass sich der Systemzustand nach der ersten erfolgreichen Anwendung ändert~\citep{helland2012idempotence}.} fehlt. Das bedeutet intuitiv, dass das System nicht nativ mit Duplikaten umgehen kann, die durch wiederholte Übertragungen der Alarmanlagen entstehen. Mitarbeiter in der Leitstelle müssen Duplikate selbstständig erkennen und ignorieren. Das führt in der Praxis zu Fehlverhalten oder zur gleichzeitigen Bearbeitung derselben Alarmmeldung durch mehrere Mitarbeiter in der Leitstelle.
+          % Review-Punkt 37: Idempotenz intuitiv über Duplikatunverträglichkeit erklären
+    \item \textbf{Smell~4}: \textit{Abhängigkeit von Exactly-Once-Delivery}. Das System ist auf eine \textit{Exactly-Once-Delivery} angewiesen, da der Verarbeitung die \textit{Idempotenz}\footnote{Idempotenz im Kontext verteilter Systeme bedeutet, dass eine Operation (wie das Verarbeiten einer Nachricht) beliebig oft wiederholt werden kann, ohne dass sich der Systemzustand nach der ersten erfolgreichen Anwendung ändert~\citep{helland2012idempotence}.} fehlt. Das bedeutet intuitiv, dass das System nicht nativ mit Duplikaten umgehen kann, die durch wiederholte Übertragungen der Alarmanlagen entstehen. Mitarbeiter in der Leitstelle müssen Duplikate selbstständig erkennen und ignorieren. Das führt in der Praxis mitunter zu Fehlverhalten oder zur gleichzeitigen Bearbeitung desselben Alarms durch mehrere Mitarbeiter in der Leitstelle.
 
-    \item \textbf{Smell~5}: \textit{Strikte Reihenfolgeabhängigkeit (In-Order-Delivery)}. Das System ist auf die korrekte zeitliche Abfolge von Alarmmeldungen angewiesen, da Alarmmeldungen zustandsbehaftet sind. Aufgrund fehlender Mechanismen zur Neuordnung führen Paketverluste oder hohe Latenzen dazu, dass Alarmmeldungen in der falschen Reihenfolge verarbeitet werden. Ein kritisches Beispiel dafür ist der Empfang einer Entwarnung vor dem eigentlichen Alarm: Wird der verspätete Alarm zuletzt verarbeitet, überschreibt er den Status der Entwarnung. Dies führt zu einer fehlerhaften Interpretation und provoziert unnötige Notfalleinsätze.
+    \item \textbf{Smell~5}: \textit{Strikte Reihenfolgeabhängigkeit (In-Order-Delivery)}. Das System ist auf die korrekte zeitliche Abfolge angewiesen, da Alarmmeldungen zustandsbehaftet sind. Aufgrund fehlender Mechanismen zur Neuordnung führen Paketverluste oder hohe Latenzen dazu, dass Alarmmeldungen in der falschen Reihenfolge verarbeitet werden. Ein kritisches Beispiel ist der Empfang einer Entwarnung vor dem eigentlichen Alarm: Wird der verspätete Alarm zuletzt verarbeitet, überschreibt er den Status der Entwarnung. Dies führt zu einer fehlerhaften Interpretation und provoziert unnötige Notfalleinsätze.
 \end{itemize}
 
-Abbildung~\ref{fig:exactly_once_diagram} zeigt einen beispielhaften Kommunikationsablauf, der zu einer Verletzung der \textit{Exactly-Once-Delivery} führt: Eine Alarmmeldung wird aufgrund eines Kommunikationsfehlers erneut übertragen und dadurch mehrfach verarbeitet.
+Abbildung~\ref{fig:exactly_once_diagram} illustriert eine Verletzung der \textit{Exactly-Once-Delivery}: Eine fachlich bereits weitergeleitete Alarmmeldung wird nach Timeout oder Kommunikationsfehler erneut übertragen und dadurch mehrfach verarbeitet. Obwohl die einzelnen Übertragungsschritte technisch korrekt ablaufen können, trifft dieselbe fachliche Meldung mehr als einmal im Zielsystem ein.
 
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.95\textwidth]{./diagram/marc_exactly_once_delivery_violation_sequence.png}
+    % Review-Punkt 38
     \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{Exactly-Once-Delivery} im \acrshort{marc}-System führt.}
     \label{fig:exactly_once_diagram}
 \end{figure}
 
-Abbildung~\ref{fig:ein_order_diagram} zeigt einen beispielhaften Kommunikationsablauf, der zu einer Verletzung der \textit{In-Order-Delivery} führt: Eine später erzeugte Alarmmeldung wird vor einer früheren Alarmmeldung verarbeitet, da variable Netzwerlatenzen die Reihenfolge verändern können.
+Abbildung~\ref{fig:ein_order_diagram} zeigt eine Verletzung der \textit{In-Order-Delivery}. Eine später erzeugte Meldung, etwa eine Entwarnung, wird vor einer früheren Alarmmeldung verarbeitet, weil Retries und variable Verzögerungen die Reihenfolge auf dem Transportpfad verändern. Die daraus resultierende Umkehr der fachlichen Ereignisfolge führt zu inkonsistenten Zuständen und kann fehlerhafte operative Entscheidungen auslösen.
 
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=0.95\textwidth]{./diagram/marc_in_order_delivery_violation_sequence.png}
+    % Review-Punkt 38
     \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{In-Order-Delivery} im \acrshort{marc}-System führt.}
     \label{fig:ein_order_diagram}
 \end{figure}
 
+
 \section{\acrfull{lps}}
 \label{sec:lps_loesung}
 
-\subsection{Architektur}
-\label{sub-sec:lps_architektur}
+% Review-Punkt 39: LPS in MARC integriert klar formulieren
+Während die vorherigen Abschnitte das Originalsystem \gls{marc} beschreiben, betrachtet dieser Abschnitt das in~\citep{liebig_2025_architectural_refactoring} vorgeschlagene originale \gls{lps}. Auf Basis der zuvor identifizierten Design Smells schlägt die Arbeit ein Ar\-chi\-tek\-tur-Reengineering vor, das ohne Modifikationen am Quellcode der Legacy-Services auskommt. Der Kern dieses Ansatzes ist die Integration des \gls{lps} in \gls{marc}: Das \gls{lps} wird transparent zwischen die bestehenden Services geschaltet.
 
-Nachdem in vorherigen Abschnitten das \gls{marc}-System beschrieben wurde, betrachtet dieser Abschnitt das in~\citep{liebig_2025_architectural_refactoring} vorgeschlagene \gls{lps}. Auf Basis der zuvor identifizierten Design Smells in Abschnitt~\ref{sec:design_smells} schlägt die Arbeit~\citep{liebig_2025_architectural_refactoring} ein Ar\-chi\-tek\-tur-Reengineering vor, um die Auswirkungen der identifizierten Design Smells zu mitigieren, ohne Modifikationen am Quellcode der Legacy-Services vorzunehmen. Der Kern dieses Ansatzes ist die transparente Integration des \gls{lps} zwischen den Services des \gls{marc}-Systems. Die Grundidee des \gls{lps} besteht in der Entkopplung der synchronen Verarbeitungskette zwischen den Services \gls{srv}~1 und \gls{srv}~2 durch eine \textit{Proxy-Broker-Proxy-Architektur}~\footnote{Eine Proxy-Broker-Proxy-Architektur bezeichnet ein Integrationsmuster, bei dem ein Message Broker von zwei Proxies gekapselt wird. Dies ermöglicht es, synchrone Kommunikationspfade transparent in eine asynchrone Kommunikationspfade zu überführen, ohne die bestehenden Schnittstellen der ursprünglichen Endpunkte anzupassen~\citep{hohpe2004enterprise}.}. Das \gls{lps} wird zwischen \gls{srv}~1 und \gls{srv}~2 positioniert und setzt sich aus drei Komponenten zusammen: dem \gls{lpone}, einem Message Broker und dem \gls{lptwo}.Abbildung~\ref{fig:lps_architektur} zeigt die transparente Einfügung von \gls{lps} zwischen \gls{srv}~1 und \gls{srv}~2. Die zuvor direkte synchrone Kopplung wird durch die Kette \textit{\gls{lpone} $\rightarrow$ Broker $\rightarrow$ \gls{lptwo}} ersetzt, sodass eingehende Alarmmeldungen zunächst entgegengenommen und im Broker gepuffert werden, bevor sie asynchron weiterverarbeitet werden. Die bestehende Legacy-Schnittstelle bleibt dabei nach außen unverändert.
+Die Grundidee des \gls{lps} besteht in der Entkopplung der synchronen Kommunikationskette zwischen den Services \gls{ars} \gls{srv}~1 und \gls{ars} \gls{srv}~2 durch eine Proxy-Broker-Proxy-Architektur\footnote{Eine Proxy-Broker-Proxy-Architektur bezeichnet ein Integrationsmuster, bei dem ein Message Broker von zwei Proxies gekapselt wird. Dies ermöglicht es, synchrone Kommunikationspfade transparent in eine asynchrone Verarbeitung zu überführen, ohne die bestehenden Schnittstellen der ursprünglichen Endpunkte anzupassen~\citep{hohpe2004enterprise}.}. Das \gls{lps} wird an dieser Stelle positioniert und setzt sich aus drei Komponenten zusammen: dem \gls{lpone}, einem Message Broker und dem \gls{lptwo}.
+
+Abbildung~\ref{fig:lps_architektur} zeigt die transparente Einfügung des Legacy Proxy Systems zwischen \gls{srv}~1 und \gls{srv}~2. Die zuvor direkte synchrone Kopplung wird durch die Kette \gls{lpone}--Broker--\gls{lptwo} ersetzt, sodass eingehende Meldungen zunächst entgegengenommen und im Broker gepuffert werden, bevor sie asynchron weiterverarbeitet werden. Die bestehende Legacy-Schnittstelle bleibt dabei nach außen unverändert, weil die Proxies die ursprünglichen Kommunikationsrollen beibehalten.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{./img/lps.pdf}
-    \caption{\acrshort{marc} nach Einfügung von \acrshort{lps} zwischen \acrshort{srv}~1 und \acrshort{srv}~2.}
+    \caption{\acrshort{marc} nach Einfügung des Legacy Proxy Systems (\acrshort{lps}) zwischen \acrshort{srv}~1 und \acrshort{srv}~2.}
     \label{fig:lps_architektur}
 \end{figure}
 
-In der Proof-of-Concept-Implementierung der Arbeit~\citep{liebig_2025_architectural_refactoring} wird das Protokoll \gls{mqtt}~v5 genutzt, um das \gls{lps} zu realisieren, wobei HiveMQ~\citep{hivemq_2025} als Broker zum Einsatz kommt. Im Normalbetrieb nimmt \gls{lpone} die Requests von \gls{srv}~1 entgegen und publiziert sie auf einem entsprechenden shared Topic, die im Folgendem als Main-Topic bezeichnet wird. Sobald der Broker den Eingang bestätigt, sendet \gls{lpone} unmittelbar eine Bestätigung an das vorgelagerte System zurück. Dadurch wird die synchrone Wartezeit der ursprünglichen Verarbeitungskette reduziert. Parallel dazu konsumiert \gls{lptwo} die Nachrichten aus dem Main-Topic und leitet sie asynchron an \gls{srv}~2 weiter. Abbildung~\ref{fig:lps_normalfluss} zeigt einen beispielhaften Verarbeitungsablauf einer Alarmmeldung innerhalb von \gls{lps} im Normalbetrieb. Unter Normalbetrieb wird die fehlerfreie Verarbeitung einer Alarmmeldung verstanden, bei der weder Netzwerkfehler noch negative Antworten der nachgelagerten Services (\gls{srv}~2, \gls{srv}~3) auftreten.
+In der Proof-of-Concept-Implementierung der Arbeit wird das Protokoll \gls{mqtt}~v5 genutzt, um das \gls{lps} zu realisieren, wobei HiveMQ~\citep{hivemq_2025} als Broker zum Einsatz kommt. Im Normalbetrieb nimmt \gls{lpone} die Requests von \gls{ars} \gls{srv}~1 entgegen und publiziert sie auf einem entsprechenden Broker-Topic. Sobald der Broker den Eingang bestätigt, sendet \gls{lpone} unmittelbar eine Antwort an das vorgelagerte System zurück. Dadurch wird die synchrone Wartezeit der ursprünglichen Verarbeitungskette reduziert. Parallel dazu konsumiert \gls{lptwo} die Nachrichten aus dem Broker und leitet sie asynchron an \gls{ars} \gls{srv}~2 weiter.
+
+Abbildung~\ref{fig:lps_normalfluss} beschreibt den Normalfall der Verarbeitung im \gls{lps}. \gls{lpone} nimmt die Meldung entgegen, publiziert sie am Broker und kann nach Broker-Bestätigung frühzeitig an das vorgelagerte System antworten, während \gls{lptwo} die nachgelagerte Weiterleitung asynchron ausführt. Dadurch wird die synchrone Warteabhängigkeit entlang der ursprünglichen Request-Response-Kette reduziert, ohne die fachliche Weiterverarbeitung zu verlieren.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{./diagram/lps_normal_sequence.png}
-    \caption{Sequenzdiagramm eines beispielhaften Verarbeitungsablaufs einer Alarmmeldung innerhalb von \gls{lps} im Normalbetrieb.}
+    \caption{Sequenz einer Alarmverarbeitung im \acrshort{lps}-Normalbetrieb.}
     \label{fig:lps_normalfluss}
 \end{figure}
 
-Um die strengen Delivery-Garantien des Legacy-Systems zu wahren, kombiniert \gls{lps} mehrere Mechanismen. Die Kommunikation zwischen \gls{lpone}, Broker und \gls{lptwo} erfolgt über \gls{mqtt} \gls{qos}~2, was eine \textit{Exactly-Once-Delivery} auf diesem Teilpfad garantiert. Um die \textit{In-Order-Delivery} der Alarmmeldungen zu gewährleisten, werden die \gls{lptwo}-Instanzen so konfiguriert, dass Nachrichten innerhalb derselben Instanz anhand von (\texttt{max\_inflight\_messages = 1}) sequentiell verarbeitet werden. Für Fehlerfälle wie Netzwerkfehler oder negative Antworten der nachgelagerten Services, die hinter \gls{lptwo} auftreten, wird ein \textit{Retry}-Mechanismus~\footnote{Retry bezeichnet das erneute Zustellen einer zuvor fehlgeschlagenen Nachricht.} eingeführt. Bei fehlgeschlagener Übertragung einer Alarmmeldung an die nachgelagerten Services, wird diese Alarmmeldung auf ein separates shared Topic, die im Folgendem als Retry-Topic bezeichnet wird, publiziert. Der Retry-Mechanismus wird durch eine Broker-Erweiterung (Plugin) umgesetzt, die Nachrichten aus dem Retry-Topic strikt priorisiert. Sobald sich Nachrichten im Retry-Topic befinden, wird die Auslieferung regulärer Nachrichten aus dem Main-Topic temporär pausiert. Erst nach der erfolgreichen Verarbeitung der Retry-Nachrichten wird der reguläre Nachrichtenfluss fortgesetzt. Dies verhindert, dass neuere Alarmmeldungen eine ältere, zuvor fehlgeschlagene Alarmmeldung überholen. Der Ablauf dieses Mechanismus gestaltet sich wie folgt:
+Um die strengen Delivery-Garantien des Systems zu wahren, kombiniert der Ansatz mehrere Mechanismen. Die Kommunikation zwischen \gls{lpone}, Broker und \gls{lptwo} erfolgt über \gls{mqtt} \gls{qos}~2, was eine \textit{Exactly-Once-Delivery} auf diesem Teilpfad garantiert. Um die \textit{In-Order-Delivery} der Alarmmeldungen zu gewährleisten, werden die \gls{lptwo}-Instanzen so konfiguriert, dass Alarmmeldungen innerhalb derselben Instanz sequentiell verarbeitet werden.
+
+Für Fehlerfälle, die nachgelagert hinter \gls{lptwo} auftreten, wird ein \textit{Retry}-Mechanismus\footnote{Retry bezeichnet hier das erneute Zustellen einer zuvor fehlgeschlagenen Nachricht.} eingeführt: Fehlgeschlagene Nachrichten werden auf ein separates Retry-Topic republiziert. Der Retry-Mechanismus wird durch eine Broker-Erweiterung (Plugin) umgesetzt, die Nachrichten aus dem Retry-Topic strikt priorisiert. Sobald sich Nachrichten im Retry-Topic befinden, wird die Auslieferung regulärer Nachrichten temporär pausiert. Erst nach der erfolgreichen Verarbeitung der Retry-Nachrichten wird der reguläre Nachrichtenfluss fortgesetzt. Dies verhindert, dass neuere Nachrichten eine ältere, zuvor fehlgeschlagene Nachricht überholen.
+
+Der Ablauf zur Einhaltung dieser Systemgarantien gestaltet sich demnach wie folgt:
 
 \begin{enumerate}
-    \item \gls{lpone} publiziert eine Alarmmeldung in das Main-Topic.
-    \item \gls{lptwo} konsumiert die Alarmmeldung aus dem Main-Topic und versucht sie an \gls{srv}~2 weiterzuleiten.
-    \item Im Fehlerfall wird die Alarmmeldung in das Retry-Topic publiziert.
-    \item Das Broker-Plugin pausiert die Auslieferung von reguläreren Nachrichten aus dem Main-Topic und priorisiert die Auslieferung der Nachrichten aus dem Retry-Topic.
-    \item Nach erfolgreicher Verarbeitung aller Nachrichten im Retry-Topic wird die Auslieferung von reguläreren Nachrichten fortgesetzt.
+    \item \gls{lpone} publiziert eine Alarmmeldung an den Broker.
+    \item \gls{lptwo} konsumiert und versucht die Weiterleitung an \gls{ars} \gls{srv}~2/3.
+    \item Im Fehlerfall wird die Meldung in das Retry-Topic republiziert.
+    \item Das Broker-Plugin priorisiert die Retry-Meldungen vor dem regulären Nachrichtenstrom.
+    \item Nach einem erfolgreichen Retry wird die normale Auslieferung fortgesetzt.
 \end{enumerate}
 
-Abbildung~\ref{fig:lps_retry_priorisierung} zeigt einen beispielhaften Verarbeitungsablauf einer Alarmmeldung innerhalb von \gls{lps} im Fehlerfall.
+Abbildung~\ref{fig:lps_retry_priorisierung} verdeutlicht das Verhalten im Fehlerfall. Schlägt die Weiterleitung fehl, wird die betroffene Meldung in das Retry-Topic verschoben und durch das Plugin gegenüber regulären Nachrichten priorisiert erneut zugestellt. Damit soll verhindert werden, dass nachfolgende Meldungen eine zuvor fehlgeschlagene Meldung überholen und dadurch die Reihenfolge innerhalb eines Alarmverlaufs verletzt wird.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{./diagram/lps_retry_prio_sequence.png}
-    \caption{Sequenzdiagramm eines beispielhaften Verarbeitungsablaufs einer Alarmmeldung innerhalb von \gls{lps} im Fehlerfall.}
+    \caption{Sequenz einer Alarmverarbeitung im \acrshort{lps}-Fehlerfall mit priorisiertem Retry-Topic.}
     \label{fig:lps_retry_priorisierung}
 \end{figure}
 
-\subsection{Auswirkungen auf die Design Smells}
-\label{sub-sec:lps_auswirkungen}
-
-Durch die Integration von \gls{lps} werden die Auswirkungen der zuvor identifizierten Design Smells in Abschnitt~\ref{sec:design_smells} mitigiert:
+Durch die Integration des \gls{lps} werden die Auswirkungen der zuvor identifizierten Design Smells reduziert:
 
 \begin{itemize}
-    \item \textbf{Smell~1}: \textit{Synchrone Request-Response-Ketten}. Die direkte synchrone Kopplung zwischen \gls{srv}~1 und \gls{srv}~2 wird aufgrund der asynchronen Verarbeitung der Alarmmeldungen durch die \textit{Proxy-Broker-Proxy-Architektur} aufgebrochen. \gls{lpone} bestätigt den Eingang einer Alarmmeldung an die vorgelagerten Services direkt nach dem Publizieren der Alarmmeldung an das Broker. Dadurch wird die Latenzakkumulation entlang der Verarbeitungskette reduziert.
+    \item \textbf{Smell~1}: \textit{Synchrone Request-Response-Ketten}. Die direkte synchrone Kopplung zwischen \gls{ars} \gls{srv}~1 und \gls{ars} \gls{srv}~2 wird durch asynchrones Queueing aufgebrochen. Da \gls{lpone} direkt nach der Broker-Bestätigung antworten kann, wird die Latenzakkumulation entlang der Verarbeitungskette reduziert.
 
-    \item \textbf{Smell~2}: \textit{Heterogene Redundanzmodi}. die \textit{Proxy-Broker-Proxy-Architektur} und der Einsatz mehrerer \gls{lptwo}-Instanzen machen die Verarbeitung widerstandsfähiger gegenüber Ausfällen nachgelagerter Services oder Netzwerkverbindungen.
+    \item \textbf{Smell~2}: \textit{Heterogene Redundanzmodi}. Die brokergestützte Entkopplung und der Einsatz mehrerer \gls{lptwo}-Instanzen machen die Verarbeitung widerstandsfähiger gegenüber Ausfällen nachgelagerter Instanzen oder Netzwerkverbindungen. Der strukturelle Flaschenhals der ursprünglichen Kette wird dadurch abgeschwächt.
 
-          % TODO: TF is this?
-    \item \textbf{Smell~3}: \textit{Manuelles Ausfall-Management}. Zwar bleibt die Notwendigkeit manueller Eingriffe bei schwerwiegenden Ausfällen formal bestehen, jedoch werden die unmittelbaren negativen Auswirkungen auf die Antwortzeiten vorgelagerter Systeme reduziert, da eingehende Alarmmeldungen sicher im Broker zwischengespeichert werden.
+    \item \textbf{Smell~3}: \textit{Manuelles Ausfall-Management}. Zwar bleibt die Notwendigkeit manueller Eingriffe bei schwerwiegenden Ausfällen formal bestehen, jedoch werden die unmittelbaren negativen Auswirkungen auf die Antwortzeiten vorgelagerter Systeme reduziert, da eingehende Meldungen sicher im Broker zwischengespeichert werden.
 
-    \item \textbf{Smell~4 \& Smell~5}: \textit{Exactly-Once-Delivery} \& \textit{In-Order-Delivery} werden über \gls{qos}~2 und das Retry-Mechanismus adressiert.
+    \item \textbf{Smell~4 \& Smell~5}: \textit{Exactly-Once-Delivery} \& \textit{In-Order-Delivery} werden über \gls{qos}~2, Retry-Mechanismus und Plugin-gestützte Priorisierung adressiert.
 \end{itemize}
 
-Zur Validierung des Ansatzes wurden abschließend Experimente durchgeführt, bei denen simulierte Alarmanlagen Alarmmeldungen an das senden. Der Fokus der Experimente lag auf der Reduktion der Antwortzeiten sowie der Einhaltung der \textit{Exactly-Once-Delivery}. Die Experimente belegten, dass die Antwortzeiten des Systems nach dem Integrieren von \gls{lps} sowohl im Normalbetrieb als auch in Fehlerszenarien verbessert wurden und das System die Vorgaben der europäischen Norm EN 50136~\citep{din_en_50136-12012-08_alarm_2012} erfüllt. Die Garantie der \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} konnten laut den Experimenten ebenso gewahrt werden.
+Zur Validierung des Ansatzes wurden abschließend Experimente durchgeführt, deren primärer Fokus auf der Reduktion der Antwortzeiten sowie der Einhaltung der \textit{Exactly-Once-Delivery} lag. Die Evaluation belegt, dass die Antwortzeiten des Legacy-Systems sowohl im Normalbetrieb als auch in Fehlerszenarien verbessert wurden und das System die Vorgaben der europäischen Norm EN 50136~\citep{din_en_50136-12012-08_alarm_2012} erfüllt. Die Garantie der \textit{Exactly-Once-Delivery} konnte im Normalbetrieb beibehalten werden.
 
-\subsection{Limitationen der Experimente}
-\label{sub-sec:lps_limitationen_experimente}
+\section{Experimente}
+\label{sec:mqtt-proxy-experimente}
 
-Nach dem Betrachten der durchgeführten Experimente und der Interpretation der Ergebnisse ergeben sich potentiale Verletzungen der Delivery-Garantien. Laut dem Paper wird die Einhaltung von \textit{Exactly-Once-Delivery} bestätigt, in dem die Anzahl gesendeter Alarmmeldungen der simulierten Alarmanlagen gleich der Anzahl angekommener Alarmmeldung. Jedoch ist der Vergleich der Anzahl nicht ausreichend, um die \textit{Exactly-Once-Delivery} zu bestätigen. Eine beispielhafte Sequenz von Alarmmeldungen, die zur Verletzung von \textit{Exactly-Once-Delivery} sieht folgendermaßen aus: Die Alarmanlage \texttt{A} sendet die Alarmmeldungen \texttt{\#1} und \texttt{\#2}. Alarmmeldung~\texttt{\#1} geht im Netz verloren, während Alarmmeldung~\texttt{\#2} dupliziert ankommt. Die Anzahl gesendeter Alarmmeldungen ist gleich der Anzahl angekommener Alarmmeldungen, jedoch ist Alarmmeldung~\texttt{\#2} mehrfach angekommen. Außerdem wird die globale \textit{In-Order-Delivery} in den Experimenten nicht betrachtet. Innerhalb der \gls{lptwo} Instanzen werden Alarmmeldungen anhand von (\texttt{max\_inflight\_messages = 1}) sequentiell bearbeitet. Dadurch garantiert \gls{lptwo} \textit{In-Order-Delivery} innerhalb einer Instanz, jedoch keine globale \textit{In-Order-Delivery}. Aufgrund der \textit{shared subscriptions} ist es möglich, dass zwei \gls{lptwo} Instanzen Alarmmeldungen gleichzeitig bearbeiten. Das kann bei variablen Verarbeitungszeiten der Alarmmeldungen in den nachgelagerten Services dazu führen, dass Alarmmeldungen in der falschen Reihenfolge in der Datenbank gespeichert werden. Im nächsten Abschnitt werden Experimente durchgeführt, bei denen die Verletzung der Delivery-Garantien gezielt provoziert wird.
+Wie im vorherigen Kapitel dargelegt, zeigt die Evaluation in \citep{liebig_2025_architectural_refactoring}, dass das eingeführte \gls{lps} die Antwortzeiten sowohl im Normalbetrieb als auch unter bestimmten Fehlerszenarien verbessert. Die Validierung der \textit{Exactly-Once-Delivery} beschränkte sich in der zugrunde liegenden Arbeit jedoch primär auf den fehlerfreien Normalbetrieb.
 
-\subsection{Experimente}
-\label{sub-sec:lps_experimente}
+Um diese Forschungslücke zu schließen, werden in diesem Abschnitt erweiterte Experimente durchgeführt, die kritische Fehlerszenarien abdecken, welche in der ursprünglichen Arbeit nicht betrachtet wurden. Zwei Fragen stehen dabei im Vordergrund: Erstens, ob das \gls{lps} die zentralen Delivery-Garantien \textit{In-Order-Delivery} und \textit{Exactly-Once-Delivery} auch unter erschwerten Bedingungen einhält. Zweitens, wie sich das System bei wachsender Last verhält und über welchen Mechanismus zusätzliche Kapazität bereitgestellt wird. Um beide Fragen sauber voneinander zu trennen und zusätzlich einen fehlerfreien Referenzzustand zu dokumentieren, ist die Evaluation in drei Phasen mit jeweils eigenem Schwerpunkt gegliedert:
 
-Die in diesem Abschnitt durchgeführten Experimente umfassen zwei Simulationen des Legacy-Systems nach dem Integrieren von \gls{lps}. Bei den Simulationen werden Alarmanlagen simuliert, die Alarmmeldungen periodisch an das System schicken. Die gesendeten Alarmmeldungen bestehen hauptsächlich aus zwei Feldern; \texttt{device\_id} und \texttt{triggertime}. \texttt{device\_id} ist der Identifikator einer Alarmanlage und \texttt{triggertime} ist der Identifikator einer Alarmmeldung. Es ist garantiert, dass die \texttt{triggertime} der einzelnen gesendeten Alarmmeldungen monoton steigend ist. Außerdem sind die simulierten Alarmanlagen sind so eingestellt, dass sie das Übertragen von Alarmmeldungen erneut versuchen, falls Fehler beim Übertragen auftreten. Wiederholte Alarmmeldungen besitzen die gleiche \texttt{triggertime} wie die ursprünglich fehlgeschlagene Alarmmeldung. Nachgelagerte Services von \gls{lps} nämlich \gls{srv}~1 und \gls{srv}~2 werden auch durch einen Service simuliert, deren Aufgabe ist, Alarmmeldungen von \gls{lps} bzw.\,w.\ \gls{lptwo} zu empfangen und speichern. Die gespeicherten Alarmmeldungen werden abschließend auf \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} geprüft. Zum Ausführen der Experimente werden vier Hilfsservices eingeführt:
+\begin{description}
+    \item[Phase 1 -- Baseline im Normalbetrieb:]
+          Dient als Referenzmessung ohne jegliche Fehlerinjektion. Der primäre Auswertungsfokus liegt auf der Über\-prü\-fung von Duplikaten und der Vollständigkeit der Zustellung im ungestörten Betriebsablauf.
+
+    \item[Phase 2 -- Korrektheit unter Fehlerbedingungen:]
+          Untersucht das System unter der gezielten Injektion von Netzwerkfehlern und Serverfehlerantworten. Im Zentrum der Auswertung steht die Einhaltung der \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} unter Fehlerlast.
+
+    \item[Phase 3 -- Skalierbarkeit im Normalbetrieb:]
+          Analysiert das Systemverhalten bei steigendem Nachrichtenvolumen im fehlerfreien Betrieb. Hierbei wird konkret ausgewertet, welchen Einfluss die Last sowie eine horizontale Skalierung der \gls{lptwo}-Instanzen auf die Ende-zu-Ende-Latenz haben.
+\end{description}
+
+Die Validierung unter Realbedingungen in Phase~2 wird durch die gezielte Injektion von zwei Fehlertypen realisiert:
+\begin{enumerate}
+    \item \textbf{Netzwerkfehler (\gls{tcp}-Drops):} Es werden bewusste Verbindungsabbrüche auf der Transportschicht zwischen den einzelnen \gls{lps}-Kom\-po\-nen\-ten (Message Broker und \gls{lptwo}) herbeigeführt, um instabile oder temporär ausfallende Netzwerkverbindungen in industriellen Umgebungen zu simulieren.
+
+    \item \textbf{Anwendungsfehler (Error Responses):} Es werden künstliche fehlerhafte Antwortnachrichten seitens des nachgelagerten Services \gls{srv}~3 erzeugt. Dies dient dazu, transiente Überlastungszustände oder temporäre Ausfälle der Kernkomponenten des Legacy-Systems zu emulieren.
+\end{enumerate}
+
+% Review-Punkt 45: Abgrenzung zur klassischen Response Time
+Als zentrale quantitative Messgröße dient in allen folgenden Versuchsreihen die Ende-zu-Ende-Verarbeitungszeit einer Alarmmeldung. Diese ist definiert als die Zeitspanne zwischen dem initialen Absenden durch die externe Alarmanlage und der finalen Erfassung im Service \gls{srv}~3.
+
+Die Wahl fällt bewusst auf diese Metrik und nicht auf die reine \textit{Response Time}: Durch das asynchrone Design des \gls{lps} erhält die Alarmanlage zwar eine frühzeitige Bestätigung, sobald die Meldung im Broker liegt, für den Leitstellenbetrieb ist diese rein technische Antwortzeit jedoch zweitrangig. Entscheidend ist die reale Dauer, bis der Alarm vollständig verarbeitet wurde und den Mitarbeitern zur Bearbeitung bereitsteht.
+
+Genau diese fachliche Durchlaufzeit ist kritisch, da europäische Normen wie die \textit{EN 50136-1}~\citep{din_en_50136-12012-08_alarm_2012} und die \textit{EN 50518}~\citep{din_en_50518_2019} strenge Zeitfenster (typischerweise maximal 10 bis 20 Sekunden) für die Alarmverarbeitung vorschreiben. Bilden sich unter Last interne Queues, droht eine Verletzung dieser Vorgaben. Die Messung der Ende-zu-Ende-Zeit dient daher als Nachweis, dass das System ausreichend skaliert, um Alarmmeldungen auch unter Hochlast verlässlich und innerhalb des zulässigen Zeitfensters auszuliefern.
+
+Experimente, die ausschließlich die isolierte Antwortzeit des \gls{lps} zurück an die Alarmanlage messen, werden in dieser Masterarbeit nicht erneut betrachtet, da sie in der zugrunde liegenden Arbeit hinreichend behandelt wurden.
+
+Alle Experimente werden mithilfe von Docker Compose~\citep{docker_compose} durchgeführt und sind anhand von Konfigurationsdateien reproduzierbar. Weitere Informationen zum Ausführen der Experimente werden in Abschnitt~\ref{sec:appendix-reproducibility} erläutert. Die Durchführung erfolgte auf einem System mit einer \textit{Intel(R) Core(TM) i5-9600K} CPU~\citep{intel_i5_9600k}, 16\,GB RAM und \textit{Ubuntu} 24.04.4~\citep{ubuntu_24_04}.
+
+\subsection{Services}
+\label{sub-sec:services}
+
+Zur Durchführung der Experimente werden vier Hilfsprogramme eingesetzt. Sie bilden keine fachliche Erweiterung des \gls{marc}-Systems, sondern dienen ausschließlich dazu, Alarmmeldungen zu erzeugen, Fehlerbedingungen gezielt zu simulieren, eingehende Meldungen zu erfassen und die erzeugten Ergebnisse anschließend zu validieren und auszuwerten.
 
 \begin{itemize}
-    \item \textbf{Alarmanlagen-Simulator:} Der Alarmanlagen-Simulator bildet externe Alarmanlagen nach und erzeugt periodisch Alarmmeldungen, die an das System geschickt werden. Die gesamte Anzahl simulierter Alarmanlagen, die maximale Anzahl gesendeter Alarmmeldungen pro Alarmanlage sowie die willkürliche Wartezeit zwischen zwei gesendeter Alarmmeldungen sind einstellbar. Erfolgreich gesendeter Alarmmeldungen werden abschließend in einer Datei gespeichert (\texttt{device-results.json}).
+    % Review-Punkt 47: Simulator in Realzeit (nicht Simulationszeit)
+    \item \textbf{Alarmanlagen-Simulator:} Der Alarmanlagen-Simulator bildet externe Alarmanlagen nach und erzeugt die Alarmmeldungen, die in den Experimenten an das \gls{lps} gesendet werden. Er arbeitet in Realzeit und nicht in einer skalierten Simulationszeit; konfigurierte Intervalle und Retry-Dauern entsprechen daher realen Wartezeiten. Die Anzahl der simulierten Anlagen, die maximale Anzahl der erzeugten Meldungen, das zeitliche Intervall zwischen zwei Meldungen sowie die Retry-Dauer bei fehlgeschlagenen Übertragungen sind konfigurierbar. Für jede simulierte Alarmanlage werden Meldungen erzeugt und per \gls{http} an eine oder mehrere Zieladressen gesendet. Schlägt eine Übertragung fehl, wiederholt der Simulator den Sendeversuch nach Ablauf der konfigurierten Retry-Dauer. Erfolgreich akzeptierte Meldungen werden in einer Ergebnisdatei gespeichert.
 
-    \item \textbf{\gls{tcp}-Proxy:} Der \gls{tcp}-Proxy dient zur gezielten Simulation von Netzwerkfehlern zwischen Komponenten des \gls{lps}, konkret zwischen \gls{lptwo} Instanzen und dem Broker. Der \gls{tcp}-Proxy akzeptiert Verbindungen und leitet sie and die Zieladresse weiter. Die willkürliche maximale Dauer einer akzeptierten Verbindung ist einstellbar. Nach Ablauf der maximale Dauer wird die Verbindung getrennt, was zu einem Netzwerkfehler zwischen den beteiligten Komponenten führt.
+    \item \textbf{\gls{tcp}-Proxy:} Der \gls{tcp}-Proxy dient zur gezielten Simulation von Netzwerkfehlern zwischen Komponenten des \gls{lps}. Dazu wird er transparent zwischen zwei Kommunikationspartnern geschaltet und leitet \gls{tcp}-Verbindungen an den jeweils konfigurierten vorgelagerten Service weiter. Über eine konfigurierbare Fehlerrate kann der Proxy Verbindungen absichtlich ablehnen. Zusätzlich kann eine bestehende Verbindung nur für eine zufällig bestimmte Dauer aufrechterhalten und anschließend unterbrochen werden. Auf diese Weise lassen sich instabile Netzwerkverbindungen, Verbindungsabbrüche und temporäre Kommunikationsausfälle reproduzierbar in die Experimente einbringen.
 
-    \item \textbf{Server-Simulator:} Der Server-Simulator simuliert die nachgelagerten Services \gls{srv}~2 und \gls{srv}~3 und stellt damit den Endpunkt der experimentellen Verarbeitungskette dar. Der Server-Simulator empfängt Alarmmeldungen von \gls{lps} bzw.\,w.\ \gls{lptwo} und antwortet anhand von einer stellbaren willkürlichen Fehlerrate mit einer positiven oder negativen Bestätigung. Dadurch bildet der Server-Simulator echte Verarbeitungsfehler in den nachgelagerten Services \gls{srv}~2 und \gls{srv}~3. Außerdem ist die willkürliche Verarbeitungsdauer einer Alarmmeldung einstellbar. Dadurch simuliert der Server beliebige Verarbeitungszeiten der nachgelagerten Services \gls{srv}~2 und \gls{srv}~3. Der Server-Simulator ist außerdem mit einer einstellbaren Idle-Zeit konfigurierbar. Die Idle-Zeit dient dazu, der Server-Simulator zu terminieren und somit die Simulation zu beenden, nachdem eine bestimmte Zeit lang keine Alarmmeldungen mehr empfangen wurden. Abschließend werden erfolgreich verarbeitete Alarmmeldungen in einer Datei gespeichert (\texttt{server-results.json}).
+    \item \textbf{Server-Simulator:} Der Server simuliert den nachgelagerten Service \newline (\gls{srv}~3) und stellt damit den Endpunkt der experimentellen Verarbeitungskette dar. Er empfängt Alarmmeldungen über eine \gls{http}-Schnitt\-stel\-le und versieht sie beim Eintreffen mit einem Zeitstempel. Um unterschiedliche Ausführungs- und Antwortzeiten von \gls{srv}~3 nachzubilden, können sowohl die maximale Bearbeitungsdauer als auch die maximale Antwortdauer konfiguriert werden. Zusätzlich kann der Server mit einer Fehlerrate betrieben werden, sodass ein Teil der Anfragen bewusst mit einem Fehlerstatus beantwortet wird. Erfolgreich verarbeitete Meldungen werden in einer Ergebnisdatei gespeichert.
 
-    \item \textbf{Validator:} Der Validator wird nach Abschluss einer Simulation ausgeführt und vergleicht die vom Alarmanlagen-Simulator gesendeter Alarmmeldungen mit den beim Server-Simulator angekommenen Alarmmeldungen. Konkret werden die Vollständigkeit der Zustellung der Alarmmeldungen sowie die Einhaltung der \textit{In-Order-Delivery} und \textit{Exactly-Once-Delivery} validiert. Die Vollständigkeit wird validiert, in dem geprüft wird, dass jede gesendete Alarmmeldung aus (\texttt{device-results.json}) mindestens einmal in (\texttt{server-results.json}) vorkommt. \textit{Exactly-Once-Delivery} wird dadurch validiert, dass jede gesendete Alarmmeldung aus (\texttt{device-results.json}) höchstens einmal in (\texttt{server-results.json}) vorkommt. Um \textit{In-Order-Delivery} zu validieren, werden zunächst mehrfach angekommene Alarmmeldungen entfernt und danach wird geprüft, ob alle Alarmmeldungen jeder einzelnen Alarmanlage anhand von \texttt{triggertime} monoton steigend sind. Jede Verletzung der monotonen Steigfähigkeit einer Alarmanlage wird als \textit{Außer Reihenfolge} klassifiziert. Zur Veranschaulichung der Validierung von \textit{In-Order-Delivery} wird die folgende Sequenz empfangener Alarmmeldungen betrachtet:
-
-          \begin{table}[h]
-              \centering
-              \begin{tabular}{@{}ccc@{}}
-                  \toprule
-                  \textbf{Index} & \textbf{device\_id} & \textbf{triggertime} \\
-                  \midrule
-                  \#1            & 1                   & 0                    \\
-                  \#2            & 1                   & 2                    \\
-                  \#3            & 1                   & 3                    \\
-                  \#4            & 1                   & 1                    \\
-                  \#5            & 1                   & 4                    \\
-                  \bottomrule
-              \end{tabular}
-              \caption{Beispielhafte Sequenz empfangener Alarmmeldungen zur Veranschaulichung von In-Order-Delivery Validierung}
-              \label{tab:inorder-delivery}
-          \end{table}
+    \item \textbf{Validator:} Der Validator wird nach Abschluss einer Simulation ausgeführt und vergleicht die vom Alarmanlagen-Simulator erzeugten Meldungen mit den beim Server angekommenen Meldungen. Dadurch über\-prüft er, ob alle erzeugten Alarmmeldungen den Server erreicht haben. Zusätzlich protokolliert er mehrfach empfangene Meldungen und validiert, ob die Reihenfolge der Meldungen je Alarmanlage eingehalten wurde. Der Validator prüft damit die für diese Masterarbeit zentralen Eigenschaften \textit{In-Order-Delivery}, \textit{Exactly-Once-Delivery} und Vollständigkeit der Zustellung.
 \end{itemize}
 
+Für die Auswertung speichern der Alarmanlagen-Simulator und der Server-Simulator ihre Ergebnisse jeweils als \gls{json}-Array von \texttt{Event}-Objekten in \texttt{device-results.json} beziehungsweise \texttt{server\-results.json}. Ein \texttt{Event} besteht aus den Feldern \texttt{device\_id}, \texttt{event\_id} und \texttt{arrived\_at}. \texttt{device\_id} identifiziert eine Alarmanlage, \texttt{event\_id} identifiziert eine spezifische Alarmmeldung, und \texttt{arrived\_at} wird erst beim erfolgreichen Eintreffen am Server gesetzt. Für die Validierung werden Ereignisse über das Tupel \texttt{(device\_id, event\_id)} identifiziert. Konkret erfolgt die Validierung in drei Schritten:
 
-% Da die Experimente stochastisch erfolgen, werden sie solange wiederholt, bis eine Verletzung der Garantie auftritt.
+\begin{itemize}
+    \item Duplikaterkennung auf \texttt{server-results.json}.
+    \item Reihenfolgeprüfung auf \texttt{server-results.json}.
+    \item Vollständigkeitsprüfung, ob alle Ereignisse aus \texttt{device-results.json} mindestens einmal in \texttt{server-results.json} vorkommen.
+\end{itemize}
 
-% 3. Vendor lock in
+\subsection{Setup}
+\label{sub-sec:setup}
 
-% TODO: for ALPS diagram. We replaced the big diagram shown on page 49 with 2 smaller ones: alps_normal_sequence and alps_retry_sequence
+Für die Durchführung der Experimente wird die originale Implementierung des \gls{lps} aus dem offiziellen GitHub-Repository~\citep{legacy_proxy_pattern_repo} herangezogen. Diese Implementierung umfasst die Komponenten \textit{\gls{srv}~1 PROXY} und \textit{\gls{srv}~2 PROXY}, welche die ursprünglichen Services \gls{srv}~1 und \gls{srv}~2 von \gls{marc} simulieren. Darüber hinaus kommen die bereits in Abschnitt~\ref{sec:lps_loesung} beschriebenen Kernkomponenten des Proxys, \textit{\gls{lpone}} (Producer) und \textit{\gls{lptwo}} (Consumer), sowie das eigens entwickelte Broker-Plugin für den Retry-Mechanismus zum Einsatz.
 
+\begin{figure}[hbtp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{./img/exp_lps.pdf}
+    \caption{Experimentelles \acrshort{lps}-Test-Setup und Kommunikationspfade der beteiligten Komponenten.}
+    \label{fig:exp_setup}
+\end{figure}
 
+Abbildung~\ref{fig:exp_setup} veranschaulicht den experimentellen Versuchsaufbau sowie die Interaktionen der einzelnen Services. Der Ablauf einer Alarmmeldung gestaltet sich dabei wie folgt: Der \textit{Alarmanlagen-Simulator} generiert kontinuierlich Meldungen und sendet sie per \gls{http} an den \textit{\gls{srv}~1 PROXY}. Dieser nimmt die Anfragen entgegen und leitet sie an die Instanz \textit{\gls{lpone}} weiter. \textit{\gls{lpone}} publiziert die empfangenen Meldungen an den Message Broker. Sobald der Broker den Eingang bestätigt, sendet \textit{\gls{lpone}} umgehend ein \gls{ack} zurück, das über den \textit{\gls{srv}~1 PROXY} wieder beim Alarmanlagen-Simulator ankommt und die erfolgreiche Übertragung signalisiert.
+
+Auf der Consumer-Seite konsumieren die \textit{\gls{lptwo}}-Instanzen die Meldungen aus dem Broker. Um die im vorherigen Abschnitt definierten Netzwerkfehler systematisch untersuchen zu können, wird die \gls{tcp}-Verbindung zwischen dem Broker und den \textit{\gls{lptwo}}-Instanzen gezielt über die \textit{\gls{tcp}-Proxies} geroutet. Nach dem erfolgreichen Empfang einer Nachricht leitet \textit{\gls{lptwo}} diese an den \textit{\gls{srv}~2 PROXY} weiter. Dieser übergibt die Meldung abschließend an den \textit{Server-Simulator}. Der Server-Simulator bildet den Endpunkt der Verarbeitungskette und übernimmt die Rolle des ursprünglichen Services \gls{srv}~3 von \gls{marc}. Er verarbeitet die Meldungen entsprechend der konfigurierten Latenzen und speichert die Ergebnisse.
+
+\subsubsection{Phase~1 -- Baseline im Normalbetrieb}
+\label{sub-sub-sec:phase-1}
+
+Die Experimente in Phase~1 werden unter normalen Bedingungen durchgeführt. Das Ziel dieser Phase besteht darin, einen Referenzfall ohne künstlich eingeführte Fehler zu erzeugen und damit zu prüfen, ob das \gls{lps} im Normalbetrieb die erwarteten Delivery-Garantien einhält. Der Aufbau orientiert sich an der ursprünglichen Evaluation des \gls{lps}: Es werden drei Instanzen von \gls{lpone} und drei Instanzen von \gls{lptwo} eingesetzt.
+
+\begin{table}[H]
+    \centering
+    \caption{Konfiguration der Experimente in Phase~1.}
+    \label{tab:exp_phase_1_config}
+    \begin{tabular}{ll}
+        \hline
+        Parameter                                      & Wert    \\
+        \hline
+        \gls{lpone}                                    & 3       \\
+        \gls{lptwo}                                    & 3       \\
+        Alarmanlagen                                   & 100     \\
+        Meldungen pro Alarmanlage                      & 50      \\
+        Erwartete Gesamtzahl erzeugter Meldungen       & 5\,000  \\
+        Serverfehlerrate                               & 0\,\%   \\
+        Maximale Server-Antwortzeit                    & 100\,ms \\
+        Netzwerkfehler zwischen Broker und \gls{lptwo} & keine   \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Die Konfiguration in Tabelle~\ref{tab:exp_phase_1_config} dient als Baseline, weil sie dieselbe grundlegende Systemgröße und denselben störungsfreien Betriebsmodus wie die ursprüngliche \gls{lps}-Evaluation verwendet. Dadurch können die Ergebnisse aus Phase~2 direkt gegen einen fehlerfreien Referenzzustand verglichen werden.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{./img/exp/mqtt/1/failure-duplicate.pdf}
+    \caption{Validator-Ausgabe zur Duplikatprüfung in Phase~1 ohne simulierte Fehler.}
+    \label{fig:exp_phase_1_duplicate}
+\end{figure}
+
+Abbildung~\ref{fig:exp_phase_1_duplicate} zeigt die Duplikatprüfung im Referenzfall. Sichtbar sind ausschließlich eindeutige Ereignisse; Duplikate treten in diesem Szenario nicht auf.
+
+\begin{table}[H]
+    \centering
+    \caption{Validierungsergebnis der Duplikatprüfung in Phase~1.}
+    \label{tab:exp_phase_1_results}
+    \begin{tabular}{lr}
+        \hline
+        Messgröße         & Wert   \\
+        \hline
+        Gesamt angekommen & 5\,000 \\
+        Eindeutig         & 5\,000 \\
+        Dupliziert        & 0      \\
+        Nie angekommen    & 0      \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Tabelle~\ref{tab:exp_phase_1_results} bestätigt damit den erwarteten Referenzzustand: keine Duplikate, keine Verluste und vollständige Zustellung. Dieser Zustand bildet den Vergleichspunkt für die anschließende Fehleranalyse in Phase~2.
+
+\subsubsection{Phase~2 -- Korrektheit unter Fehlerbedingungen}
+\label{sub-sub-sec:phase-2}
+
+Phase~2 erweitert den Referenzfall aus Phase~1 um die beiden zuvor beschriebenen Fehlertypen: Netzwerkfehler zwischen dem Broker und den \gls{lptwo}-Instanzen sowie Fehlerantworten des Server-Simulators. Dadurch wird untersucht, ob das \gls{lps} die Garantien \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} auch dann einhält, wenn die Kommunikation zur Consumer-Seite instabil ist oder die nachgelagerte Verarbeitung zeitweise fehlschlägt.
+
+\begin{table}[H]
+    \centering
+    \caption{Konfiguration der Experimente in Phase~2.}
+    \label{tab:exp_phase_2_config}
+    \begin{tabular}{ll}
+        \hline
+        Parameter                                    & Wert      \\
+        \hline
+        \gls{lpone}                                  & 3         \\
+        \gls{lptwo}                                  & 3         \\
+        Alarmanlagen                                 & 100       \\
+        Meldungen pro Alarmanlage                    & 50        \\
+        Erwartete Gesamtzahl erzeugter Meldungen     & 5\,000    \\
+        Serverfehlerrate                             & 0{,}1\,\% \\
+        Maximale Server-Antwortzeit                  & 100\,ms   \\
+        \gls{tcp}-Proxy-Fehlerrate                   & 0{,}1\,\% \\
+        Maximale Verbindungsdauer im \gls{tcp}-Proxy & 10\,s     \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Die Fehlerinjektion erfolgt stochastisch: Der Server-Simulator entscheidet pro Anfrage probabilistisch anhand der konfigurierten Fehlerrate, ob ein Fehlerstatus zurückgegeben wird; der \gls{tcp}-Proxy entscheidet pro Verbindungsannahme probabilistisch über einen Verbindungsabbruch und kann akzeptierte Verbindungen zusätzlich nach einer zufälligen Dauer trennen.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{./img/exp/mqtt/2/failure-duplicate.pdf}
+    \caption{Validator-Ausgabe zur Duplikatprüfung in Phase~2 mit Netzwerk- und Serverfehlern.}
+    \label{fig:exp_phase_2_duplicate}
+\end{figure}
+
+Abbildung~\ref{fig:exp_phase_2_duplicate} zeigt unter Fehlerbedingungen eine starke Zunahme mehrfach zugestellter Meldungen.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{./img/exp/mqtt/2/failure-order.pdf}
+    \caption{Validator-Ausgabe zur Reihenfolgeprüfung in Phase~2 mit Netzwerk- und Serverfehlern.}
+    \label{fig:exp_phase_2_order}
+\end{figure}
+
+Abbildung~\ref{fig:exp_phase_2_order} zeigt zusätzlich Reihenfolgeverletzungen innerhalb der Meldungsfolgen einzelner Alarmanlagen.
+
+\begin{table}[H]
+    \centering
+    \caption{Validierungsergebnisse der Duplikat- und Reihenfolgeprüfung in Phase~2.}
+    \label{tab:exp_phase_2_results}
+    \begin{tabular}{lr}
+        \hline
+        Messgröße         & Wert                 \\
+        \hline
+        Gesamt angekommen & 22\,504              \\
+        Eindeutig         & 5\,000               \\
+        Dupliziert        & 17\,504 (77{,}8\,\%) \\
+        Nie angekommen    & 0                    \\
+        Außer Reihenfolge & 3\,035 (13{,}5\,\%)  \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Die aggregierten Ergebnisse in Tabelle~\ref{tab:exp_phase_2_results} zeigen, dass die betrachteten Delivery-Garantien unter diesen Fehlerbedingungen nicht eingehalten werden. Die hohe Duplikatrate verletzt \textit{Exactly-Once-Delivery}; die zusätzlich beobachteten Reihenfolgeverletzungen zeigen Defizite bei \textit{In-Order-Delivery}.
+
+Ursächlich ist das Zusammenspiel mehrerer Wiederholungsmechanismen: Serverfehlerantworten und Verbindungsabbrüche zwischen Broker und \gls{lptwo} füh\-ren zu Retries beziehungsweise erneuter Zustellung durch den Broker. Ohne echte Ende-zu-Ende-Idempotenz gelangen fachlich identische Meldungen mehrfach bis zur Zielverarbeitung. Gleichzeitig können verzögerte Retries älterer Meldungen durch asynchrone Verarbeitung und erneute Zustellung von späteren Meldungen derselben Alarmanlage überholt werden. Der \gls{mqtt}-basierte Retry-Mechanismus reduziert dieses Risiko, eliminiert es unter den betrachteten Stör\-mustern jedoch nicht vollständig. Diese Fehlerquellen bilden damit den Ausgangspunkt für die in Kapitel~\ref{ch:amqp-proxy} entwickelten Erweiterungen.
+
+\subsubsection{Phase~3 -- Skalierbarkeit im Normalbetrieb}
+\label{sub-sub-sec:phase-3}
+
+Phase~3 untersucht die Skalierbarkeit des \gls{lps} im fehlerfreien Normalbetrieb. Die Versuchsreihe ist in zwei Blöcke aufgeteilt: Zunächst wird die Last bei konstanter \gls{lptwo}-Anzahl erhöht (Phase~3.1 bis Phase~3.3), anschließend wird bei konstanter hoher Last die \gls{lptwo}-Anzahl erhöht (Phase~3.3 bis Phase~3.5).
+
+\begin{table}[H]
+    \centering
+    \caption{Konfigurationen der Skalierungsexperimente in Phase~3.}
+    \label{tab:exp_phase_3_config}
+    \begin{tabular}{lllllll}
+        \hline
+        Experiment & \gls{lpone} & \gls{lptwo} & Alarmanlagen & Meldungen je Alarmanlage \\
+        \hline
+        Phase~3.1  & 3           & 3           & 10           & 10                       \\
+        Phase~3.2  & 3           & 3           & 50           & 50                       \\
+        Phase~3.3  & 3           & 3           & 100          & 100                      \\
+        Phase~3.4  & 3           & 6           & 100          & 100                      \\
+        Phase~3.5  & 3           & 9           & 100          & 100                      \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Alle Konfigurationen aus Tabelle~\ref{tab:exp_phase_3_config} verwenden dieselben fehlerfreien Randbedingungen (Serverfehlerrate 0\,\%, maximale Server-Antwortzeit 100\,ms), sodass Unterschiede in den Latenzen auf Last- beziehungsweise \gls{lptwo}-Variation zurückgeführt werden können.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{./img/exp/mqtt/3/1/latency-line.pdf}
+    \caption{Ende-zu-Ende-Latenzverlauf in Phase~3.1 (100 Meldungen, 3 \acrshort{lptwo}-Instanzen).}
+    \label{fig:exp_phase_3_1_latency}
+\end{figure}
+
+Abbildung~\ref{fig:exp_phase_3_1_latency} zeigt den Referenzverlauf bei geringer Last.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{./img/exp/mqtt/3/2/latency-line.pdf}
+    \caption{Ende-zu-Ende-Latenzverlauf in Phase~3.2 (2\,500 Meldungen, 3 \acrshort{lptwo}-Instanzen).}
+    \label{fig:exp_phase_3_2_latency}
+\end{figure}
+
+Abbildung~\ref{fig:exp_phase_3_2_latency} zeigt bereits bei mittlerer Last einen deutlich ansteigenden Verlauf.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{./img/exp/mqtt/3/3/latency-line.pdf}
+    \caption{Ende-zu-Ende-Latenzverlauf in Phase~3.3 (10\,000 Meldungen, 3 \acrshort{lptwo}-Instanzen).}
+    \label{fig:exp_phase_3_3_latency}
+\end{figure}
+
+Abbildung~\ref{fig:exp_phase_3_3_latency} bestätigt diesen Trend bei hoher Last: Es bildet sich eine Queue, wodurch spätere Meldungen deutlich länger auf Verarbeitung warten.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{./img/exp/mqtt/3/4/latency-line.pdf}
+    \caption{Ende-zu-Ende-Latenzverlauf in Phase~3.4 (10\,000 Meldungen, 6 \acrshort{lptwo}-Instanzen).}
+    \label{fig:exp_phase_3_4_latency}
+\end{figure}
+
+Abbildung~\ref{fig:exp_phase_3_4_latency} zeigt bei unveränderter Last und erhöhter \gls{lptwo}-Anzahl einen deutlich flacheren Verlauf.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{./img/exp/mqtt/3/5/latency-line.pdf}
+    \caption{Ende-zu-Ende-Latenzverlauf in Phase~3.5 (10\,000 Meldungen, 9 \acrshort{lptwo}-Instanzen).}
+    \label{fig:exp_phase_3_5_latency}
+\end{figure}
+
+Abbildung~\ref{fig:exp_phase_3_5_latency} setzt diese Entwicklung fort: Zusätzliche \gls{lptwo}-Instanzen reduzieren die Ende-zu-Ende-Latenzen weiter.
+
+\begin{table}[H]
+    \centering
+    \caption{Zusammenfassung der Latenzmessungen in Phase~3 in Millisekunden.}
+    \label{tab:exp_phase_3_latency}
+    \begin{tabular}{lllllll}
+        \hline
+        Experiment & Alarmmeldungen & \gls{lptwo} & Mittelwert   \\
+        \hline
+        Phase~3.1  & 100            & 3           & 1\,914,151   \\
+        Phase~3.2  & 2\,500         & 3           & 70\,772,642  \\
+        Phase~3.3  & 10\,000        & 3           & 287\,592,951 \\
+        Phase~3.4  & 10\,000        & 6           & 129\,709,884 \\
+        Phase~3.5  & 10\,000        & 9           & 54\,222,918  \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Die zusammengefassten Kennzahlen in Tabelle~\ref{tab:exp_phase_3_latency} zeigen zwei klare Effekte: Bei konstanter \gls{lptwo}-Anzahl steigen die Latenzen mit wachsender Last stark an; bei konstanter Last sinken die Latenzen deutlich mit zusätzlicher \gls{lptwo}-Kapazität. Das \gls{lps} skaliert damit horizontal über zusätzliche \gls{lptwo}-Instanzen, bleibt aber an den Betrieb weiterer Service-Instanzen gebunden; Ein Punkt, der in Kapitel~\ref{ch:amqp-proxy} als eine der Limitationen des \gls{lps} adressiert wird.
+
+\section{Limitationen des \acrshort{lps}}
+\label{sec:mqtt-proxy-schwach}
+
+Die Experimente zeigen, dass das \gls{mqtt}-basierte \gls{lps} im fehlerfreien Normalbetrieb erwartungsgemäß arbeitet, unter den in Phase~2 untersuchten Fehlerbedingungen jedoch zentrale Delivery-Garantien verletzt. Während Phase~1 keine Duplikate und keine verlorenen Meldungen zeigt, entstehen in Phase~2 sowohl eine hohe Anzahl duplizierter Meldungen als auch messbare Reihenfolgeverletzungen.
+
+Eine erste Limitation betrifft die Ende-zu-Ende-Sicherstellung der \textit{Exactly-Once-Delivery}. Die Experimente zeigen, dass eine fachliche Alarmmeldung unter Fehlerbedingungen mehrfach am Ende der Verarbeitungskette ankommen kann. Solche Duplikate können beispielsweise entstehen, wenn eine Meldung bereits an den Server-Simulator beziehungsweise im Legacy-System an \gls{srv}~3 weitergeleitet wurde, der vorherige Verarbeitungsschritt jedoch aufgrund eines Fehlers oder Verbindungsabbruchs erneut ausgeführt wird. Für eine robuste \textit{Exactly-Once-Delivery} reicht es daher nicht aus, Nachrichten lediglich zuverlässig zwischen einzelnen Komponenten zu übertragen. Zusätzlich wird ein Mechanismus benötigt, der fachliche Duplikate erkennt oder verhindert.
+
+Eine zweite Limitation betrifft die Reihenfolge der Verarbeitung. Die Ergebnisse aus Phase~2 zeigen, dass unter Fehlerbedingungen Meldungen außerhalb der erwarteten Reihenfolge beim Server ankommen können. Für das betrachtete Legacy-System ist dies kritisch, weil Meldungen einer Alarmanlage in ihrer ursprünglichen Reihenfolge verarbeitet werden müssen. Ein verbessertes Design muss deshalb nicht nur erneute Zustellung unterstützen, sondern auch verhindern, dass spätere Meldungen derselben Alarmanlage eine frühere, fehlgeschlagene Meldung überholen.
+
+Eine dritte Limitation betrifft die Skalierung. Phase~3 zeigt zwar, dass die Verarbeitungszeit durch zusätzliche \gls{lptwo}-Instanzen reduziert werden kann. Diese Skalierung erfordert jedoch den Betrieb weiterer Service-Instanzen. Jede zusätzliche Instanz muss bereitgestellt, konfiguriert, überwacht und im Fehlerfall betrieben werden. Dieser zusätzliche Betriebsaufwand sollte in der späteren Fassung durch geeignete Literatur oder durch eine klare technische Argumentation belegt werden~\citep{newman2021building}.
+
+Eine vierte Limitation ist die Ab\-hän\-gig\-keit von einer brokerseitigen Erweiterung. Der Retry-Mechanismus des \gls{lps} basiert auf einem spezifischen HiveMQ-Plugin, das Retry-Nachrichten gegenüber regulären Nachrichten priorisiert. Dies erschwert die Portierung auf andere Broker und erhöht die Ab\-hän\-gig\-keit von einer konkreten Broker-Plattform.
+
+Zusammenfassend ergeben sich aus den Experimenten drei zentrale Problemfelder: Erstens müssen Duplikate Ende-zu-Ende erkannt oder vermieden werden. Zweitens muss die Reihenfolge pro Alarmanlage auch unter Fehlerbedingungen erhalten bleiben. Drittens soll die Skalierung verbessert werden, ohne die Korrektheitslogik an ein brokerspezifisches Plugin zu binden.
 
 \section{Abgeleitete Anforderungen}
 \label{sec:requirements}

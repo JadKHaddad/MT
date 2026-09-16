@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="oaQ5ezWDppv2KV0WdWMT">
-    <mxGraphModel dx="1414" dy="809" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="975" dy="536" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -28,10 +28,10 @@
         <mxCell id="Uo4VtgE1X8RedTPr1fhj-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Alarmanlagen" vertex="1">
           <mxGeometry height="60" width="120" x="90" y="300" as="geometry" />
         </mxCell>
-        <mxCell id="Uo4VtgE1X8RedTPr1fhj-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 1" vertex="1">
+        <mxCell id="Uo4VtgE1X8RedTPr1fhj-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 1 Proxy" vertex="1">
           <mxGeometry height="60" width="120" x="270" y="120" as="geometry" />
         </mxCell>
-        <mxCell id="Uo4VtgE1X8RedTPr1fhj-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 2" vertex="1">
+        <mxCell id="Uo4VtgE1X8RedTPr1fhj-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 2 Proxy" vertex="1">
           <mxGeometry height="60" width="120" x="965" y="120" as="geometry" />
         </mxCell>
         <mxCell id="Uo4VtgE1X8RedTPr1fhj-11" edge="1" parent="1" source="Uo4VtgE1X8RedTPr1fhj-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="Uo4VtgE1X8RedTPr1fhj-31">
@@ -43,16 +43,16 @@
         <mxCell id="Uo4VtgE1X8RedTPr1fhj-20" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 1" vertex="1">
           <mxGeometry height="60" width="120" x="270" y="460" as="geometry" />
         </mxCell>
-        <mxCell id="Uo4VtgE1X8RedTPr1fhj-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 2" vertex="1">
+        <mxCell id="Uo4VtgE1X8RedTPr1fhj-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 2 Proxy" vertex="1">
           <mxGeometry height="60" width="120" x="965" y="460" as="geometry" />
         </mxCell>
-        <mxCell id="Uo4VtgE1X8RedTPr1fhj-28" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 1" vertex="1">
+        <mxCell id="Uo4VtgE1X8RedTPr1fhj-28" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 1 Proxy" vertex="1">
           <mxGeometry height="60" width="120" x="270" y="290" as="geometry" />
         </mxCell>
         <mxCell id="Uo4VtgE1X8RedTPr1fhj-29" edge="1" parent="1" source="Uo4VtgE1X8RedTPr1fhj-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="Uo4VtgE1X8RedTPr1fhj-31">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Uo4VtgE1X8RedTPr1fhj-30" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 2" vertex="1">
+        <mxCell id="Uo4VtgE1X8RedTPr1fhj-30" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ARS SRV 2 Proxy" vertex="1">
           <mxGeometry height="60" width="120" x="965" y="290" as="geometry" />
         </mxCell>
         <mxCell id="Uo4VtgE1X8RedTPr1fhj-31" parent="1" style="rounded=1;whiteSpace=wrap;html=1;textShadow=0;" value="Server" vertex="1">
@@ -139,7 +139,6 @@
             <Array as="points">
               <mxPoint x="715" y="305" />
               <mxPoint x="715" y="150" />
-              <mxPoint x="765" y="150" />
             </Array>
             <mxPoint x="725" y="405" as="sourcePoint" />
             <mxPoint x="755" y="405" as="targetPoint" />
