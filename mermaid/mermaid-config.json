@@ -1,6 +1,7 @@
 {
     "theme": "base",
     "themeVariables": {
+        "fontFamily": "'Times New Roman', Times, serif",
         "actorBkg": "#ffffff",
         "actorBorder": "#333333",
         "actorTextColor": "#000000",
@@ -20,6 +21,9 @@
     },
     "sequence": {
         "diagramMarginX": 1,
-        "diagramMarginY": 1
+        "diagramMarginY": 1,
+        "wrap": true,
+        "noteMargin": 10,
+        "themeCSS": ".actor-box-label, .boxText { text-anchor: middle; }"
     }
 }
