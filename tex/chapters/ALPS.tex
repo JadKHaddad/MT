@@ -29,7 +29,12 @@ Die Erfüllung der beschriebeben Anforderungen erfordert Modifikationen an der b
     \item \textbf{\gls{alpdedup}}: Implementiert die Deduplizierungslogik von Alarmmeldungen. Wird unmittelbar vor dem letzten Service in der Verarbeitungskette positioniert (\gls{srv}~3 im \gls{marc}-System). Empfängt Alarmmeldungen von vorgelagerten Services und leitet nur die eindeutigen Alarmmeldungen an den nachgelagerten Service weiter.
 \end{itemize}
 
-Als Transportprotokoll zwischen den Komponenten wird \gls{amqp} verwendet, da \gls{amqp} die benötigten Mechanismen bietet, die die Kontrolle über den Fluss der Nachrichten bzw.~Alarmmeldungen und die Koordination zwischen den Komponenten ermöglichen. Konkret sollen mithilfe von \gls{amqp} Mechanismen folgende Anforderungen erfüllt werden:
+Als Transportprotokoll zwischen den Komponenten wird \gls{amqp} verwendet, da \gls{amqp} die benötigten Mechanismen bietet, die die Kontrolle über den Fluss der Nachrichten bzw.~Alarmmeldungen und die Koordination zwischen den Komponenten ermöglichen.
+
+\subsection{In-Order-Delivery Garantie}
+\label{sub-sec:alps-in-order-delivery-garantie}
+
+Um die die \textit{In-Order-Delivery} zu garantieren, sollen mithilfe von \gls{amqp} Mechanismen folgende Anforderungen erfüllt werden:
 
 \begin{itemize}
     \item Alarmmeldungen pro Alarmanlage sollen immer von einer bestimmten \gls{lptwo} Instanz verarbeitet werden: Beliebige Verteilung von Alarmmeldungen auf beliebige \gls{lptwo} Instanzen soll unterbunden werden.
@@ -38,3 +43,6 @@ Als Transportprotokoll zwischen den Komponenten wird \gls{amqp} verwendet, da \g
 \end{itemize}
 
 Die Erfüllung dieser Anforderungen garantiert die \textit{In-Order-Delivery} pro Alarmanlage.
+
+\subsection{Exactly-Once-Delivery Garantie}
+\label{sub-sec:alps-exactly-once-delivery-garantie}
