@@ -11,13 +11,19 @@ sequenceDiagram
     L1->>QA: Alarmmeldung A
     QA-->>L1: Bestätigung A
     QA->>L2A: Alarmmeldung A
+
+    L1->>QB: Alarmmeldung B
+    QB-->>L1: Bestätigung B
+
     L2A->>S2: Weiterleitung A
+
+    QB->>L2B: Alarmmeldung B
+    
+    L2B->>S2: Weiterleitung B
+
+    S2-->>L2B: Bestätigung B
+    L2B-->>QB: Bestätigung B
+
     S2-->>L2A: Bestätigung A
     L2A-->>QA: Bestätigung A
     
-    L1->>QB: Alarmmeldung B
-    QB-->>L1: Bestätigung B
-    QB->>L2B: Alarmmeldung B
-    L2B->>S2: Weiterleitung B
-    S2-->>L2B: Bestätigung B
-    L2B-->>QB: Bestätigung B
