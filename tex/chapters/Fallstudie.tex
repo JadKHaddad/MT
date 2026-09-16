@@ -170,7 +170,6 @@ Die in diesem Abschnitt durchgeführten Experimente umfassen zwei Simulationen d
 
 Für die Durchführung der Experimente wird die originale Implementierung von \gls{lps} aus dem offiziellen GitHub-Repository~\citep{legacy_proxy_pattern_repo} herangezogen. Die Implementierung umfasst die Komponenten \textit{\gls{lpone}}, \textit{\gls{lptwo}} und das eigens entwickelte Broker-Plugin für den Retry-Mechanismus, sowie zwei Hilfsservices \textit{\gls{srv}~1 PROXY} und \textit{\gls{srv}~2 PROXY}, die die Kommunikation zwischen \textit{\gls{lpone}} und \textit{\gls{srv}~1} und zwischen \textit{\gls{lptwo}} und \textit{\gls{srv}~2} ermöglichen. Nach dem Zusammenstellen der beteiligten Komponenten sieht die Architektur der Experimente wie in Abbildung~\ref{fig:exp_setup} dargestellt ist.
 
-% TODO: fix diagram
 \begin{figure}[hbtp]
     \centering
     \includegraphics[width=\textwidth]{./img/drawio/exp_lps.pdf}
@@ -275,7 +274,16 @@ In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzu
 
 Alle Experimente in diesem Abschnitt wurden mithilfe von Docker Compose~\citep{docker_compose} durchgeführt und sind anhand von Konfigurationsdateien reproduzierbar. Weitere Informationen zum Ausführen der Experimente werden in Abschnitt~\ref{sec:appendix-reproducibility} erläutert. Die Experimente erfolgten auf einem System mit einer \textit{Intel(R) Core(TM) i5-9600K} CPU~\citep{intel_i5_9600k}, 16\,GB RAM und \textit{Ubuntu} 24.04.4~\citep{ubuntu_24_04}.
 
-% 3. Vendor lock in
+\section{Limitationen}
+\label{sec:lps_limitationen}
+
+Die Experimente im vorherigen Abschnitt~\ref{sub-sec:lps_experimente} zeigen, dass \gls{lps} die Delivery-Garantien unter bestimmten Bedingungen verletzt. Beim Auftreten von Netzwerkfehlern zwischen \gls{lps} Komponenten wird die \textit{Exactly-Once-Delivery} Garantie verletzt und bie variablen Netzwerklatenzen oder variablen Verarbeitungszeiten der Alarmmeldungen in den nachgelagerten Services wird die \textit{In-Order-Delivery} Garantie verletzt, wenn mehrere \gls{lptwo} Instanzen parallel Alarmmeldungen verarbeiten. Eine weitere Limitation von \gls{lps} hat sich beim Durch\-füh\-ren der Experimente indirekt gezeigt. Das entwickelte Retry-Mechanismus Plugin ist vendor-spezifisch und kann nicht auf andere Broker übertragen werden. Dies führt zu einer Abhängigkeit von einem bestimmten Broker, was die Portabilität und Flexibilität des Systems einschränkt. Zusammenfassend ergeben sich folgende Limitationen von \gls{lps}:
+
+\begin{itemize}
+    \item Verletzung der \textit{Exactly-Once-Delivery} Garantie.
+    \item Verletzung der \textit{In-Order-Delivery} Garantie.
+    \item Vendor-Lock-in durch das vendor-spezifische Plugin.
+\end{itemize}
 
 % TODO: for ALPS diagram. We replaced the big diagram shown on page 49 with 2 smaller ones: alps_normal_sequence and alps_retry_sequence
 
