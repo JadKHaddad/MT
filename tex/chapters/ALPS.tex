@@ -37,9 +37,9 @@ Als Transportprotokoll zwischen den Komponenten wird \gls{amqp} verwendet, da \g
 Um die die \textit{In-Order-Delivery} zu garantieren, sollen mithilfe von \gls{amqp} Mechanismen folgende Anforderungen erfüllt werden:
 
 \begin{itemize}
-    \item Alarmmeldungen pro Alarmanlage sollen immer von einer bestimmten \gls{lptwo} Instanz verarbeitet werden: Beliebige Verteilung von Alarmmeldungen auf beliebige \gls{lptwo} Instanzen soll unterbunden werden.
-    \item Alarmmeldungen pro Alarmanlage sollen immer sequentiell von einer einzigen \gls{lptwo} Instanz verarbeitet werden: Parallele Verarbeitung von Alarmmeldungen einer einzelnen Alarmanlage soll unterbunden werden. Jedoch ist die parallele Verarbeitung von Alarmmeldungen verschiedener Alarmanlagen weiterhin erlaubt.
-    \item Übertragungsfehler in \gls{lptwo} Instanzen sollen nicht zu einer Verlust führen: Alarmmeldungen, die von einer \gls{lptwo} Instanz nicht verarbeitet werden können, sollen neu übertragen werden, bis sie erfolgreich verarbeitet wurden. Dabei soll die Reihenfolge der Alarmmeldungen pro Alarmanlage beibehalten werden.
+    \item \textbf{A1}: Alarmmeldungen pro Alarmanlage sollen immer von einer bestimmten \gls{lptwo} Instanz verarbeitet werden: Beliebige Verteilung von Alarmmeldungen auf beliebige \gls{lptwo} Instanzen soll unterbunden werden.
+    \item \textbf{A2}: Alarmmeldungen pro Alarmanlage sollen immer sequentiell von einer einzigen \gls{lptwo} Instanz verarbeitet werden: Parallele Verarbeitung von Alarmmeldungen einer einzelnen Alarmanlage soll unterbunden werden. Jedoch ist die parallele Verarbeitung von Alarmmeldungen verschiedener Alarmanlagen weiterhin erlaubt.
+    \item \textbf{A3}: Übertragungsfehler in \gls{lptwo} Instanzen sollen nicht zu einer Verlust führen: Alarmmeldungen, die von einer \gls{lptwo} Instanz nicht verarbeitet werden können, sollen neu übertragen werden, bis sie erfolgreich verarbeitet wurden. Dabei soll die Reihenfolge der Alarmmeldungen pro Alarmanlage beibehalten werden.
 \end{itemize}
 
 Die Erfüllung dieser Anforderungen garantiert die \textit{In-Order-Delivery} pro Alarmanlage.
@@ -84,6 +84,8 @@ Die verwendeten \gls{amqp}-Mechanismen sind nicht \textit{RabbitMQ}-spezifisch s
 
 \subsection{Advanced Legacy Proxy I}
 \label{sub-sec:alpone}
+
+Die Implementierung von \gls{alpone} setzt voraus, dass die Alarmmeldungen mindestens den Feld \texttt{device\_id} besitzen. \texttt{device\_id} ist der Identifikator einer Alarmanlage. \gls{alpone} besteht aus zwei Teilen; einer \gls{http}-Schnitt\-stel\-le, über die Alarmmeldungen empfangen werden, und einem \gls{amqp}-Pro\-du\-cer. Beim Starten von \gls{alpone} wird eine vordefinierte Anzahl $N$ von \gls{amqp}-Queues im Broker erstellt. Jede Queue wird mit dem \texttt{x-consistent-hash} Exchange verbunden. Beim Empfangen einer Alarmmeldung über die \gls{http}-Schnittstelle, wird die Alarmmeldung anhand der \texttt{device\_id} als \texttt{routing-key} an den Broker publiziert. Der \texttt{x-consistent-hash} Exchange leitet die Alarmmeldung anhand des \texttt{routing-key} an eine bestimmten Queue weiter. Dadurch wird garantiert, dass Alarmmeldungen einer einzelnen Alarmanlage immer an die gleiche Queue weitergeleitet werden.
 
 \subsection{Advanced Legacy Proxy II}
 \label{sub-sec:alptwo}
