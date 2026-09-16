@@ -1,0 +1,18 @@
+\chapter{Advanced Legacy Proxy System}
+\label{ch:alps}
+
+Die identifizierten Limitationen von \gls{lps} in Abschnitt~\ref{sec:lps_limitationen} motivieren die Entwicklung eines neuen Systems, das diese Limitationen adressiert und gleichzeitig die Vorteile von \gls{lps} beibehält. Das neue System wird als \gls{alps} realisiert und in diesem Kapitel vorgestellt.
+
+\section{Anforderungen}
+\label{sec:alps-anforderungen}
+
+Die Anforderung an \gls{alps} lassen sich direkt aus den Vorteilen und Limitationen von \gls{lps} ableiten:
+
+\begin{itemize}
+    \item \textbf{Asynchrone Entkopplung beibehalten}: Das vorteilhafte asynchrone Design von \gls{lps} soll beibehalten werden, da es sich positiv auf die Antwortzeiten des Systems auswirkt, wie in Abschnitt~\ref{sub-sec:lps_auswirkungen} beschrieben wurde.
+    \item \textbf{Transparenz zum Legacy-System beibehalten}: Es soll möglich sein, \gls{alps} in das bestehende Legacy-System transparent zu integrieren.
+    \item \textbf{Nachrichtenverlust verbieten}: Alarmmeldungen dürfen nicht verloren gehen.
+    \item \textbf{Exactly-Once-Delivery garantieren}: Alarmmeldungen dürfen nicht mehrfach verarbeitet werden.
+    \item \textbf{In-Order-Delivery pro Alarmanlage garantieren}: Alarmmeldungen einzelner Alarmanlagen sollen in der richtigen Reihenfolge verarbeitet werden.
+    \item \textbf{Vendor-Neutralität}: \gls{alps} soll nicht von einem bestimmten Vendor abhängig sein, um die Portabilität und Flexibilität von \gls{alps} zu ge\-währ\-leis\-ten.
+\end{itemize}
