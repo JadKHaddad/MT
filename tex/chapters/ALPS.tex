@@ -71,3 +71,22 @@ Analog zu \gls{lps} wird \gls{alps} transparent in das bestehende Legacy-System 
 
 \section{Implementierung}
 \label{sec:alps-implementierung}
+
+Für die Implementierung von \gls{alps} wird \textit{RabbitMQ}~\citep{rabbitmq} als Message Broker verwendet und es werden folgende \gls{amqp}-Mechanismen in \gls{alpone} und \gls{alptwo} verwendet, um die Anforderung in Abschnitt~\ref{sec:alps-anforderungen} zu erfüllen:
+
+\begin{itemize}
+    \item \texttt{x-consistent-hash}
+    \item \texttt{x-single-active-consumer}
+    \item \texttt{prefetch\_count}
+\end{itemize}
+
+Die verwendeten \gls{amqp}-Mechanismen sind nicht \textit{RabbitMQ}-spezifisch sondern lassen sich funktional auch auf andere gängige Message Broker wie beispielsweise \textit{Apache ActiveMQ Artemis} oder \textit{LavinMQ} übertragen, wie im Abschnitt~\ref{sec:amqp} erwähnt wurde. Als eine verteilte Datenbank in \gls{alpdedup} wird  \textit{Mnesia} verwendet.
+
+\subsection{Advanced Legacy Proxy I}
+\label{sub-sec:alpone}
+
+\subsection{Advanced Legacy Proxy II}
+\label{sub-sec:alptwo}
+
+\subsection{Advanced Legacy Proxy Deduplication}
+\label{sub-sec:alpdedup}
