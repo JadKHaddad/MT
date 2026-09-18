@@ -2,18 +2,17 @@
 sequenceDiagram
     autonumber
     participant B as Broker
-    participant L1 as LP 2 Instanz A
-    participant L2 as LP 2 Instanz B
+    participant L as LP 2
     participant S as SRV 2
 
-    B->>L1: Alarmmeldung wird konsumiert
-    L1->>S: Weiterleitung
-    S-->>L1: Bestätigung
-    Note over B,L1: Netzwerkfehler
-    L1--xB: Keine Bestätigung
+    B->>L: Alarmmeldung wird konsumiert
+    L->>S: Weiterleitung
+    S-->>L: Bestätigung
+    Note over B,L: Netzwerkfehler
+    L--xB: Keine Bestätigung
 
-    B->>L2: Gleiche Alarmmeldung wird konsumiert
-    L2->>S: Weiterleitung
-    S-->>L2: Bestätigung
-    Note over L2,S: Exactly-Once-Delivery verletzt
-    L2-->>B: Bestätigung
+    B->>L: Gleiche Alarmmeldung wird konsumiert
+    L->>S: Weiterleitung
+    S-->>L: Bestätigung
+    Note over L,S: Exactly-Once-Delivery verletzt
+    L-->>B: Bestätigung

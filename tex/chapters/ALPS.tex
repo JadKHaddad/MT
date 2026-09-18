@@ -162,3 +162,42 @@ Um zu belegen, dass die Simulation gültig ist und die Garantien eingehalten wer
 
 % TODO: Auch noch erklären wie LP D deployt wird also bootrapping. Es ist auch erforderlich die altem Beiträge in der Datenback zu löschen.
 % TODO: Acknowledgements: Broker ausfälle können zu Verlust führen (Das verhalten des systems wurde unter Broker Ausfällen nicht getestet). Immerwieder fehlgeschlagene Meldungen können zu einem Bottleneck führen. Die Anzahl N an Queues wird beim Starten von einer LP 1 instanz im Broker festgelegt und kann nicht dynamisch angepasst werden. Die Änderung der Anzahl N an Queues erfordert das Neustarten von einer LP 1 Instanz und alle LP 2 Instanzen. Auch noch erwähnen dass das operieren von ALPS weitere Operational cost verursacht, weil mehr services die gewartet werden müssen und so.
+
+\chapter{N}
+
+Um die Einhaltung der Delivery-Garantien statistisch fundiert nachzuweisen, muss eine hinreichend große Anzahl an Alarmmeldungen verarbeitet werden. Da stochastische Tests das Auftreten von Duplikaten ($N_{\text{dup}}$) und Sequenzfehlern ($N_{\text{ooo}}$) prinzipbedingt nicht absolut ausschließen können, wird das statistische Verfahren der \textit{Rule of Three} nach Hanley und Lippman-Hand angewendet.
+
+Beobachtet man in einer Testreihe von $N$ unabhängigen Übertragungen null Fehlereignisse ($N_{\text{dup}} = 0$ bzw. $N_{\text{ooo}} = 0$), so lässt sich mit einem Konfidenzniveau von 95\,\% eine obere Schranke für die wahre Fehlerrate $p$ pro Alarmmeldung ableiten:
+\begin{equation}
+    p \le \frac{3}{N} \quad \Longleftrightarrow \quad N \ge \frac{3}{p}
+\end{equation}
+
+Für die Dimensionierung des Testumfangs $N_{\text{msg}}$ dient der europäische Sicherheitsstandard \mbox{EN IEC 61784-3} (bzw. \mbox{EN 61508}) als Referenzrahmen. Für sicherheitskritische Alarmübertragungsanlagen im Brand- und Personenschutz (\mbox{SIL 2}) fordert die Norm eine maximale Restfehlerwahrscheinlichkeit von $p \le 10^{-8}$ pro Einzelnachricht für Übertragungsfehler wie Wiederholungen und Vertauschungen. Daraus ergibt sich für die experimentelle Evaluation eine geforderte Stichprobengröße von:
+\begin{equation}
+    N_{\text{msg}} \ge \frac{3}{10^{-8}} = 3 \cdot 10^{8} = 300\,000\,000 \text{ Alarmmeldungen}
+\end{equation}
+
+Das Kriterium für eine erfolgreiche Validierung der Implementierung ist somit erreicht, wenn über den Verlauf von $3 \cdot 10^8$ erfolgreich unter Fehlereinfluss übertragenen Alarmmeldungen gilt:
+\begin{equation}
+    N_{\text{dup}} = 0 \quad \text{und} \quad N_{\text{ooo}} = 0
+\end{equation}
+Damit ist mit einer Konfidenz von 95\,\% belegt, dass die Fehlerrate von \gls{alps} die geforderte Schranke von $10^{-8}$ nicht überschreitet.
+
+\chapter{M}
+Um sicher zu sein, dass die Garantien wirklich eingehalten werden, reicht es nicht, nur ein paar Alarme zu testen. Da Tests mit Zufallsfehlern niemals zu 100\,\% beweisen können, dass Fehler wie doppelte ($N_{\text{dup}}$) oder vertauschte Alarme ($N_{\text{ooo}}$) unmöglich sind, wird die sogenannte \textit{Rule of Three} verwendet.
+
+Diese Regel besagt: Wenn in einem Test mit $N$ Nachrichten genau null Fehler auftreten, kann man mit 95\,\% Sicherheit sagen, dass das verbleibende Fehlerrisiko $p$ pro Alarm nicht größer ist als:
+\begin{equation}
+    p \le \frac{3}{N} \quad \text{bzw.} \quad N \ge \frac{3}{p}
+\end{equation}
+
+Als Vorgabe für den maximal erlaubten Fehlerwert $p$ dient die europäische Sicherheitsnorm \mbox{EN IEC 61784-3}. Für Alarmübertragungen im Bereich Brand- und Personenschutz (Sicherheitsstufe \mbox{SIL 2}) darf das Risiko für Duplikate oder Vertauschungen höchstens bei $p = 10^{-8}$ pro Nachricht liegen (also höchstens ein Fehler auf 100 Millionen Alarme). Setzt man diesen Wert in die Formel ein, ergibt sich die Anzahl der Alarme, die fehlerfrei übertragen werden müssen:
+\begin{equation}
+    N_{\text{msg}} \ge \frac{3}{10^{-8}} = 300\,000\,000 \text{ Alarmmeldungen}
+\end{equation}
+
+Der Test gilt als bestanden, wenn während der Übertragung dieser $300\,000\,000$ Alarme unter Störungseinfluss Folgendes gilt:
+\begin{equation}
+    N_{\text{dup}} = 0 \quad \text{und} \quad N_{\text{ooo}} = 0
+\end{equation}
+Damit ist mit 95\,\% statistischer Sicherheit nachgewiesen, dass \gls{alps} die Anforderungen von \mbox{SIL 2} erfüllt.
