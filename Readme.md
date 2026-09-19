@@ -1,5 +1,9 @@
 # MT
 
+## Freshly built document
+
+`.build/main.pdf`
+
 ## Install latex packages
 
 ```bash
