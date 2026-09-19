@@ -125,37 +125,68 @@ Wie im Abschnitt~\ref{sub-sec:alps-exactly-once-delivery-garantie} beschrieben, 
 \subsection{Experimentelle Evaluation}
 \label{sub-sec:alps-experimentelle-evaluation}
 
-In diesem Abschnitt wird die Implementierung von \gls{alps} experimentell evaluiert. Ziel der Evaluation ist es, die Einhaltung der Delivery-Garantien \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} unter Fehlszenarien wie Netzwerkfehlern und negativen Verarbeitungsbestätigungen der Alarmmeldungen zu über\-prü\-fen. Analog zu \gls{lps} werden die gleichen vier Hilfsservices aus Abschnitt~\ref{sub-sec:lps-experimente} verwendet (\textit{Alarmanlagen-Simulator}, \textit{\gls{tcp}-Proxy}, \textit{Server-Simulator} und \textit{Validator}).
+In diesem Abschnitt wird die Implementierung von \gls{alps} experimentell evaluiert. Ziel der Evaluation ist es, die Einhaltung der Delivery-Garantien \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} unter Fehlerszenarien wie Netzwerkfehlern und negativen Verarbeitungsbestätigungen von Alarmmeldungen zu überprüfen. Die Experimente sind stochastisch, da die Fehler zufällig erzeugt werden. Aus dem Ergebnis eines einzelnen Durchlaufs lässt sich daher keine belastbare Aussage über die Einhaltung der Delivery-Garantien ableiten. Ein erfolgreicher Durchlauf kann auch darauf beruhen, dass eine kritische Fehlerkonstellation zufällig nicht aufgetreten ist. Aus diesem Grund werden die Experimente mehrfach wiederholt. Die Anzahl der benötigten Wiederholungen $n$ wird nach dem \textit{Success-Run-Theorem}~\citep{joshi2023, kececioglu1992} bestimmt:
 
-Da sowohl der \gls{tcp}-Proxy als auch der Server-Simulator Fehler zufällig erzeugen, reicht ein einzelner Durchlauf nicht aus, die Delivery-Garantien zu bestätigen, da ein fehlerfreier Durchlauf auch reines Glück bei den Zufallswerten sein könnte. Da die Hilfsservices alle aufgetretenen Ereignisse speichern, lässt sich genau zählen, wie viele Störungen während eines Laufs aufgetreten sind. Zur Auswertung werden folgende Messwerte definiert:
+\begin{equation}
+    n = \frac{\ln(1 - C)}{\ln(R)}
+\end{equation}
+
+Dabei ist $R$ die Zuverlässigkeit (\textit{Reliability}): Die minimale Wahrscheinlichkeit, mit der ein einzelner Durchlauf die Delivery-Garantien einhält. $C$ ist die Konfidenz (\textit{Confidence}), mit der diese Aussage getroffen werden soll. Im Folgenden werden $R = 95\,\%$ und $C = 95\,\%$ verwendet. Diese Kombination ist in der Zuverlässigkeitsprüfung und Prozessvalidierung gängig~\citep{qualitymag, schenkelberg2024}. Daraus ergibt sich:
+
+\begin{equation}
+    n = \frac{\ln(1 - 0{,}95)}{\ln(0{,}95)} \approx 58{,}4 \;\rightarrow\; n = 59
+\end{equation}
+
+Die Experimente werden somit 59-mal wiederholt. Wird in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien festgestellt, kann mit einer Konfidenz von 95\,\% behauptet werden, dass \gls{alps} die Delivery-Garantien mit einer Wahrscheinlichkeit von mindestens 95\,\% einhält. Tritt hingegen in mindestens einem Durchlauf eine Verletzung auf, kann diese Aussage nicht getroffen werden. Die Experimente in diesem Abschnitt gliedern sich in drei Phasen. In den ersten beiden Phasen werden dieselben Fehlerbedingungen wie in Abschnitt~\ref{sub-sec:lps-experimente} provoziert, unter denen \gls{lps} die Delivery-Garantien verletzt hat. In der dritten Phase wird \gls{alps} anschließend unter realitätsnahen Bedingungen evaluiert. Dafür werden Netzwerkfehler, deren Häufigkeit auf Messungen von \textit{Cloudflare}~\citep{cloudflare} basiert~\citep{valenta2024}. Die Verarbeitungszeiten des Legacy-Systems werden mithilfe eines trainierten Vorhersagemodells nachgebildet.
+
+\subsubsection{Phase~1: Exactly-Once-Delivery}
+
+In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} geprüft. Dazu werden die gleichen Fehlbedingungen aus Abschnitt~\ref{sub-sub:alp-verletzung-iod} provoziert und die gleichen vier Hilfsservices verwendet (\textit{Alarmanlagen-Simulator}, \textit{\gls{tcp}-Proxy}, \textit{Server-Simulator} und \textit{Validator}). Die für das Experiment ausgewählten Parameter werden in Tabelle~\ref{tab:exp-alps-eod-config} dargestellt.
+
+\begin{table}[hbtp]
+    \centering
+    \caption{Konfiguration des Experiments zur Einhaltung der Exactly-Once-Delivery in \gls{alps}.}
+    \label{tab:exp-alps-eod-config}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Parameter}  & \textbf{Beschreibung}                        & \textbf{Wert} \\
+        \hline
+        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                & 1             \\
+        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                & 1             \\
+        $N_{\text{queue}}$  & Anzahl \gls{mqtt}-Queues                     & 1             \\
+        $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 1             \\
+        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 1             \\
+        $T_{\text{server}}$ & Maximale Server-Antwortzeit                  & 5\,s          \\
+        $E_{\text{server}}$ & Serverfehlerrate                             & 0{,}0\,\%     \\
+        $T_{\text{idle}}$   & Server-Idle-Zeit                             & 5\,s          \\
+        $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & 4\,s          \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-    \item $N_{\text{msg}}$: Anzahl der getrennten Alarmmeldungen.
-    \item $N_{\text{drop}}$: Anzahl der getrennten \gls{tcp}-Verbindungen zwischen \gls{alptwo} und dem Broker.
-    \item $N_{\text{nack}}$: Anzahl der negativen Bestätigungen durch den Server-Simulator.
-    \item $N_{\text{loss}}$: Anzahl der verlorene Alarmmeldungen.
-    \item $N_{\text{dup}}$: Anzahl der doppelten Alarmmeldungen.
-    \item $N_{\text{ooo}}$: Anzahl der Alarmmeldungen in falscher Reihenfolge.
+    \item $N_{\text{alp~1}}$: Entspricht $N_{\text{lp~1}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-iod}, damit die Ergebnisse mit denen von \gls{lps} vergleichbar sind.
+    \item $N_{\text{alp~2}}$: Entspricht $N_{\text{lp~2}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-iod}, aus demselben Grund.
+    \item $N_{\text{queue}}$: Da nur eine Alarmanlage simuliert wird, wird nur eine Queue benötigt. Weitere Queues würden von keiner Alarmmeldung genutzt werden.
 \end{itemize}
 
-Um zu belegen, dass die Simulation gültig ist und die Garantien eingehalten werden, wird folgendes Vorgehen gewählt:
+Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-iod}. Dadurch werden die Fehlerbedingungen, unter denen \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, unverändert reproduziert. Für die Durchführung der Experimente werden zusätzliche Parameter definiert:
 
-\begin{enumerate}
-    \item \textbf{Mehrere Testläufe durchführen}: Die Simulation wird mehrfach mit unterschiedlichen Zufallswerten wiederholt. Dadurch treten Verbindungsabbrüche und Serverfehler zu immer wieder anderen Zeitpunkten auf.
-    \item \textbf{Fehler überprüfen}: Ein Testlauf gilt nur dann als gültig, wenn der \gls{tcp}-Proxy und der Server-Simulator Störungen verursacht haben:
-          \begin{equation}
-              N_{\text{drop}} > 0 \quad \text{und} \quad N_{\text{nack}} > 0
-          \end{equation}
-    \item \textbf{Ergebnisse überprüfen}: Nach jedem Testlauf vergleicht der \textit{Validator} die Dateien \texttt{device-results.json} und \texttt{server-results.json}, sodass gilt:
-          \begin{equation}
-              N_{\text{loss}} = 0, \quad N_{\text{dup}} = 0 \quad \text{und} \quad N_{\text{ooo}} = 0
-          \end{equation}
-    \item \textbf{Statistische Absicherung bei null Fehlern}: Da bei null aufgetretenen Fehlern keine herkömmliche Standardabweichung berechnet werden kann, wird die sogenannte \textit{Rule of Three}~\citep{hanley1983} verwendet. Wenn bei insgesamt $N$ gesendeten Alarmmeldungen kein einziger Fehler auftritt, ist die verbleibende Fehlerwahrscheinlichkeit $p$ mit einer statistischen Sicherheit von $95\,\%$ kleiner als:
-          \begin{equation}
-              p < \frac{3}{N}
-          \end{equation}
-          Je mehr Nachrichten unter ständigen Störungen erfolgreich verarbeitet werden, desto sicherer ist nachgewiesen, dass Fehler im regulären Betrieb nahezu ausgeschlossen sind.
-\end{enumerate}
+\begin{itemize}
+    \item $N_{\text{loss}}$: Anzahl der verlorenen Alarmmeldungen.
+    \item $N_{\text{ooo}}$: Anzahl der Alarmmeldungen, die in falscher Reihenfolge verarbeitet wurden.
+    \item $N_{\text{dup}}$: Anzahl der doppelt empfangenen Alarmmeldungen.
+\end{itemize}
+
+Wie zuvor beschrieben, wird jedes Experiment 59-mal durchgeführt. In diesem Experiment gilt ein Durchlauf erst dann als bestanden, wenn keine Alarmmeldung verloren geht und keine Alarmmeldung mehrfach verarbeitet wird, also $N_{\text{loss}} = 0$ und $N_{\text{dup}} = 0$. Zusätzlich muss im Durchlauf die Fehlerbedingung eingetreten sein, unter der \gls{lps} gescheitert ist: Die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} wird getrennt, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet. Tritt dieser Fall nicht ein, sagt der Durchlauf nichts über die Einhaltung der \textit{Exactly-Once-Delivery} aus und somit wird er aus der Auswertung ausgeschlossen.
+
+... \textit{to be continued}
+
+
+\subsubsection{Phase~2: In-Order-Delivery}
+\subsubsection{Phase~3: Realitätsnahe Fehlerbedingungen}
 
 \subsection{Limitationen der Experimente}
 \label{sub-sec:alps-limitationen-experimente}
@@ -163,41 +194,3 @@ Um zu belegen, dass die Simulation gültig ist und die Garantien eingehalten wer
 % TODO: Auch noch erklären wie LP D deployt wird also bootrapping. Es ist auch erforderlich die altem Beiträge in der Datenback zu löschen.
 % TODO: Acknowledgements: Broker ausfälle können zu Verlust führen (Das verhalten des systems wurde unter Broker Ausfällen nicht getestet). Immerwieder fehlgeschlagene Meldungen können zu einem Bottleneck führen. Die Anzahl N an Queues wird beim Starten von einer LP 1 instanz im Broker festgelegt und kann nicht dynamisch angepasst werden. Die Änderung der Anzahl N an Queues erfordert das Neustarten von einer LP 1 Instanz und alle LP 2 Instanzen. Auch noch erwähnen dass das operieren von ALPS weitere Operational cost verursacht, weil mehr services die gewartet werden müssen und so.
 
-\chapter{N}
-
-Um die Einhaltung der Delivery-Garantien statistisch fundiert nachzuweisen, muss eine hinreichend große Anzahl an Alarmmeldungen verarbeitet werden. Da stochastische Tests das Auftreten von Duplikaten ($N_{\text{dup}}$) und Sequenzfehlern ($N_{\text{ooo}}$) prinzipbedingt nicht absolut ausschließen können, wird das statistische Verfahren der \textit{Rule of Three} nach Hanley und Lippman-Hand angewendet.
-
-Beobachtet man in einer Testreihe von $N$ unabhängigen Übertragungen null Fehlereignisse ($N_{\text{dup}} = 0$ bzw. $N_{\text{ooo}} = 0$), so lässt sich mit einem Konfidenzniveau von 95\,\% eine obere Schranke für die wahre Fehlerrate $p$ pro Alarmmeldung ableiten:
-\begin{equation}
-    p \le \frac{3}{N} \quad \Longleftrightarrow \quad N \ge \frac{3}{p}
-\end{equation}
-
-Für die Dimensionierung des Testumfangs $N_{\text{msg}}$ dient der europäische Sicherheitsstandard \mbox{EN IEC 61784-3} (bzw. \mbox{EN 61508}) als Referenzrahmen. Für sicherheitskritische Alarmübertragungsanlagen im Brand- und Personenschutz (\mbox{SIL 2}) fordert die Norm eine maximale Restfehlerwahrscheinlichkeit von $p \le 10^{-8}$ pro Einzelnachricht für Übertragungsfehler wie Wiederholungen und Vertauschungen. Daraus ergibt sich für die experimentelle Evaluation eine geforderte Stichprobengröße von:
-\begin{equation}
-    N_{\text{msg}} \ge \frac{3}{10^{-8}} = 3 \cdot 10^{8} = 300\,000\,000 \text{ Alarmmeldungen}
-\end{equation}
-
-Das Kriterium für eine erfolgreiche Validierung der Implementierung ist somit erreicht, wenn über den Verlauf von $3 \cdot 10^8$ erfolgreich unter Fehlereinfluss übertragenen Alarmmeldungen gilt:
-\begin{equation}
-    N_{\text{dup}} = 0 \quad \text{und} \quad N_{\text{ooo}} = 0
-\end{equation}
-Damit ist mit einer Konfidenz von 95\,\% belegt, dass die Fehlerrate von \gls{alps} die geforderte Schranke von $10^{-8}$ nicht überschreitet.
-
-\chapter{M}
-Um sicher zu sein, dass die Garantien wirklich eingehalten werden, reicht es nicht, nur ein paar Alarme zu testen. Da Tests mit Zufallsfehlern niemals zu 100\,\% beweisen können, dass Fehler wie doppelte ($N_{\text{dup}}$) oder vertauschte Alarme ($N_{\text{ooo}}$) unmöglich sind, wird die sogenannte \textit{Rule of Three} verwendet.
-
-Diese Regel besagt: Wenn in einem Test mit $N$ Nachrichten genau null Fehler auftreten, kann man mit 95\,\% Sicherheit sagen, dass das verbleibende Fehlerrisiko $p$ pro Alarm nicht größer ist als:
-\begin{equation}
-    p \le \frac{3}{N} \quad \text{bzw.} \quad N \ge \frac{3}{p}
-\end{equation}
-
-Als Vorgabe für den maximal erlaubten Fehlerwert $p$ dient die europäische Sicherheitsnorm \mbox{EN IEC 61784-3}. Für Alarmübertragungen im Bereich Brand- und Personenschutz (Sicherheitsstufe \mbox{SIL 2}) darf das Risiko für Duplikate oder Vertauschungen höchstens bei $p = 10^{-8}$ pro Nachricht liegen (also höchstens ein Fehler auf 100 Millionen Alarme). Setzt man diesen Wert in die Formel ein, ergibt sich die Anzahl der Alarme, die fehlerfrei übertragen werden müssen:
-\begin{equation}
-    N_{\text{msg}} \ge \frac{3}{10^{-8}} = 300\,000\,000 \text{ Alarmmeldungen}
-\end{equation}
-
-Der Test gilt als bestanden, wenn während der Übertragung dieser $300\,000\,000$ Alarme unter Störungseinfluss Folgendes gilt:
-\begin{equation}
-    N_{\text{dup}} = 0 \quad \text{und} \quad N_{\text{ooo}} = 0
-\end{equation}
-Damit ist mit 95\,\% statistischer Sicherheit nachgewiesen, dass \gls{alps} die Anforderungen von \mbox{SIL 2} erfüllt.
