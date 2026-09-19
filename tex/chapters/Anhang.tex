@@ -3,217 +3,217 @@
 \chapter{Anhang}
 \label{ch:anhang}
 
-\section{Reproduzierbarkeit der Experimente}
-\label{sec:appendix-reproducibility}
+% \section{Reproduzierbarkeit der Experimente}
+% \label{sec:appendix-reproducibility}
 
-Die in Abschnitt~\ref{sec:mqtt-proxy-experimente} und Kapitel~\ref{ch:eval} beschriebenen Experimente sind reproduzierbar, indem die benötigten Docker-Images geladen, eigene Konfigurationsdateien erstellt und die Simulationen anschließend gestartet werden.
+% Die in Abschnitt~\ref{sec:mqtt-proxy-experimente} und Kapitel~\ref{ch:eval} beschriebenen Experimente sind reproduzierbar, indem die benötigten Docker-Images geladen, eigene Konfigurationsdateien erstellt und die Simulationen anschließend gestartet werden.
 
-\subsection{Voraussetzungen}
+% \subsection{Voraussetzungen}
 
-\begin{itemize}
-    \item Installiertes Docker~\citep{docker_2023}.
-    \item Installiertes Docker Compose~\citep{docker_compose}.
-\end{itemize}
+% \begin{itemize}
+%     \item Installiertes Docker~\citep{docker_2023}.
+%     \item Installiertes Docker Compose~\citep{docker_compose}.
+% \end{itemize}
 
-\subsection{Docker-Images laden}
+% \subsection{Docker-Images laden}
 
-\begin{verbatim}
-docker pull rabbitmq:4-management
-docker pull jadkhaddad/lps-rs
-docker pull jadkhaddad/lps-gleam
-docker pull jadkhaddad/lps-scripts
-docker pull jadkhaddad/lps-mqtt-python
-docker pull jadkhaddad/lps-mqtt-hivemq
-\end{verbatim}
+% \begin{verbatim}
+% docker pull rabbitmq:4-management
+% docker pull jadkhaddad/lps-rs
+% docker pull jadkhaddad/lps-gleam
+% docker pull jadkhaddad/lps-scripts
+% docker pull jadkhaddad/lps-mqtt-python
+% docker pull jadkhaddad/lps-mqtt-hivemq
+% \end{verbatim}
 
-\subsection{Bedeutung der Docker-Images}
+% \subsection{Bedeutung der Docker-Images}
 
-\begin{itemize}
-    \item \texttt{rabbitmq:4-management}: RabbitMQ-Broker für das \gls{amqp}-Szenario.
-    \item \texttt{jadkhaddad/lps-rs}: Enthält die Simulation-Runner sowie die Kern-Komponenten (u.\,a. Alarmanlagen-Simulator, \gls{alpone}, \gls{lptwo}, Server-Simulator, Validator, \gls{tcp}-Proxy).
-    \item \texttt{jadkhaddad/lps-gleam}: Enthält die Deduplizierungs-Komponente (\gls{alpdedup}) für \gls{alps}.
-    \item \texttt{jadkhaddad/lps-scripts}: Enthält Auswertungsskripte zur Plot-Erzeugung.
-    \item \texttt{jadkhaddad/lps-mqtt-python}: Enthält die \gls{mqtt}-bezogenen Proxy-Skripte (u.\,a. \gls{srv}~1, \gls{srv}~2, \gls{lpone}, \gls{lptwo}).
-    \item \texttt{jadkhaddad/lps-mqtt-hivemq}: Enthält den HiveMQ-Broker mit den verwendeten Plugins für das \gls{mqtt}-Szenario.
-\end{itemize}
+% \begin{itemize}
+%     \item \texttt{rabbitmq:4-management}: RabbitMQ-Broker für das \gls{amqp}-Szenario.
+%     \item \texttt{jadkhaddad/lps-rs}: Enthält die Simulation-Runner sowie die Kern-Komponenten (u.\,a. Alarmanlagen-Simulator, \gls{alpone}, \gls{lptwo}, Server-Simulator, Validator, \gls{tcp}-Proxy).
+%     \item \texttt{jadkhaddad/lps-gleam}: Enthält die Deduplizierungs-Komponente (\gls{alpdedup}) für \gls{alps}.
+%     \item \texttt{jadkhaddad/lps-scripts}: Enthält Auswertungsskripte zur Plot-Erzeugung.
+%     \item \texttt{jadkhaddad/lps-mqtt-python}: Enthält die \gls{mqtt}-bezogenen Proxy-Skripte (u.\,a. \gls{srv}~1, \gls{srv}~2, \gls{lpone}, \gls{lptwo}).
+%     \item \texttt{jadkhaddad/lps-mqtt-hivemq}: Enthält den HiveMQ-Broker mit den verwendeten Plugins für das \gls{mqtt}-Szenario.
+% \end{itemize}
 
-\subsection{Docker-Netzwerk erstellen}
+% \subsection{Docker-Netzwerk erstellen}
 
-Vor dem Start wird ein Docker-Netzwerk angelegt, über das die Komponenten mit einander kommunizieren.
+% Vor dem Start wird ein Docker-Netzwerk angelegt, über das die Komponenten mit einander kommunizieren.
 
-\begin{verbatim}
-docker network create lps-simulation-net
-\end{verbatim}
+% \begin{verbatim}
+% docker network create lps-simulation-net
+% \end{verbatim}
 
-\subsection{Konfigurationsdateien anlegen}
+% \subsection{Konfigurationsdateien anlegen}
 
-Vor dem Start werden die benötigten Simulationskonfigurationen als \gls{yaml}-Dateien angelegt (z.\,B. eine \gls{amqp}-Konfiguration und eine \gls{mqtt}-Konfiguration).
-Diese Dateien enthalten die jeweiligen Parameter für Last, Fehlerprofile und Laufzeit der Experimente.
+% Vor dem Start werden die benötigten Simulationskonfigurationen als \gls{yaml}-Dateien angelegt (z.\,B. eine \gls{amqp}-Konfiguration und eine \gls{mqtt}-Konfiguration).
+% Diese Dateien enthalten die jeweiligen Parameter für Last, Fehlerprofile und Laufzeit der Experimente.
 
-\subsubsection*{Beispiel: \gls{amqp}-Konfiguration}
+% \subsubsection*{Beispiel: \gls{amqp}-Konfiguration}
 
-\begin{verbatim}
-simulation_dir: "simulation"
-simulation_docker_network: "lps-simulation-net"
+% \begin{verbatim}
+% simulation_dir: "simulation"
+% simulation_docker_network: "lps-simulation-net"
 
-lps_rust_image: "jadkhaddad/lps-rs"
-lps_scripts_image: "jadkhaddad/lps-scripts"
-lps_gleam_image: "jadkhaddad/lps-gleam"
+% lps_rust_image: "jadkhaddad/lps-rs"
+% lps_scripts_image: "jadkhaddad/lps-scripts"
+% lps_gleam_image: "jadkhaddad/lps-gleam"
 
-devices:
-  devices_count: 100
-  max_event_interval: 500ms
-  retry_duration: 500ms
-  max_events: 100
+% devices:
+%   devices_count: 100
+%   max_event_interval: 500ms
+%   retry_duration: 500ms
+%   max_events: 100
 
-server:
-  failure_rate: 0.1
-  max_work_duration: 50ms
-  max_response_duration: 50ms
-  deduplication: true
-  server_count: 3
+% server:
+%   failure_rate: 0.1
+%   max_work_duration: 50ms
+%   max_response_duration: 50ms
+%   deduplication: true
+%   server_count: 3
 
-amqp:
-  queues_count: 10
-  producers:
-    producers_count: 3
-  consumers:
-    consumers_count: 3
-    reconnect_duration: 500ms
-    amqp_proxy:
-      failure_rate: 0.1
-      max_up_duration: 10s
-\end{verbatim}
+% amqp:
+%   queues_count: 10
+%   producers:
+%     producers_count: 3
+%   consumers:
+%     consumers_count: 3
+%     reconnect_duration: 500ms
+%     amqp_proxy:
+%       failure_rate: 0.1
+%       max_up_duration: 10s
+% \end{verbatim}
 
-\subsubsection*{Beispiel: \gls{mqtt}-Konfiguration}
+% \subsubsection*{Beispiel: \gls{mqtt}-Konfiguration}
 
-\begin{verbatim}
-simulation_dir: "simulation-mqtt"
-simulation_docker_network: "lps-simulation-net"
+% \begin{verbatim}
+% simulation_dir: "simulation-mqtt"
+% simulation_docker_network: "lps-simulation-net"
 
-lps_rust_image: "jadkhaddad/lps-rs"
-lps_scripts_image: "jadkhaddad/lps-scripts"
-lps_gleam_image: "jadkhaddad/lps-gleam"
-lps_mqtt_python_image: "jadkhaddad/lps-mqtt-python"
-lps_mqtt_hivemq_image: "jadkhaddad/lps-mqtt-hivemq"
+% lps_rust_image: "jadkhaddad/lps-rs"
+% lps_scripts_image: "jadkhaddad/lps-scripts"
+% lps_gleam_image: "jadkhaddad/lps-gleam"
+% lps_mqtt_python_image: "jadkhaddad/lps-mqtt-python"
+% lps_mqtt_hivemq_image: "jadkhaddad/lps-mqtt-hivemq"
 
-devices:
-  devices_count: 100
-  max_event_interval: 500ms
-  retry_duration: 500ms
-  max_events: 100
+% devices:
+%   devices_count: 100
+%   max_event_interval: 500ms
+%   retry_duration: 500ms
+%   max_events: 100
 
-server:
-  failure_rate: 0.1
-  max_work_duration: 50ms
-  max_response_duration: 50ms
-  server_count: 3
+% server:
+%   failure_rate: 0.1
+%   max_work_duration: 50ms
+%   max_response_duration: 50ms
+%   server_count: 3
 
-mqtt:
-  producers:
-    producers_count: 3
-  consumers:
-    consumers_count: 3
-    mqtt_proxy:
-      failure_rate: 0.1
-      max_up_duration: 10s
-\end{verbatim}
+% mqtt:
+%   producers:
+%     producers_count: 3
+%   consumers:
+%     consumers_count: 3
+%     mqtt_proxy:
+%       failure_rate: 0.1
+%       max_up_duration: 10s
+% \end{verbatim}
 
-\subsubsection*{Bedeutung der Parameter}
+% \subsubsection*{Bedeutung der Parameter}
 
-\paragraph{Allgemein}
-\begin{itemize}
-    \item \texttt{simulation\_dir}: Zielverzeichnis der erzeugten Simulationsartefakte.
-    \item \texttt{simulation\_docker\_network}: Externes Docker-Netzwerk, in dem die Services gestartet werden.
-    \item \texttt{lps\_rust\_image}: Image-Name für die Simulation-Runner und Kernkomponenten.
-    \item \texttt{lps\_scripts\_image}: Image-Name für die Auswertungsskripte.
-    \item \texttt{lps\_gleam\_image}: Image-Name für die Deduplizierungs-Komponente (\gls{alpdedup}).
-    \item \texttt{lps\_mqtt\_python\_image}: Image-Name für die Python-basierten \gls{mqtt}-Proxy-Komponenten.
-    \item \texttt{lps\_mqtt\_hivemq\_image}: Image-Name für den HiveMQ-Broker im \gls{mqtt}-Szenario.
-\end{itemize}
+% \paragraph{Allgemein}
+% \begin{itemize}
+%     \item \texttt{simulation\_dir}: Zielverzeichnis der erzeugten Simulationsartefakte.
+%     \item \texttt{simulation\_docker\_network}: Externes Docker-Netzwerk, in dem die Services gestartet werden.
+%     \item \texttt{lps\_rust\_image}: Image-Name für die Simulation-Runner und Kernkomponenten.
+%     \item \texttt{lps\_scripts\_image}: Image-Name für die Auswertungsskripte.
+%     \item \texttt{lps\_gleam\_image}: Image-Name für die Deduplizierungs-Komponente (\gls{alpdedup}).
+%     \item \texttt{lps\_mqtt\_python\_image}: Image-Name für die Python-basierten \gls{mqtt}-Proxy-Komponenten.
+%     \item \texttt{lps\_mqtt\_hivemq\_image}: Image-Name für den HiveMQ-Broker im \gls{mqtt}-Szenario.
+% \end{itemize}
 
-\paragraph{Block \texttt{devices}}
-\begin{itemize}
-    \item \texttt{devices\_count}: Anzahl simulierter Alarmanlagen.
-    \item \texttt{max\_event\_interval}: Maximales Intervall zwischen zwei erzeugten Meldungen pro Alarmanlage.
-    \item \texttt{retry\_duration}: Wartezeit bis zum erneuten Sendeversuch bei fehlgeschlagener Übertragung.
-    \item \texttt{max\_events}: Maximale Anzahl erzeugter Meldungen pro Alarmanlage.
-\end{itemize}
+% \paragraph{Block \texttt{devices}}
+% \begin{itemize}
+%     \item \texttt{devices\_count}: Anzahl simulierter Alarmanlagen.
+%     \item \texttt{max\_event\_interval}: Maximales Intervall zwischen zwei erzeugten Meldungen pro Alarmanlage.
+%     \item \texttt{retry\_duration}: Wartezeit bis zum erneuten Sendeversuch bei fehlgeschlagener Übertragung.
+%     \item \texttt{max\_events}: Maximale Anzahl erzeugter Meldungen pro Alarmanlage.
+% \end{itemize}
 
-\paragraph{Block \texttt{server}}
-\begin{itemize}
-    \item \texttt{failure\_rate}: Wahrscheinlichkeit für Fehlerantworten des Server-Simulators.
-    \item \texttt{max\_work\_duration}: Maximale Bearbeitungszeit einer Anfrage im Server.
-    \item \texttt{max\_response\_duration}: Maximale zusätzliche Antwortverzögerung.
-    \item \texttt{server\_count}: Anzahl gestarteter Server-Instanzen.
-    \item \texttt{deduplication} (optional): Aktiviert die zusätzliche Deduplizierungs-Komponente (\gls{alps}-Szenario).
-\end{itemize}
+% \paragraph{Block \texttt{server}}
+% \begin{itemize}
+%     \item \texttt{failure\_rate}: Wahrscheinlichkeit für Fehlerantworten des Server-Simulators.
+%     \item \texttt{max\_work\_duration}: Maximale Bearbeitungszeit einer Anfrage im Server.
+%     \item \texttt{max\_response\_duration}: Maximale zusätzliche Antwortverzögerung.
+%     \item \texttt{server\_count}: Anzahl gestarteter Server-Instanzen.
+%     \item \texttt{deduplication} (optional): Aktiviert die zusätzliche Deduplizierungs-Komponente (\gls{alps}-Szenario).
+% \end{itemize}
 
-\paragraph{Block \texttt{amqp}}
-\begin{itemize}
-    \item \texttt{queues\_count}: Anzahl der Broker-Queues.
-    \item \texttt{producers.producers\_count}: Anzahl \gls{amqp}-Producer-Instanzen (\gls{alpone}).
-    \item \texttt{consumers.consumers\_count}: Anzahl \gls{amqp}-Consumer-Instanzen (\gls{alptwo}).
-    \item \texttt{consumers.reconnect\_duration}: Wartezeit vor Reconnect eines Consumers nach Verbindungsabbruch.
-    \item \texttt{consumers.amqp\_proxy} (optional): Fehlerproxy zwischen Consumer und Broker.
-          \begin{itemize}
-              \item \texttt{failure\_rate}: Wahrscheinlichkeit eines künstlichen Verbindungsfehlers.
-              \item \texttt{max\_up\_duration}: Maximale Dauer einer Verbindung vor erzwungener Trennung.
-          \end{itemize}
-\end{itemize}
+% \paragraph{Block \texttt{amqp}}
+% \begin{itemize}
+%     \item \texttt{queues\_count}: Anzahl der Broker-Queues.
+%     \item \texttt{producers.producers\_count}: Anzahl \gls{amqp}-Producer-Instanzen (\gls{alpone}).
+%     \item \texttt{consumers.consumers\_count}: Anzahl \gls{amqp}-Consumer-Instanzen (\gls{alptwo}).
+%     \item \texttt{consumers.reconnect\_duration}: Wartezeit vor Reconnect eines Consumers nach Verbindungsabbruch.
+%     \item \texttt{consumers.amqp\_proxy} (optional): Fehlerproxy zwischen Consumer und Broker.
+%           \begin{itemize}
+%               \item \texttt{failure\_rate}: Wahrscheinlichkeit eines künstlichen Verbindungsfehlers.
+%               \item \texttt{max\_up\_duration}: Maximale Dauer einer Verbindung vor erzwungener Trennung.
+%           \end{itemize}
+% \end{itemize}
 
-\paragraph{Block \texttt{mqtt}}
-\begin{itemize}
-    \item \texttt{producers.producers\_count}: Anzahl \gls{mqtt}-Producer-Instanzen (\gls{lpone}).
-    \item \texttt{consumers.consumers\_count}: Anzahl \gls{mqtt}-Consumer-Instanzen (\gls{lptwo}).
-    \item \texttt{consumers.mqtt\_proxy} (optional): Fehlerproxy zwischen \gls{mqtt}-Consumer-Pfad und Broker.
-          \begin{itemize}
-              \item \texttt{failure\_rate}: Wahrscheinlichkeit eines künstlichen Verbindungsfehlers.
-              \item \texttt{max\_up\_duration}: Maximale Dauer einer Verbindung vor erzwungener Trennung.
-          \end{itemize}
-\end{itemize}
+% \paragraph{Block \texttt{mqtt}}
+% \begin{itemize}
+%     \item \texttt{producers.producers\_count}: Anzahl \gls{mqtt}-Producer-Instanzen (\gls{lpone}).
+%     \item \texttt{consumers.consumers\_count}: Anzahl \gls{mqtt}-Consumer-Instanzen (\gls{lptwo}).
+%     \item \texttt{consumers.mqtt\_proxy} (optional): Fehlerproxy zwischen \gls{mqtt}-Consumer-Pfad und Broker.
+%           \begin{itemize}
+%               \item \texttt{failure\_rate}: Wahrscheinlichkeit eines künstlichen Verbindungsfehlers.
+%               \item \texttt{max\_up\_duration}: Maximale Dauer einer Verbindung vor erzwungener Trennung.
+%           \end{itemize}
+% \end{itemize}
 
-\paragraph{Dauerangaben}
-Zeitwerte werden als Dauerangaben angegeben (z.\,B. \texttt{500ms}, \texttt{10s}).
+% \paragraph{Dauerangaben}
+% Zeitwerte werden als Dauerangaben angegeben (z.\,B. \texttt{500ms}, \texttt{10s}).
 
-\subsection{Simulationen starten}
+% \subsection{Simulationen starten}
 
-\subsubsection*{\gls{amqp}}
+% \subsubsection*{\gls{amqp}}
 
-\begin{verbatim}
-docker run --rm -it \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v "$(pwd):/app" \
-  jadkhaddad/lps-rs \
-  simulation-runner \
-  --config-file <amqp-config.yaml> \
-  --root-abs-path $(pwd)
-\end{verbatim}
+% \begin{verbatim}
+% docker run --rm -it \
+%   -v /var/run/docker.sock:/var/run/docker.sock \
+%   -v "$(pwd):/app" \
+%   jadkhaddad/lps-rs \
+%   simulation-runner \
+%   --config-file <amqp-config.yaml> \
+%   --root-abs-path $(pwd)
+% \end{verbatim}
 
-\subsubsection*{\gls{mqtt}}
+% \subsubsection*{\gls{mqtt}}
 
-\begin{verbatim}
-docker run --rm -it \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v "$(pwd):/app" \
-  jadkhaddad/lps-rs \
-  mqtt-simulation-runner \
-  --config-file <mqtt-config.yaml> \
-  --root-abs-path $(pwd)
-\end{verbatim}
+% \begin{verbatim}
+% docker run --rm -it \
+%   -v /var/run/docker.sock:/var/run/docker.sock \
+%   -v "$(pwd):/app" \
+%   jadkhaddad/lps-rs \
+%   mqtt-simulation-runner \
+%   --config-file <mqtt-config.yaml> \
+%   --root-abs-path $(pwd)
+% \end{verbatim}
 
-\subsection{Ergebnisse}
+% \subsection{Ergebnisse}
 
-Nach Abschluss eines Laufs befinden sich die erzeugten Ergebnisse unter\newline \texttt{\$(pwd)/mount}.
+% Nach Abschluss eines Laufs befinden sich die erzeugten Ergebnisse unter\newline \texttt{\$(pwd)/mount}.
 
-\section{Quellcode}
-\label{s:source-code}
+% \section{Quellcode}
+% \label{s:source-code}
 
-Dieses Projekt ist ein Open-Source-Projekt~\citep{source} und unter der \textit{MIT License}~\citep{MIT} lizenziert.
+% Dieses Projekt ist ein Open-Source-Projekt~\citep{source} und unter der \textit{MIT License}~\citep{MIT} lizenziert.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.4\textwidth]{./img/qrcode.png}
-    \caption{Quellcode}
-    \label{fig:sc}
-\end{figure}
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{./img/qrcode.png}
+%     \caption{Quellcode}
+%     \label{fig:sc}
+% \end{figure}
