@@ -140,6 +140,7 @@ Dabei ist $R$ die Zuverlässigkeit (\textit{Reliability}): Die minimale Wahrsche
 Die Experimente werden somit 59-mal wiederholt. Wird in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien festgestellt, kann mit einer Konfidenz von 95\,\% behauptet werden, dass \gls{alps} die Delivery-Garantien mit einer Wahrscheinlichkeit von mindestens 95\,\% einhält. Tritt hingegen in mindestens einem Durchlauf eine Verletzung auf, kann diese Aussage nicht getroffen werden. Die Experimente in diesem Abschnitt gliedern sich in drei Phasen. In den ersten beiden Phasen werden dieselben Fehlerbedingungen wie in Abschnitt~\ref{sub-sec:lps-experimente} provoziert, unter denen \gls{lps} die Delivery-Garantien verletzt hat. In der dritten Phase wird \gls{alps} abschließend unter realitätsnahen Bedingungen evaluiert. Dafür werden Netzwerkfehler, deren Häufigkeit auf Messungen von \textit{Cloudflare}~\citep{cloudflare} basiert~\citep{valenta2024}. Die Verarbeitungszeiten des Legacy-Systems werden mithilfe eines trainierten Vorhersagemodells nachgebildet.
 
 \subsubsection{Phase~1: Exactly-Once-Delivery}
+\label{sub-sub:exp-alps-phase-1}
 
 In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} geprüft. Dazu werden die gleichen Fehlbedingungen aus Abschnitt~\ref{sub-sub:alp-verletzung-iod} provoziert und die gleichen vier Hilfsservices verwendet (\textit{Alarmanlagen-Simulator}, \textit{\gls{tcp}-Proxy}, \textit{Server-Simulator} und \textit{Validator}). Die für das Experiment ausgewählten Parameter werden in Tabelle~\ref{tab:exp-alps-eod-config} dargestellt.
 
@@ -167,12 +168,12 @@ In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} gepr�
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-    \item $N_{\text{alp~1}}$: Entspricht $N_{\text{lp~1}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-iod}, damit die Ergebnisse mit denen von \gls{lps} vergleichbar sind.
-    \item $N_{\text{alp~2}}$: Entspricht $N_{\text{lp~2}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-iod}, aus demselben Grund.
+    \item $N_{\text{alp~1}}$: Entspricht $N_{\text{lp~1}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-eod}, damit die Ergebnisse mit denen von \gls{lps} vergleichbar sind.
+    \item $N_{\text{alp~2}}$: Entspricht $N_{\text{lp~2}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-eod}, aus demselben Grund.
     \item $N_{\text{queue}}$: Da nur eine Alarmanlage simuliert wird, wird nur eine Queue benötigt. Weitere Queues würden von keiner Alarmmeldung genutzt werden.
 \end{itemize}
 
-Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-iod}. Dadurch werden die Fehlerbedingungen, unter denen \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, unverändert reproduziert. Für die Durchführung der Experimente werden zusätzliche Parameter definiert, die in Tabelle~\ref{tab:exp-alps-more-metrics} dargestellt werden.
+Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-eod}. Dadurch werden die Fehlerbedingungen, unter denen \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, unverändert reproduziert. Für die Durchführung der Experimente werden zusätzliche Parameter definiert, die in Tabelle~\ref{tab:exp-alps-more-metrics} dargestellt werden.
 
 \begin{table}[hbtp]
     \centering
@@ -197,8 +198,43 @@ Wie zuvor beschrieben, wird jedes Experiment 59-mal durchgeführt. In diesem Exp
 ... \textit{to be continued}
 
 \subsubsection{Phase~2: In-Order-Delivery}
+\label{sub-sub:exp-alps-phase-2}
 
-... \textit{coming soon}
+In diesem Abschnitt wird die Einhaltung der \textit{In-Order-Delivery} geprüft. Analog zu \textit{Phase~1}~\ref{sub-sub:exp-alps-phase-1} werden die gleichen Parameter ausgewählt, die zur Verletzung der \textit{In-Order-Delivery} in \gls{lps} im Abschnitt~\ref{sub-sub:alp-verletzung-iod} geführt haben. Konkret werden die Parameter in Tabelle~\ref{tab:exp-alps-iod-config} ausgewählt.
+
+\begin{table}[hbtp]
+    \centering
+    \caption{Konfiguration des Experiments zur Einhaltung der In-Order-Delivery in \gls{alps}.}
+    \label{tab:exp-alps-iod-config}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Parameter}  & \textbf{Beschreibung}                        & \textbf{Wert} \\
+        \hline
+        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                & 1             \\
+        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                & 2             \\
+        $N_{\text{queue}}$  & Anzahl \gls{mqtt}-Queues                     & 2             \\
+        $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 1             \\
+        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
+        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage   & 100\,ms       \\
+        $T_{\text{server}}$ & Maximale Server-Antwortzeit                  & 5\,s          \\
+        $E_{\text{server}}$ & Serverfehlerrate                             & 0{,}0\,\%     \\
+        $T_{\text{idle}}$   & Server-Idle-Zeit                             & 5\,s          \\
+        $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & $\infty$      \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Die Auswahl der Parameter begründet sich wie folgt:
+
+\begin{itemize}
+    \item $N_{\text{alp~1}}$: Entspricht $N_{\text{lp~1}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-iod}.
+    \item $N_{\text{alp~2}}$: Entspricht $N_{\text{lp~2}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-iod}.
+    \item $N_{\text{queue}}$: Minimale Anzahl an Queues, die die parallele Verarbeitung von Alarmmeldungen durch zwei \gls{alptwo} Instanzen erlaubt.
+\end{itemize}
+
+Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-iod}. Für dieses Experiment, gilt ein Durchlauf als bestanden, wenn $N_{\text{loss}} = 0$ und $N_{\text{ooo}} = 0$. Es werden keine weiteren Bedingungen, wie in \textit{Phase~1}~\ref{sub-sub:exp-alps-phase-1}, geprüft, da die Verletzung der \textit{In-Order-Delivery} in \gls{lps} sich durch die parallele Verarbeitung von Alarmmeldungen durch mehrere \gls{lptwo} Instanzen (\textit{shared subscriptions}) erklärt. \gls{alps} unterbindet planmäßig die parallele Verarbeitung von Alarmmeldungen einzelner Alarmanlagen. Daher kann dieser Fall nicht auftreten.
+
+... \textit{to be continued}
 
 \subsubsection{Phase~3: Realitätsnahe Fehlerbedingungen}
 
