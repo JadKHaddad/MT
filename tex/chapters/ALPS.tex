@@ -120,7 +120,7 @@ Jedoch sind die benutzten \gls{amqp}-Mechanismen und die Verarbeitungslogik von 
 \subsection{Advanced Legacy Proxy Deduplication}
 \label{sub-sec:alpdedup}
 
-Wie im Abschnitt~\ref{sub-sec:alps-exactly-once-delivery-garantie} beschrieben, besteht die Implementierung von \gls{alpdedup} aus einer \gls{http}-Schnittstelle und einer verteilten Datenbank. Als eine verteilte Datenbank wird \textit{Mnesia} verwendet, wobei für die Speicherung von eindeutigen Alarmmeldungen eine einzige Tabelle mit dem Speichertyp \texttt{disc\_copies} angelegt wird. Dieser Speichertyp gewährleistet, dass Daten über mehrere Knoten hinweg repliziert und auf dem Festspeicher abgelegt werden, sodass der Systemzustand bei Ausfällen einzelner Knoten verlustfrei erhalten bleibt. Nach erfolgreicher Verarbeitung einer Alarmmeldung, wird sie als ein Tuple \texttt{(device\_id, triggertime)} in der Tabelle gespeichert. Dieser Tuple identifiziert eine Alarmmeldung eindeutig. Um der Problematik divergierender Datensätze bei Netzwerkpartitionierungen (\textit{Split-Brain-Szenarien}) zu begegnen, wird der Cluster anhand der Bibliothek \textit{unsplit}~\citep{unsplit2010} so konfiguriert, dass nach der Wiederherstellung der Netzwerkverbindung alle Datensätze aller Knoten automatisch zusammengeführt werden. Diese Strategie ist in diesem spezifischen Anwendungsfall unproblematisch anwendbar, da bestehende Datensätze in der Datenbank nach dem Hinzufügen niemals modifiziert werden. Wie im Abschnitt~\ref{sub-sec:alps-exactly-once-delivery-garantie} beschrieben wurde, besteht die Gefahr, im Falle von Kommunikationsfehlern zwischen \gls{alpdedup} und \gls{srvt} die \textit{Idempotenz} zu verletzen. Aus diesem Grund wird \gls{alpdedup} nach dem \textit{Sidecar-Prinzip}~\citep{burns2018designing} so nah wie möglich vor \gls{srvt} bereitgestellt. Dadurch wird die Wahrscheinlichkeit eines Kommunikationsfehlers geringer und somit die Gefahr, die \textit{Idempotenz} zu verletzen.
+Wie im Abschnitt~\ref{sub-sec:alps-exactly-once-delivery-garantie} beschrieben, besteht die Implementierung von \gls{alpdedup} aus einer \gls{http}-Schnittstelle und einer verteilten Datenbank. Als eine verteilte Datenbank wird \textit{Mnesia} verwendet, wobei für die Speicherung von eindeutigen Alarmmeldungen eine einzige Tabelle mit dem Speichertyp \texttt{disc\_copies} angelegt wird. Dieser Speichertyp gewährleistet, dass Daten über mehrere Knoten hinweg repliziert und auf dem Festspeicher abgelegt werden, sodass der Systemzustand bei Ausfällen einzelner Knoten verlustfrei erhalten bleibt. Nach erfolgreicher Verarbeitung einer Alarmmeldung, wird sie als ein Tuple \texttt{(device\_id, triggertime)} in der Tabelle gespeichert. Dieser Tuple identifiziert eine Alarmmeldung eindeutig. Um der Problematik divergierender Datensätze bei Netzwerkpartitionierungen (\textit{Split-Brain-Szenarien}) zu begegnen, wird der Cluster anhand der Bibliothek \textit{unsplit}~\citep{unsplit2010} so konfiguriert, dass nach der Wiederherstellung der Netzwerkverbindung alle Datensätze aller Knoten automatisch zusammengeführt werden. Diese Strategie ist in diesem spezifischen Anwendungsfall unproblematisch anwendbar, da bestehende Datensätze in der Datenbank nach dem Hinzufügen niemals modifiziert werden. Wie im Abschnitt~\ref{sub-sec:alps-exactly-once-delivery-garantie} beschrieben wurde, besteht die Gefahr, im Falle von Kommunikationsfehlern zwischen \gls{alpdedup} und \gls{srvt} die \textit{Idempotenz} zu verletzen. Aus diesem Grund wird \gls{alpdedup} nach dem \textit{Sidecar-Prinzip}~\citep{burns2018designing} so nah wie möglich vor \gls{srvt} bereitgestellt. Dadurch wird die Wahrscheinlichkeit eines Kommunikationsfehlers geringer und somit die Gefahr, die \textit{Idempotenz} zu verletzen. Da sich die \textit{Exactly-Once-Delivery} in verteilten Systemen bei möglichen Ausfällen und Nachrichtenverlusten nicht garantieren lässt~\citep{akkoyunlu1975}, versteht sich die Implementierung von \gls{alpdedup} als \textit{Proof of Concept}. Sie zeigt, dass die \textit{Exactly-Once-Delivery} unter idealisierten Bedingungen erreichbar ist, nämlich wenn zwischen \gls{alpdedup} und \gls{srvt} keine Kommunikationsfehler auftreten und \gls{alpdedup} zwischen der Weiterleitung und dem Speichern einer Alarmmeldung nicht ausfällt.
 
 \subsection{Experimentelle Evaluation}
 \label{sub-sec:alps-experimentelle-evaluation}
@@ -154,7 +154,7 @@ In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} gepr�
         \hline
         $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                & 1             \\
         $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                & 1             \\
-        $N_{\text{queue}}$  & Anzahl \gls{mqtt}-Queues                     & 1             \\
+        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                     & 1             \\
         $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 1             \\
         $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 1             \\
         $T_{\text{server}}$ & Maximale Server-Antwortzeit                  & 5\,s          \\
@@ -175,7 +175,7 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
 Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-eod}. Dadurch werden die Fehlerbedingungen, unter denen \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, unverändert reproduziert. Für die Durchführung der Experimente werden zusätzliche Parameter definiert, die in Tabelle~\ref{tab:exp-alps-more-metrics} dargestellt werden.
 
-\begin{table}[hbtp]
+\begin{table}[H]
     \centering
     \caption{Weitere Parameter zur Durchführung der Experimente in \gls{alps}.}
     \label{tab:exp-alps-more-metrics}
@@ -202,7 +202,7 @@ Wie zuvor beschrieben, wird jedes Experiment 59-mal durchgeführt. In diesem Exp
 
 In diesem Abschnitt wird die Einhaltung der \textit{In-Order-Delivery} geprüft. Analog zu \textit{Phase~1}~\ref{sub-sub:exp-alps-phase-1} werden die gleichen Parameter ausgewählt, die zur Verletzung der \textit{In-Order-Delivery} in \gls{lps} im Abschnitt~\ref{sub-sub:alp-verletzung-iod} geführt haben. Konkret werden die Parameter in Tabelle~\ref{tab:exp-alps-iod-config} ausgewählt.
 
-\begin{table}[hbtp]
+\begin{table}[H]
     \centering
     \caption{Konfiguration des Experiments zur Einhaltung der In-Order-Delivery in \gls{alps}.}
     \label{tab:exp-alps-iod-config}
@@ -212,7 +212,7 @@ In diesem Abschnitt wird die Einhaltung der \textit{In-Order-Delivery} geprüft.
         \hline
         $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                & 1             \\
         $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                & 2             \\
-        $N_{\text{queue}}$  & Anzahl \gls{mqtt}-Queues                     & 2             \\
+        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                     & 2             \\
         $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 1             \\
         $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
         $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage   & 100\,ms       \\
@@ -241,11 +241,11 @@ Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzu
 
 In dieser Phase wird \gls{alps} unter realitätsnahen Bedingungen evaluiert. Dafür werden die Verarbeitungszeiten des Legacy-Systems mithilfe eines trainierten Vorhersagemodells nachgebildet. Das Modell wurde nach dem \gls{rast}-Ansatz erstellt~\citep{rast22, rast25}.
 
-\paragraph{Training}
+\paragraph{Training des Modells}
 
 Das Modell wurde mit Regressionsverfahren aus den Request-Logs des Legacy-Systems trainiert. Diese Logs enthalten für jeden Request den Typ sowie die Zeitstempel für Beginn und Ende der Verarbeitung. Aus mehreren Regressionsverfahren wurde das mit dem besten Score ausgewählt. Das Training selbst ist nicht Teil dieser Masterarbeit und wird in~\citep{rast22, rast25} im Detail beschrieben.
 
-\paragraph{Eingaben}
+\paragraph{Eingaben des Modells}
 
 Das Modell erwartet drei Eingabewerte:
 
@@ -255,29 +255,76 @@ Das Modell erwartet drei Eingabewerte:
     \item \texttt{CMD}: Request-Typ
 \end{itemize}
 
-\paragraph{Ausgabe}
+\paragraph{Ausgabe des Modells}
 
-Die Ausgabe des Modells ist ein einzelner Zahlenwert; die vorhergesagte Verarbeitungszeit in Millisekunden des Requests. Sie beschreibt, wie lange das Legacy-System für den Request voraussichtlich braucht. Die Netzwerklatenz ist darin nicht enthalten.
+Die Ausgabe des Modells ist ein einzelner Zahlenwert; die vorhergesagte Verarbeitungszeit eines Requests. Sie beschreibt, wie lange das Legacy-System für den Request voraussichtlich braucht. Die Netzwerklatenz ist darin nicht enthalten.
 
-\paragraph{Limitationen}
+\paragraph{Integration des Modells}
 
-Das Modell hat folgende Einschränkungen:
+Um das Modell ins Experiment zu integrieren, wird der \textit{Server-Simulator} so modifiziert, dass die Parameter \texttt{PR1N} und \texttt{PR2N} für jeden Request berechnet werden. Da die Häufigkeit der Request-Typen nicht bekannt ist, wird \texttt{CMD} bei jedem eingehenden Request zufällig gesetzt. Anschließend werden die drei Parameter dem Modell übergeben, und der \textit{Server-Simulator} verzögert seinen Response gemäß der vorhergesagten Verarbeitungszeit. Zusätzlich wird wie in~\citep{rast22} eine konstante Hintergrundlast von 70 Requests pro Sekunde erzeugt. Sie entspricht dem höchsten Wert im Lastmuster von \gls{marc} und stellt die Requests an die übrigen Serverprogramme dar und fließt ebenfalls in \texttt{PR1N} und \texttt{PR2N} des Vorhersagemodells ein.
+
+\paragraph{Kommunikation}
+
+Die kommunikation zwischen den verschidenen Komponenten innerhalb des Experiments erfolgt über den \textit{\gls{tcp}-Proxy}. Als Fehlerrate $E_{\text{tcp}}$ wird 20\,\% verwendet. Laut den Messungen von \textit{Cloudflare} enden weltweit etwa 20\,\% der neuen \gls{tcp}-Verbindungen innerhalb der ersten 10 Pakete durch einen Reset oder Timeout~\citep{valenta2024}. Da keine Informationen über die Häufigkeit von Netzwerkfehlern in \gls{marc} vorliegen, wird dieser Wert als \textit{pessimistische Obergrenze} verwendet. Er stammt aus Internet-Verbindungen und ist keine realistische Rate für \gls{marc}. Die Delivery-Garantien müssen unabhängig von der Fehlerrate gelten. Die Rate bestimmt nur, wie oft kritische Fehlerkonstellationen auftreten.
+
+\paragraph{Parameter}
+
+Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-realistic-config} zusammengefasst.
+
+\begin{table}[H]
+    \centering
+    \caption{Konfiguration des realitätsnahen Experiments zur Einhaltung der Delivery-Garantien in \gls{alps}.}
+    \label{tab:exp-alps-realistic-config}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Parameter}  & \textbf{Beschreibung}                        & \textbf{Wert} \\
+        \hline
+        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                & 3             \\
+        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                & 3             \\
+        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                     & 3             \\
+        $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 1000          \\
+        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 100           \\
+        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage   & 100\,ms       \\
+        $R_{\text{bg}}$     & Hintergrundlast                              & 70\,s$^{-1}$  \\
+        $T_{\text{idle}}$   & Server-Idle-Zeit                             & 5\,s          \\
+        $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate                         & 20{,}0\,\%    \\
+        $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & 5\,ms         \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-    \item \textbf{Unvollständige Datenbasis}: Nur fünf von zwölf Serverprogrammen des Legacy-Systems schreiben Request-Logs. Daher sind die übrigen Programme nicht berücksichtigt.
-    \item \textbf{Nur Normalbetrieb}: Das Modell gilt für den Betrieb ohne Fehler, Backups oder Virenscans. Bei solcher Zusatzlast ist die tatsächliche Verarbeitungszeit voraussichtlich höher als die Vorhersage.
+    \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen der Anzahl der \gls{srv}~1 und \gls{srv}~2 Instanzen in \gls{marc}.
+    \item $N_{\text{queue}}$: Minimale Anzahl an Queues, bei der jede \gls{alptwo} Instanz eine Queue aktiv bedienen kann.
+    \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: ???.
+    \item $R_{\text{bg}}$: Entspricht dem Wert aus~\citep{rast22}.
+    \item $T_{\text{idle}}$: Entspricht \textit{Phase~1} und \textit{Phase~2}.
+    \item $E_{\text{tcp}}$: Entspricht dem Wert der Messungen von Cloudflare~\citep{valenta2024}.
+    \item $T_{\text{tcp}}$: Median der vorhergesagten Verarbeitungszeit. Er wird in einem Pilotdurchlauf mit denselben Parametern, aber ohne \gls{tcp}-Fehler ($E_{\text{tcp}} = 0\,\%$ , $T_{\text{tcp}} = \infty$) bestimmt. Da die Verarbeitungszeit schwankt, trifft die Trennung bei etwa der Hälfte der betroffenen Requests vor der Antwort ein. Das ist die kritische Fehlerkonstellation aus \textit{Phase~1}.
 \end{itemize}
 
-\paragraph{Itegration}
+\paragraph{Limitierungen}
 
-Um das Modell ins Experiment zu integrieren, wird der \textit{Server-Simulator} so modifiziert, dass die Parameter \texttt{PR1N} und \texttt{PR2N} bei jedem eingehenden Request berechnet werden. Aufgrund der fehlenden Informationen über die Häufigkeit der eingenden Request-Typen, wird \texttt{CMD} bei jedem eingehenden Request zufällig gesetzt. Anschließend werden die drei berechneten Parameter dem Modell übergeben und der \textit{Server-Simulator} verzögert seinen Response gemäß der vorhergesagten Verarbeitungszeit.
+Die folgenden Aspekte werden in diesem Experiment nicht betrachtet:
 
-... \textit{to be continued}
+\begin{itemize}
+    \item \textbf{\gls{amqp}-Broker}: Es wird ein einzelner Broker ohne Cluster verwendet, und es werden keine Broker-Ausfälle simuliert. Die Ausfallsicherheit liegt in der Verantwortung des Brokers, da gängige Broker wie \textit{RabbitMQ} Hochverfügbarkeit durch replizierte Queues bieten. Vorausgesetzt wird, dass der Broker akzeptierte Alarmmeldungen dauerhaft speichert und nicht verliert.
 
-\subsection{Limitationen der Experimente}
-\label{sub-sec:alps-limitationen-experimente}
+    \item \textbf{\gls{alpone}}: Es werden keine \gls{alpone}-Ausfälle simuliert. Die \gls{alpone}-Instanzen sind stateless und werden bei einem Ausfall automatisch neu gestartet.
 
-... \textit{coming soon}
+    \item \textbf{\gls{alptwo}}: Es werden keine \gls{alptwo}-Ausfälle simuliert. Die \gls{alptwo}-Instanzen sind ebenfalls stateless und werden bei einem Ausfall automatisch neu gestartet. Außerdem hat ein \gls{alptwo}-Ausfall auf die Delivery-Garantien dieselbe Wirkung wie ein \gls{tcp}-Fehler zwischen Broker und \gls{alptwo}: Der Broker erkennt den Verbindungsverlust und aktiviert einen anderen Consumer. Dieser Fall wird durch die \gls{tcp}-Fehler im Experiment bereits abgedeckt.
+
+    \item \textbf{\gls{alpdedup}}: Es werden weder \gls{alpdedup}-Ausfälle noch \gls{tcp}-Fehler zwischen \gls{alpdedup} und \gls{srvt} simuliert. Da \gls{alpdedup} nach dem \textit{Sidecar-Prinzip} unmittelbar vor \gls{srvt} betrieben wird (siehe Abschnitt~\ref{sub-sec:alpdedup}), ist die Wahrscheinlichkeit solcher Fehler minimal~\citep{burns2018designing}. Ebenso werden innerhalb des \gls{alpdedup}-Clusters weder Ausfälle einzelner \textit{Mnesia}-Knoten noch \gls{tcp}-Fehler zwischen den Knoten und damit auch keine Netzwerkpartitionierungen simuliert. Der Grund dafür ist, dass die Implementierung von \gls{alpdedup} als \textit{Proof of Concept} dient und die \textit{Exactly-Once-Delivery} unter idealisierten Bedingungen zeigen soll (siehe Abschnitt~\ref{sub-sec:alpdedup}). Die Konsistenz der Datenbank bei Partitionierungen ist ein bekanntes, eigenständiges Problem verteilter Datenbanken~\citep{gilbert2002, davidson1985} und wird in dieser Masterarbeit nicht behandelt.
+
+    \item \textbf{\gls{tcp}}: Latenz und Paketverlust werden nicht simuliert. Für die Delivery-Garantien ist ausschließlich relevant, ob eine Verbindung zu einem un\-güns\-ti\-gen Zeitpunkt abbricht. Paketverlust und hohe Latenz werden von \gls{tcp} durch Neuübertragungen ausgeglichen und wirken sich zunächst nur auf die Verzögerung aus~\citep{rfc9293, rfc6298}. Sie führen erst zu einem Verlust der Verbindung, wenn die Timeouts für Neuübertragungen überschritten werden~\citep{rfc9293, rfc1122}, und diese Konsequenz wird vom \textit{\gls{tcp}-Proxy} direkt provoziert.
+\end{itemize}
+
+% \subsection{Limitationen der Experimente}
+% \label{sub-sec:alps-limitationen-experimente}
+
+% ... \textit{coming soon}
 
 % TODO: Auch noch erklären wie LP D deployt wird also bootrapping. Es ist auch erforderlich die altem Beiträge in der Datenback zu löschen.
 % TODO: Acknowledgements: Broker ausfälle können zu Verlust führen (Das verhalten des systems wurde unter Broker Ausfällen nicht getestet). Immerwieder fehlgeschlagene Meldungen können zu einem Bottleneck führen. Die Anzahl N an Queues wird beim Starten von einer LP 1 instanz im Broker festgelegt und kann nicht dynamisch angepasst werden. Die Änderung der Anzahl N an Queues erfordert das Neustarten von einer LP 1 Instanz und alle LP 2 Instanzen. Auch noch erwähnen dass das operieren von ALPS weitere Operational cost verursacht, weil mehr services die gewartet werden müssen und so.

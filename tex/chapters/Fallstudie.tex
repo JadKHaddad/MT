@@ -142,7 +142,7 @@ Die in diesem Abschnitt durchgeführten Experimente umfassen zwei Simulationen d
 \begin{itemize}
     \item \textbf{Alarmanlagen-Simulator:} Der Alarmanlagen-Simulator bildet externe Alarmanlagen nach und erzeugt periodisch Alarmmeldungen, die an das System geschickt werden. Die gesamte Anzahl simulierter Alarmanlagen, die maximale Anzahl gesendeter Alarmmeldungen pro Alarmanlage sowie die willkürliche Wartezeit zwischen zwei gesendeter Alarmmeldungen sind einstellbar. Erfolgreich gesendeter Alarmmeldungen werden abschließend in einer Datei gespeichert (\texttt{device-results.json}).
 
-    \item \textbf{\gls{tcp}-Proxy:} Der \gls{tcp}-Proxy dient zur gezielten Simulation von Netzwerkfehlern zwischen Komponenten des \gls{lps}, konkret zwischen \gls{lptwo} Instanzen und dem Broker. Der \gls{tcp}-Proxy akzeptiert Verbindungen und leitet sie and die Zieladresse weiter. Die willkürliche maximale Dauer einer akzeptierten Verbindung ist einstellbar. Nach Ablauf der maximale Dauer wird die Verbindung getrennt, was zu einem Netzwerkfehler zwischen den beteiligten Komponenten führt. Abschließend werden Timestamps, an denen eine Verbindung getrennt wurde in einer Datei gespeichert (\texttt{tcp-proxy-results.json}).
+    \item \textbf{\gls{tcp}-Proxy:} Der \gls{tcp}-Proxy dient zur gezielten Simulation von Netzwerkfehlern zwischen Komponenten des \gls{lps}, konkret zwischen \gls{lptwo} Instanzen und dem Broker. Der \gls{tcp}-Proxy akzeptiert Verbindungen nach einer stellbaren willkürlichen Fehlerrate und leitet sie and die Zieladresse weiter. Die willkürliche maximale Dauer einer akzeptierten Verbindung ist einstellbar. Nach Ablauf der maximale Dauer wird die Verbindung getrennt, was zu einem Netzwerkfehler zwischen den beteiligten Komponenten führt. Abschließend werden Timestamps, an denen eine Verbindung getrennt wurde in einer Datei gespeichert (\texttt{tcp-proxy-results.json}).
 
     \item \textbf{Server-Simulator:} Der Server-Simulator simuliert die nachgelagerten Services \gls{srv}~2 und \gls{srv}~3 und stellt damit den Endpunkt der experimentellen Verarbeitungskette dar. Der Server-Simulator empfängt Alarmmeldungen von \gls{lps} bzw.~\gls{lptwo} und antwortet anhand von einer stellbaren willkürlichen Fehlerrate mit einer positiven oder negativen Bestätigung. Dadurch bildet der Server-Simulator echte Verarbeitungsfehler in den nachgelagerten Services \gls{srv}~2 und \gls{srv}~3. Außerdem ist die willkürliche Verarbeitungsdauer einer Alarmmeldung einstellbar. Dadurch simuliert der Server beliebige Verarbeitungszeiten der nachgelagerten Services \gls{srv}~2 und \gls{srv}~3 sowie variable Übertragungslatenzen im Netz. Der Server-Simulator ist außerdem mit einer einstellbaren Idle-Zeit konfigurierbar. Die Idle-Zeit dient dazu, der Server-Simulator zu terminieren und somit die Simulation zu beenden, nachdem eine bestimmte Zeit lang keine Alarmmeldungen mehr empfangen wurden. Abschließend werden erfolgreich verarbeitete Alarmmeldungen in einer Datei gespeichert (\texttt{server-results.json}).
 
@@ -199,6 +199,7 @@ In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzu
         $T_{\text{server}}$ & Maximale Server-Antwortzeit                  & 5\,s          \\
         $E_{\text{server}}$ & Serverfehlerrate                             & 0{,}0\,\%     \\
         $T_{\text{idle}}$   & Server-Idle-Zeit                             & 5\,s          \\
+        $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate                         & 0{,}0\,\%     \\
         $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & 4\,s          \\
         \hline
     \end{tabular}
@@ -249,6 +250,7 @@ In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzu
         $T_{\text{server}}$ & Maximale Server-Antwortzeit                  & 5\,s          \\
         $E_{\text{server}}$ & Serverfehlerrate                             & 0{,}0\,\%     \\
         $T_{\text{idle}}$   & Server-Idle-Zeit                             & 5\,s          \\
+        $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate                         & 0{,}0\,\%     \\
         $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & $\infty$      \\
         \hline
     \end{tabular}
