@@ -237,8 +237,42 @@ Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzu
 ... \textit{to be continued}
 
 \subsubsection{Phase~3: Realitätsnahe Fehlerbedingungen}
+\label{sub-sub:exp-alps-phase-3}
 
-... \textit{coming soon}
+In dieser Phase wird \gls{alps} unter realitätsnahen Bedingungen evaluiert. Dafür werden die Verarbeitungszeiten des Legacy-Systems mithilfe eines trainierten Vorhersagemodells nachgebildet. Das Modell wurde nach dem \gls{rast}-Ansatz erstellt~\citep{rast22, rast25}.
+
+\paragraph{Training}
+
+Das Modell wurde mit Regressionsverfahren aus den Request-Logs des Legacy-Systems trainiert. Diese Logs enthalten für jeden Request den Typ sowie die Zeitstempel für Beginn und Ende der Verarbeitung. Aus mehreren Regressionsverfahren wurde das mit dem besten Score ausgewählt. Das Training selbst ist nicht Teil dieser Masterarbeit und wird in~\citep{rast22, rast25} im Detail beschrieben.
+
+\paragraph{Eingaben}
+
+Das Modell erwartet drei Eingabewerte:
+
+\begin{itemize}
+    \item \texttt{PR1N}: Anzahl paralleler Requests zu Beginn des Requests
+    \item \texttt{PR2N}: Anzahl paralleler Requests, die während der Verarbeitung abgeschlossen wurden
+    \item \texttt{CMD}: Request-Typ
+\end{itemize}
+
+\paragraph{Ausgabe}
+
+Die Ausgabe des Modells ist ein einzelner Zahlenwert; die vorhergesagte Verarbeitungszeit in Millisekunden des Requests. Sie beschreibt, wie lange das Legacy-System für den Request voraussichtlich braucht. Die Netzwerklatenz ist darin nicht enthalten.
+
+\paragraph{Limitationen}
+
+Das Modell hat folgende Einschränkungen:
+
+\begin{itemize}
+    \item \textbf{Unvollständige Datenbasis}: Nur fünf von zwölf Serverprogrammen des Legacy-Systems schreiben Request-Logs. Daher sind die übrigen Programme nicht berücksichtigt.
+    \item \textbf{Nur Normalbetrieb}: Das Modell gilt für den Betrieb ohne Fehler, Backups oder Virenscans. Bei solcher Zusatzlast ist die tatsächliche Verarbeitungszeit voraussichtlich höher als die Vorhersage.
+\end{itemize}
+
+\paragraph{Itegration}
+
+Um das Modell ins Experiment zu integrieren, wird der \textit{Server-Simulator} so modifiziert, dass die Parameter \texttt{PR1N} und \texttt{PR2N} bei jedem eingehenden Request berechnet werden. Aufgrund der fehlenden Informationen über die Häufigkeit der eingenden Request-Typen, wird \texttt{CMD} bei jedem eingehenden Request zufällig gesetzt. Anschließend werden die drei berechneten Parameter dem Modell übergeben und der \textit{Server-Simulator} verzögert seinen Response gemäß der vorhergesagten Verarbeitungszeit.
+
+... \textit{to be continued}
 
 \subsection{Limitationen der Experimente}
 \label{sub-sec:alps-limitationen-experimente}
