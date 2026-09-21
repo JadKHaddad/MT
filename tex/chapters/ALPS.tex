@@ -294,6 +294,11 @@ Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-realistic-config
 \end{table}
 
 % TODO: other tcp maximal connection duration alp2 -> server, and between alp dedup nodes. 
+% $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 50            \\
+% $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 60            \\
+% $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage   & 5\,s          \\
+% \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: Diese Parameter bestimmen die Dauer eines Durchlaufs. Laut~\citep{rast22} verarbeitet \gls{marc} etwa 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. Würde ein Durchlauf diese Last in Echtzeit nachbilden, dauerte er 24 Stunden, und 59 Wiederholungen bräuchten 59 Tage. Das ist im zeitlichen Rahmen dieser Masterarbeit nicht möglich. Stattdessen werden die Parameter so gewählt, dass ein Durchlauf etwa 5 Minuten dauert und alle 59 Durchläufe zusammen etwa 5 Stunden benötigen. Die Dauer der Sendephase ergibt sich aus $N_{\text{alarm}} \cdot I_{\text{alarm}} = 60 \cdot 5\,\text{s} = 300\,\text{s} = 5\,\text{min}$. Die Alarmmeldungsrate beträgt $N_{\text{device}} / I_{\text{alarm}} = 50 / 5\,\text{s} = 10\,\text{s}^{-1}$, sodass pro Durchlauf insgesamt $N_{\text{device}} \cdot N_{\text{alarm}} = 3000$ Alarmmeldungen gesendet werden. Das entspricht etwa 23\,\% der Tageslast von \gls{marc}, zusammengedrängt auf 5 Minuten. Die Rate liegt damit deutlich über der durchschnittlichen Rate von etwa $0{,}15\,\text{s}^{-1}$ (13.000 Alarmmeldungen pro 24 Stunden). Über alle 59 Durchläufe werden 177.000 Alarmmeldungen verarbeitet, also etwa die Last von 13,6 Tagen. Die Rate ist bewusst so gewählt, dass sie unterhalb der Verarbeitungskapazität von drei \gls{alptwo} Instanzen liegt. Andernfalls würden sich Alarmmeldungen in den Queues aufstauen und die Dauer eines Durchlaufs über die 5 Minuten hinaus verlängern. Dies wird im Pilotdurchlauf überprüft. Die Anzahl der Alarmanlagen ist groß genug, damit die Alarmmeldungen über den \texttt{x-consistent-hash} Exchange auf alle drei Queues verteilt werden. Pro Alarmanlage werden 60 Alarmmeldungen gesendet, damit die Reihenfolge über viele aufeinanderfolgende Alarmmeldungen einer Alarmanlage geprüft wird.
+
 
 Die Auswahl der Parameter begründet sich wie folgt:
 
