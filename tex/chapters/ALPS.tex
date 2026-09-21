@@ -282,23 +282,25 @@ Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-realistic-config
         $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                & 3             \\
         $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                & 3             \\
         $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                     & 3             \\
-        $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 1000          \\
-        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 100           \\
-        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage   & 100\,ms       \\
+        $N_{\text{device}}$ & Anzahl Alarmanlagen                          & todo          \\
+        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & todo          \\
+        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage   & todo          \\
         $R_{\text{bg}}$     & Hintergrundlast                              & 70\,s$^{-1}$  \\
         $T_{\text{idle}}$   & Server-Idle-Zeit                             & 5\,s          \\
         $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate                         & 20{,}0\,\%    \\
-        $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & 5\,ms         \\
+        $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & todo          \\
         \hline
     \end{tabular}
 \end{table}
+
+% TODO: other tcp maximal connection duration alp2 -> server, and between alp dedup nodes. 
 
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
     \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen der Anzahl der \gls{srv}~1 und \gls{srv}~2 Instanzen in \gls{marc}.
     \item $N_{\text{queue}}$: Minimale Anzahl an Queues, bei der jede \gls{alptwo} Instanz eine Queue aktiv bedienen kann.
-    \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: ???.
+    \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: % 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. laut rast (rast22). aufgrund der zeitlichen einschränkung der masterarbeit bla bla bla ist diese zahl nicht möglich. stattdessen ist die zahl so gewählt dass ein Durchlauf ~ 5 min dauert -> 59 Durchläufe in ~ ? stunde?
     \item $R_{\text{bg}}$: Entspricht dem Wert aus~\citep{rast22}.
     \item $T_{\text{idle}}$: Entspricht \textit{Phase~1} und \textit{Phase~2}.
     \item $E_{\text{tcp}}$: Entspricht dem Wert der Messungen von Cloudflare~\citep{valenta2024}.
