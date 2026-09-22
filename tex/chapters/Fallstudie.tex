@@ -3,7 +3,7 @@
 
 Als Fallstudie betrachtet diese Masterarbeit das in~\citep{liebig_2025_architectural_refactoring} untersuchte verteilte Legacy-System \textit{\enquote{\gls{marc}}}~\footnote{Das reale \gls{marc} umfasst mehr als 30 Komponenten; in dieser Masterarbeit wird eine für die Analyse reduzierte Sicht auf die relevanten Kommunikations- und Servicepfade verwendet.} der Firma GS electronic Gebr. Schönweitz GmbH~\citep{gselectronic}. \gls{marc} ist ein verteiltes Alarmempfangssystem, das externe Alarmanlagen überwacht sowie Alarmmeldungen empfängt, verarbeitet und in einer Datenbank persistiert, um sie für die anschließende Bearbeitung durch Mitarbeiter in einer Leitstelle bereitzustellen. Abbildung~\ref{fig:marc-simple-architektur} zeigt eine vereinfachte Architektur von \gls{marc} sowie seine zentrale Komponente \textit{\enquote{\gls{ars}}} zur Verarbeitung von Alarmmeldungen. Ist \gls{ars} nicht verfügbar, können keine Alarmmeldungen bearbeitet werden.
 
-\begin{figure}[hbtp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/drawio/marc_simple.pdf}
     \caption{Vereinfachte Gesamtarchitektur des Legacy-Systems \acrshort{marc}.}
@@ -17,7 +17,7 @@ Wie im vorherigen Abschnitt beschrieben, bildet die \gls{ars} die zentrale Kompo
 
 Nach dem Empfang einer Alarmmeldung durchläuft sie eine synchrone \textit{Request-Response-Kette}~\footnote{Request-Response-Kette bezeichnet eine sequentielle Folge synchroner Request-Response-Interaktionen über mehrere Services, bei der jeder nachgelagerte Schritt erst nach erfolgreicher Antwort des vorherigen Schritts fortgesetzt wird.} über alle beteiligten Services bis hin zu \gls{srv}~3, welcher die finale Verarbeitung und die Persistierung der Alarmmeldung in einer Datenbank übernimmt. Die Kommunikation innerhalb dieser Kette erfolgt über eine Kombination aus \gls{http}-Requests und einem proprietären \gls{tcp}-Protokoll. Erst nachdem \gls{srv}~3 die Verarbeitung der Alarmmeldung erfolgreich abgeschlossen hat, wird eine Bestätigung über die VerarbeitungsKette an die sendende Alarmanlage zurückgeleitet. Die Antworten der einzelnen Services dienen ausschließlich als Bestätigung des erfolgreichen Empfangs beziehungsweise der erfolgreichen Verarbeitung und enthalten keine zusätzlichen Nutzdaten. Bei negativen Antworten, Netzstörungen oder Timeouts senden die Alarmanlagen die Alarmmeldungen erneut. Abbildung~\ref{fig:ars-architektur} veranschaulicht die interne Verarbeitungskette der \gls{ars}. Eine eingehende Alarmmeldung wird von \gls{srv}~1 angenommen, synchron über \gls{srv}~2 an \gls{srv}~3 weitergereicht und erst nach erfolgreicher Verarbeitung bestätigt.
 
-\begin{figure}[hbtp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/drawio/ars.pdf}
     \caption{Interne Service-Architektur der Alarm Receiving Software (\acrshort{ars}).}
@@ -26,7 +26,7 @@ Nach dem Empfang einer Alarmmeldung durchläuft sie eine synchrone \textit{Reque
 
 \gls{marc} ist über drei Rechenzentren repliziert, wobei in jedem Replikat eine eigene Instanz von \gls{ars} betrieben wird. Während die Services \gls{srv}~1 und \gls{srv}~2 in allen \gls{ars}-Instanzen zur Lastverteilung im Aktiv-Aktiv-Modus operieren, ist \gls{srv}~3 im Aktiv-Passiv-Modus ausgelegt. Folglich ist zu jedem Zeitpunkt nur eine Instanz von \gls{srv}~3 aktiv und für die Verarbeitung von Alarmmeldungen zuständig. Abbildung~\ref{fig:marc-architektur} zeigt die replizierte \gls{marc}-Architektur über drei Rechenzentren und wie die verschiedenen Services miteinander interagieren.
 
-\begin{figure}[hbtp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/drawio/marc.pdf}
     \caption{Replizierte \acrshort{marc}-Architektur über drei Rechenzentren mit Aktiv-Aktiv- und Aktiv-Passiv-Betrieb.}
@@ -52,7 +52,7 @@ Die im vorherigen Abschnitt beschriebene Architektur von \gls{marc} führt laut~
 
 Abbildung~\ref{fig:exactly-once-diagram} zeigt einen beispielhaften Kommunikationsablauf, der zu einer Verletzung der \textit{Exactly-Once-Delivery} führt: Eine Alarmmeldung wird aufgrund eines Kommunikationsfehlers erneut übertragen und dadurch mehrfach verarbeitet.
 
-\begin{figure}[hbtp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/mermaid/marc_exactly_once_delivery_violation_sequence.pdf}
     \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{Exactly-Once-Delivery} im \acrshort{marc}-System führt.}
@@ -61,7 +61,7 @@ Abbildung~\ref{fig:exactly-once-diagram} zeigt einen beispielhaften Kommunikatio
 
 Abbildung~\ref{fig:in-order-diagram} zeigt einen beispielhaften Kommunikationsablauf, der zu einer Verletzung der \textit{In-Order-Delivery} führt: Eine später erzeugte Alarmmeldung wird vor einer früheren Alarmmeldung verarbeitet, da variable Netzwerlatenzen die Reihenfolge verändern können.
 
-\begin{figure}[hbtp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/mermaid/marc_in_order_delivery_violation_sequence.pdf}
     \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{In-Order-Delivery} im \acrshort{marc}-System führt.}
@@ -148,7 +148,7 @@ Die in diesem Abschnitt durchgeführten Experimente umfassen zwei Simulationen d
 
     \item \textbf{Validator:} Der Validator wird nach Abschluss einer Simulation ausgeführt und vergleicht die vom Alarmanlagen-Simulator gesendeter Alarmmeldungen mit den beim Server-Simulator angekommenen Alarmmeldungen. Konkret werden die Vollständigkeit der Zustellung der Alarmmeldungen sowie die Einhaltung der \textit{In-Order-Delivery} und \textit{Exactly-Once-Delivery} validiert. Die Vollständigkeit wird validiert, in dem geprüft wird, dass jede gesendete Alarmmeldung aus (\texttt{device-\allowbreak results\allowbreak .json}) mindestens einmal in (\texttt{server-results\allowbreak .json}) vorkommt. \textit{Exactly-Once-Delivery} wird dadurch validiert, dass jede gesendete Alarmmeldung aus (\texttt{device-results\allowbreak .json}) höchstens einmal in (\texttt{server-results\allowbreak .json}) vorkommt. Die \textit{In-Order-Delivery} wird pro Alarmanlage validiert, indem zunächst mehrfach angekommene Alarmmeldungen entfernt werden und danach geprüft wird, ob alle Alarmmeldungen jeder einzelnen Alarmanlage anhand von \texttt{triggertime} monoton steigend sind. Jede Verletzung der monotonen Steigfähigkeit einer Alarmanlage wird als \textit{Außer Reihenfolge} klassifiziert. Zur Veranschaulichung der Validierung von \textit{In-Order-Delivery} wird die folgende Sequenz empfangener Alarmmeldungen betrachtet:
 
-          \begin{table}[hbtp]
+          \begin{table}[H]
               \centering
               \begin{tabular}{|l|l|l|}
                   \hline
@@ -170,7 +170,7 @@ Die in diesem Abschnitt durchgeführten Experimente umfassen zwei Simulationen d
 
 Für die Durchführung der Experimente wird die originale Implementierung von \gls{lps} aus dem offiziellen GitHub-Repository~\citep{legacy_proxy_pattern_repo} herangezogen. Die Implementierung umfasst die Komponenten \textit{\gls{lpone}}, \textit{\gls{lptwo}} und das eigens entwickelte Broker-Plugin für den Retry-Mechanismus, sowie zwei Hilfsservices \textit{\gls{srv}~1 PROXY} und \textit{\gls{srv}~2 PROXY}, die die Kommunikation zwischen \textit{\gls{lpone}} und \textit{\gls{srv}~1} und zwischen \textit{\gls{lptwo}} und \textit{\gls{srv}~2} ermöglichen. Nach dem Zusammenstellen der beteiligten Komponenten sieht die Architektur der Experimente wie in Abbildung~\ref{fig:exp-setup} dargestellt ist.
 
-\begin{figure}[hbtp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/drawio/exp_lps.pdf}
     \caption{Architektur der Experimente von \acrshort{lps} und Kommunikationspfade der beteiligten Komponenten.}
@@ -184,7 +184,7 @@ Abbildung~\ref{fig:exp-setup} veranschaulicht die Architektur der durchgeführte
 
 In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzung der \textit{Exactly-Once-Delivery} Garantie in \gls{lps} provoziert. Dafür werden die Parameter in Tablle~\ref{tab:exp-lps-eod-config} ausgewählt. Die Auswahl der quantitativen Parameter wie $N_{\text{lp~1}}$, $N_{\text{lp~2}}$,  $N_{\text{device}}$ und $N_{\text{alarm}}$ wird dadurch begründet, die minimale Anzahl generierter Alarmmeldungen sowie beteiligter Komponenten auszuwählen, die zu einer Verletzung der \textit{Exactly-Once-Delivery} führen kann. Die Auswahl der zeitlichen Parameter wie $T_{\text{server}}$ und $T_{\text{tcp}}$ wird dadurch begründet, einen Netzwerkfehler zwischen \gls{lptwo} und dem Broker zu provozieren, während \gls{lptwo} eine Alarmmeldung verarbeitet und auf eine Antwort von den nachgelagerten Services wartet. Dieses Experiment wurde mit \textit{HiveMQ CE} in Version \textit{2025.5} durchgeführt. Da dieses Experiment anhand probabilistischer Parameter wie $T_{\text{server}}$ und $T_{\text{tcp}}$ stochastisch erfolgt, wird es so lange wiederholt, bis eine Verletzung der \textit{Exactly-Once-Delivery} auftritt. Die Ergebnisse der Experiment werden in Tablle~\ref{tab:exp-lps-eod-result} dargestellt. Die Ergebnisse zeigen eine Duplikatrate von 80{,}0\,\% bei insgesamt 5 verarbeiteter Alarmmeldungen. Eine mögliche Erklärung der Ergebnisse ist: \gls{lptwo} konsumiert eine Alarmmeldung aus dem Broker leitet sie an den \textit{Server-Simulator} weiter. Während der \textit{Server-Simulator} die Alarmmeldung verarbeitet, wird die Verbindung zwischen \gls{lptwo} und dem Broker getrennt. \gls{lptwo} baut die Verbindung erneut auf und konsumiert die gleiche Alarmmeldung and \textit{Server-Simulator} weiter. Dadurch wird die gleiche Meldung mehrfach verarbeitet. Abbildung~\ref{fig:lps-exactly-once-delivery-violation-sequence} veranschaulicht diese Erklärung als ein Sequenzdiagramm. Dadurch wird gezeigt, dass \gls{lps} beim Auftreten von Netzwerkfehlern zwischen \gls{lptwo} Instanzen und dem Broker die \textit{Exactly-Once-Delivery} Garantie verletzt.
 
-\begin{table}[hbtp]
+\begin{table}[H]
     \centering
     \caption{Konfiguration des Experiments zur Verletzung der Exactly-Once-Delivery in \gls{lps}.}
     \label{tab:exp-lps-eod-config}
@@ -205,7 +205,7 @@ In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzu
     \end{tabular}
 \end{table}
 
-\begin{table}[hbtp]
+\begin{table}[H]
     \centering
     \caption{Ergebnisse des Experiments zur Verletzung der Exactly-Once-Delivery in \gls{lps}.}
     \label{tab:exp-lps-eod-result}
@@ -234,7 +234,7 @@ In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzu
 
 In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzung der \textit{In-Order-Delivery} Garantie in \gls{lps} provoziert. Zum Ausführen des Experiments werden die Parameter in Tablle~\ref{tab:exp-lps-iod-config} ausgewählt. Die Auswahl der quantitativen Parameter wie $N_{\text{lp~1}}$, $N_{\text{lp~2}}$, $N_{\text{device}}$ und $N_{\text{alarm}}$ wird dadurch begründet, die minimale Anzahl generierter Alarmmeldungen sowie beteiligter Komponenten auszuwählen, die zu einer Verletzung der \textit{In-Order-Delivery} führen kann. Die Auswahl der zeitlichen Parameter wie $I_{\text{alarm}}$ und $T_{\text{server}}$ wird dadurch begründet, die parallele Verarbeitung von verschiedenen Alarmmeldungen durch mehrere \gls{lptwo} Instanzen zu provozieren. Analog zum vorherigen Experiment wird dieses Experiment so lange wiederholt, bis eine Verletzung der \textit{In-Order-Delivery} auftritt. Ursprünglich wurde \textit{HiveMQ CE} in Version \textit{2025.5} als Message Broker verwendet. Jedoch ist die Simulation aufgrund eines ungelösten Bugs~\citep{hivemq_issue_558} in \textit{HiveMQ CE} gescheitert. Der Bug verhindert die parallele Verarbeitung vom \gls{mqtt}-Nachrichten durch mehrere Consumer einer einzelnen \textit{shared subscription}. Dieser Bug schien auch in älteren Versionen von \textit{HiveMQ CE} zu existieren~\citep{hivemq_issue_558}. Daher wurde auf \textit{HiveMQ CE} verzichtet und stattdessen \textit{Mosquitto}~\citep{mosquitto} in Version \textit{2.1.2} als Message Broker verwendet. Die Verwendung von einem anderen Broker ist dadurch gerechtfertigt, dass \gls{lps} standard \gls{mqtt}~v5 Features verwendet, die von allen \gls{mqtt}~v5 kompatiblen Brokern unterstützt werden. Außerdem ist dieses Experiment so aufgebaut, dass weder fehlerhafte Verarbeitungen der Alarmemeldungen noch Netzwerkfehler auftreten. Dadurch soll das \textit{HiveMQ}-spezifische Retry-Mechanismus Plugin nicht zum Einsatz kommen. Tabelle~\ref{tab:exp-lps-iod-result} zeigt die Ergebnisse des Experiments. Die Ergebnisse zeigen, dass zwei Alarmmeldungen in der falschen Reihenfolge empfangen wurden. Erklärung dafür ist, dass aufgrund der \textit{shared subscription} mehrere \gls{lptwo} Instanzen Alarmmeldungen parallel verarbeiten. Bei hohe Netzwerklatenzen oder variablen Verarbeitungszeiten der Alarmmeldungen in den nachgelagerten Services kann es dazu führen, dass Alarmmeldungen in der falschen Reihenfolge an den letzten Service der Verarbeitungskette gelangen. In diesem Experiment, ist der letzte Service der Verarbeitungskette der Server-Simulator. Im realen \gls{marc}-System ist es \gls{srv}~3, der das Persistieren der Alarmmeldungen in der Datenbank durchführt. Abbildung~\ref{fig:lps-in-order-delivery-violation-sequence} veranschaulicht diese Erklärung als ein Sequenzdiagramm. Dadurch wird gezeigt, dass \gls{lps} bei variablen Netzwerklatenzen oder variablen Verarbeitungszeiten der Alarmmeldungen in den nachgelagerten Services die \textit{In-Order-Delivery} Garantie verletzt.
 
-\begin{table}[hbtp]
+\begin{table}[H]
     \centering
     \caption{Konfiguration des Experiments zur Verletzung der In-Order-Delivery in \gls{lps}.}
     \label{tab:exp-lps-iod-config}
@@ -256,7 +256,7 @@ In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzu
     \end{tabular}
 \end{table}
 
-\begin{table}[hbtp]
+\begin{table}[H]
     \centering
     \caption{Ergebnisse des Experiments zur Verletzung der In-Order-Delivery in \gls{lps}.}
     \label{tab:exp-lps-iod-result}

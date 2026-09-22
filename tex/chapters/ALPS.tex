@@ -62,7 +62,7 @@ Der optimale Einsatz von \gls{alpdedup} erfordert, dass \gls{alpdedup} unmittelb
 
 Analog zu \gls{lps} wird \gls{alps} transparent in das bestehende Legacy-System zwischen den Komponenten integriert. \gls{alpone} wird hinter \gls{srv}~1 positioniert. Er empfängt Alarmmeldungen von \gls{srv}~1 und leitet sie an den Broker weiter. \gls{alptwo} wird vor \gls{srv}~2 positioniert. Er empfängt Alarmmeldungen vom Broker und leitet sie an \gls{srv}~2 weiter. \gls{alpdedup} wird unmittelbar vor \gls{srv}~3 positioniert. Er empfängt Alarmmeldungen von \gls{srv}~2 und leitet nur die eindeutigen Alarmmeldungen an \gls{srv}~3 weiter. Analog zu \gls{lps} wird die synchrone Kopplung durch die Kette \textit{\gls{alpone} $\rightarrow$ Broker $\rightarrow$ \gls{alptwo}} ersetzt und die bestehende Legacy-Schnittstelle bleibt nach außen unverändert. Abbildung~\ref{fig:alps-architektur} zeigt die transparente Integration von \gls{alps} in \gls{marc}. Anstelle von \gls{mqtt} wird \gls{amqp} als Transportprotokoll verwendet. Zusätzlich macht die Abbildung die Positionierung von \gls{alpdedup} unmittelbar vor \gls{srv}~3 deutlich.
 
-\begin{figure}[hbtp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/drawio/a_lps.pdf}
     \caption{Gesamtarchitektur von \acrshort{marc} nach der Integration von \acrshort{alps}.}
@@ -144,7 +144,7 @@ Die Experimente werden somit 59-mal wiederholt. Wird in keinem der 59 Durchläuf
 
 In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} geprüft. Dazu werden die gleichen Fehlbedingungen aus Abschnitt~\ref{sub-sub:alp-verletzung-iod} provoziert und die gleichen vier Hilfsservices verwendet (\textit{Alarmanlagen-Simulator}, \textit{\gls{tcp}-Proxy}, \textit{Server-Simulator} und \textit{Validator}). Die für das Experiment ausgewählten Parameter werden in Tabelle~\ref{tab:exp-alps-eod-config} dargestellt.
 
-\begin{table}[hbtp]
+\begin{table}[H]
     \centering
     \caption{Konfiguration des Experiments zur Einhaltung der Exactly-Once-Delivery in \gls{alps}.}
     \label{tab:exp-alps-eod-config}
