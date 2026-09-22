@@ -8,11 +8,11 @@
 
 \usepackage[utf8]{inputenc} % UTF-8 Codierung / utf-8 coding
 \ifthenelse{\boolean{en}}{}{
-\usepackage[ngerman]{babel} % Deutsche Beschriftung / for german language
+    \usepackage[ngerman]{babel} % Deutsche Beschriftung / for german language
 }
 
 \usepackage{graphicx} % Um Bilder einzufügen / to insert figures
-\usepackage{caption} 
+\usepackage{caption}
 \usepackage{subcaption} % Um mehrere Bilder in eine figure einzufügen / to include subfigures into one figure
 \usepackage{amssymb, amsmath} % für verschiedene mathematische Darstellungen / for various mathematical representations
 \usepackage{verbatim} % Um Quellcode einzufügen / to add source code
@@ -33,28 +33,28 @@
 \usepackage[acronym]{glossaries}
 
 \ifthenelse{\boolean{en}}{
-\usepackage[capitalise]{cleveref} %for references: \Cref{} at the beginning of a sentence; \cref{} everywhere else
+    \usepackage[capitalise]{cleveref} %for references: \Cref{} at the beginning of a sentence; \cref{} everywhere else
 }{
-\usepackage[capitalise,german]{cleveref} % \Cref{} für Großschreibung
+    \usepackage[capitalise,german]{cleveref} % \Cref{} für Großschreibung
 }
 
 %Einstellungen für Quelltexte und Algorithmen / setttings for listings
 \newfloat{listing}{tbhp}{lop}
 \crefname{algorithm}{Alg.}{Algs.}
 \ifthenelse{\boolean{en}}{
-\renewcommand{\lstlistingname}{Listing}  
-\renewcommand{\lstlistlistingname}{List of Listings}
-\crefname{listing}{Listing}{Listings}
-\Crefname{listing}{Listing}{Listings}
-\Crefname{algorithm}{Algorithm}{Algorithms}
+    \renewcommand{\lstlistingname}{Listing}
+    \renewcommand{\lstlistlistingname}{List of Listings}
+    \crefname{listing}{Listing}{Listings}
+    \Crefname{listing}{Listing}{Listings}
+    \Crefname{algorithm}{Algorithm}{Algorithms}
 }{
-\renewcommand{\lstlistingname}{Quelltext} 
-\renewcommand{\lstlistlistingname}{Quelltextverzeichnis} 
-\crefname{listing}{Quelltext}{Quelltexte}
-\Crefname{listing}{Quelltext}{Quelltexte}
-\floatname{algorithm}{Algorithmus}
-\renewcommand{\listalgorithmname}{Algorithmenverzeichnis} 
-\Crefname{algorithm}{Algorithmus}{Algorithmen}
+    \renewcommand{\lstlistingname}{Quelltext}
+    \renewcommand{\lstlistlistingname}{Quelltextverzeichnis}
+    \crefname{listing}{Quelltext}{Quelltexte}
+    \Crefname{listing}{Quelltext}{Quelltexte}
+    \floatname{algorithm}{Algorithmus}
+    \renewcommand{\listalgorithmname}{Algorithmenverzeichnis}
+    \Crefname{algorithm}{Algorithmus}{Algorithmen}
 }
 
 

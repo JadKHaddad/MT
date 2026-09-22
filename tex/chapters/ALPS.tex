@@ -269,7 +269,7 @@ Die kommunikation zwischen den verschidenen Komponenten innerhalb des Experiment
 
 \paragraph{Parameter}
 
-Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-realistic-config} zusammengefasst.
+Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-realistic-config} zusammengefasst, wobei \textit{Server-Proxy} die Verbindung zwischen \gls{alptwo} und \gls{srv}~2 bezeichnet, wäh\-rend \textit{\gls{amqp}-Proxy} die Verbindung zwischen \gls{alptwo} und dem Broker bezeichnet.
 
 \begin{table}[H]
     \centering
@@ -277,40 +277,57 @@ Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-realistic-config
     \label{tab:exp-alps-realistic-config}
     \begin{tabular}{|l|l|l|}
         \hline
-        \textbf{Parameter}  & \textbf{Beschreibung}                        & \textbf{Wert} \\
+        \textbf{Parameter}  & \textbf{Beschreibung}                                                       & \textbf{Wert} \\
         \hline
-        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                & 3             \\
-        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                & 3             \\
-        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                     & 3             \\
-        $N_{\text{device}}$ & Anzahl Alarmanlagen                          & todo          \\
-        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & todo          \\
-        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage   & todo          \\
-        $R_{\text{bg}}$     & Hintergrundlast                              & 70\,s$^{-1}$  \\
-        $T_{\text{idle}}$   & Server-Idle-Zeit                             & 5\,s          \\
-        $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate                         & 20{,}0\,\%    \\
-        $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & todo          \\
+        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                                               & 3             \\
+        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                                               & 3             \\
+        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                                                    & 3             \\
+        $N_{\text{device}}$ & Anzahl Alarmanlagen                                                         & 50            \\
+        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage                                       & 60            \\
+        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage                                  & 5\,s          \\
+        $R_{\text{bg}}$     & Hintergrundlast                                                             & 70\,s$^{-1}$  \\
+        $T_{\text{idle}}$   & Server-Idle-Zeit                                                            & 5\,s          \\
+        $T_{\text{m}}$      & Median der vorhergesagten Verarbeitungszeit                                 & 16\,ms        \\
+        $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate in \textit{Server-Proxy} und \textit{\gls{amqp}-Proxy} & 20{,}0\,\%    \\
+        $T_{\text{sp,min}}$ & Minimale Verbindungsdauer im \textit{Server-Proxy}                          & 12\,ms        \\
+        $T_{\text{sp,max}}$ & Maximale Verbindungsdauer im \textit{Server-Proxy}                          & 48\,ms        \\
+        $T_{\text{ap,min}}$ & Minimale Verbindungsdauer im \textit{\gls{amqp}-Proxy}                      & 227\,s        \\
+        $T_{\text{ap,max}}$ & Maximale Verbindungsdauer im \textit{\gls{amqp}-Proxy}                      & 909\,s        \\
         \hline
     \end{tabular}
 \end{table}
-
-% TODO: other tcp maximal connection duration alp2 -> server, and between alp dedup nodes. 
-% $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 50            \\
-% $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 60            \\
-% $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage   & 5\,s          \\
-% \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: Diese Parameter bestimmen die Dauer eines Durchlaufs. Laut~\citep{rast22} verarbeitet \gls{marc} etwa 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. Würde ein Durchlauf diese Last in Echtzeit nachbilden, dauerte er 24 Stunden, und 59 Wiederholungen bräuchten 59 Tage. Das ist im zeitlichen Rahmen dieser Masterarbeit nicht möglich. Stattdessen werden die Parameter so gewählt, dass ein Durchlauf etwa 5 Minuten dauert und alle 59 Durchläufe zusammen etwa 5 Stunden benötigen. Die Dauer der Sendephase ergibt sich aus $N_{\text{alarm}} \cdot I_{\text{alarm}} = 60 \cdot 5\,\text{s} = 300\,\text{s} = 5\,\text{min}$. Die Alarmmeldungsrate beträgt $N_{\text{device}} / I_{\text{alarm}} = 50 / 5\,\text{s} = 10\,\text{s}^{-1}$, sodass pro Durchlauf insgesamt $N_{\text{device}} \cdot N_{\text{alarm}} = 3000$ Alarmmeldungen gesendet werden. Das entspricht etwa 23\,\% der Tageslast von \gls{marc}, zusammengedrängt auf 5 Minuten. Die Rate liegt damit deutlich über der durchschnittlichen Rate von etwa $0{,}15\,\text{s}^{-1}$ (13.000 Alarmmeldungen pro 24 Stunden). Über alle 59 Durchläufe werden 177.000 Alarmmeldungen verarbeitet, also etwa die Last von 13,6 Tagen. Die Rate ist bewusst so gewählt, dass sie unterhalb der Verarbeitungskapazität von drei \gls{alptwo} Instanzen liegt. Andernfalls würden sich Alarmmeldungen in den Queues aufstauen und die Dauer eines Durchlaufs über die 5 Minuten hinaus verlängern. Dies wird im Pilotdurchlauf überprüft. Die Anzahl der Alarmanlagen ist groß genug, damit die Alarmmeldungen über den \texttt{x-consistent-hash} Exchange auf alle drei Queues verteilt werden. Pro Alarmanlage werden 60 Alarmmeldungen gesendet, damit die Reihenfolge über viele aufeinanderfolgende Alarmmeldungen einer Alarmanlage geprüft wird.
-
 
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
     \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen der Anzahl der \gls{srv}~1 und \gls{srv}~2 Instanzen in \gls{marc}.
-    \item $N_{\text{queue}}$: Minimale Anzahl an Queues, bei der jede \gls{alptwo} Instanz eine Queue aktiv bedienen kann.
-    \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: % 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. laut rast (rast22). aufgrund der zeitlichen einschränkung der masterarbeit bla bla bla ist diese zahl nicht möglich. stattdessen ist die zahl so gewählt dass ein Durchlauf ~ 5 min dauert -> 59 Durchläufe in ~ ? stunde?
+
+    \item $N_{\text{queue}}$: Minimale Anzahl an Queues, bei der jede \gls{alptwo} Instanz eine Queue aktiv verarbeiten kann.
+
+    \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: Laut~\citep{rast22} verarbeitet \gls{marc} etwa 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. Würde das Experiment diese Last in Echtzeit nachbilden, dauerte ein Durchlauf 24 Stunden, und 59 Wiederholungen bräuchten 59 Tage. Das ist im zeitlichen Rahmen dieser Masterarbeit nicht möglich. Stattdessen werden die Parameter so gewählt, dass ein Durchlauf etwa 5 Minuten dauert und alle 59 Durchläufe zusammen etwa 5 Stunden benötigen. Die Anzahl der Alarmanlagen 50 ist groß genug, damit die Alarmmeldungen über den \texttt{x-consistent-hash} Exchange auf alle drei Queues verteilt werden. Pro Alarmanlage werden 60 Alarmmeldungen gesendet, damit die Reihenfolge über aufeinanderfolgende Alarmmeldungen einer Alarmanlage geprüft wird.
+
     \item $R_{\text{bg}}$: Entspricht dem Wert aus~\citep{rast22}.
+
     \item $T_{\text{idle}}$: Entspricht \textit{Phase~1} und \textit{Phase~2}.
-    \item $E_{\text{tcp}}$: Entspricht dem Wert der Messungen von Cloudflare~\citep{valenta2024}.
-    \item $T_{\text{tcp}}$: Median der vorhergesagten Verarbeitungszeit. Er wird in einem Pilotdurchlauf mit denselben Parametern, aber ohne \gls{tcp}-Fehler ($E_{\text{tcp}} = 0\,\%$ , $T_{\text{tcp}} = \infty$) bestimmt. Da die Verarbeitungszeit schwankt, trifft die Trennung bei etwa der Hälfte der betroffenen Requests vor der Antwort ein. Das ist die kritische Fehlerkonstellation aus \textit{Phase~1}.
+
+    \item $T_{\text{m}}$: Median der vorhergesagten Verarbeitungszeit, aufgerundet auf die nächste ganze Zahl. Er wird in einem Pilotdurchlauf mit denselben Parametern, aber ohne \gls{tcp}-Fehler bestimmt und dient als Referenzwert für die Kalibrierung des \textit{Server-Proxy}.
+
+    \item $E_{\text{tcp}}$: Entspricht dem Wert der Messungen von Cloudflare~\citep{valenta2024}. Er wird einheitlich für den \textit{Server-Proxy} und den \textit{\gls{amqp}-Proxy} verwendet. Zwischen \gls{alpone} und dem Broker wird hingegen kein Proxy eingesetzt und somit keine \gls{tcp}-Fehler provoziert: Ein Verbindungsabbruch auf dieser Strecke betrifft eine Alarmmeldung, bevor sie den Broker erreicht hat, und liegt damit außerhalb der Delivery-Garantien.
+
+    \item $T_{\text{sp,min}}$, $T_{\text{sp,max}}$: Verbindungsdauern werden log-gleichverteilt zwischen die Grenzen gezogen, sodass ihr Median
+          \begin{equation}
+              M_{\text{sp}} = \sqrt{T_{\text{sp,min}} \cdot T_{\text{sp,max}}} \approx 24\,\text{ms}
+          \end{equation}
+          beträgt. Bei einer Referenzverarbeitungszeit von $T_{\text{m}} = 16\,\text{ms}$ ergibt sich daraus eine Wahrscheinlichkeit von etwa $20\,\%$, dass die Verbindung zwischen \gls{alptwo} und \gls{srv}~2 abbricht, während eine Alarmmeldung verarbeitet wird. Das entspricht der kritischen Fehlerkonstellation aus \textit{Phase~1}.
+
+    \item $T_{\text{ap,min}}$, $T_{\text{ap,max}}$: Analog dazu ergibt sich ein Median von
+          \begin{equation}
+              M_{\text{ap}} = \sqrt{T_{\text{ap,min}} \cdot T_{\text{ap,max}}} \approx 455\,\text{s}
+          \end{equation}
+          Damit beträgt die Wahrscheinlichkeit, dass eine einzelne Verbindung zwischen \gls{alptwo} und dem Broker innerhalb eines Durchlaufs ($N_{\text{alarm}} \cdot I_{\text{alarm}} = 300\,\text{s}$) abbricht, ebenfalls etwa $20\,\%$.
 \end{itemize}
+
+% \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: Laut~\citep{rast22} verarbeitet \gls{marc} etwa 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. Würde ein Durchlauf diese Last in Echtzeit nachbilden, dauerte er 24 Stunden, und 59 Wiederholungen bräuchten 59 Tage. Das ist im zeitlichen Rahmen dieser Masterarbeit nicht möglich. Stattdessen werden die Parameter so gewählt, dass ein Durchlauf etwa 5 Minuten dauert und alle 59 Durchläufe zusammen etwa 5 Stunden benötigen. Die Dauer der Sendephase ergibt sich aus $N_{\text{alarm}} \cdot I_{\text{alarm}} = 60 \cdot 5\,\text{s} = 300\,\text{s} = 5\,\text{min}$. Die Alarmmeldungsrate beträgt $N_{\text{device}} / I_{\text{alarm}} = 50 / 5\,\text{s} = 10\,\text{s}^{-1}$, sodass pro Durchlauf insgesamt $N_{\text{device}} \cdot N_{\text{alarm}} = 3000$ Alarmmeldungen gesendet werden. Das entspricht etwa 23\,\% der Tageslast von \gls{marc}, zusammengedrängt auf 5 Minuten. Die Rate liegt damit deutlich über der durchschnittlichen Rate von etwa $0{,}15\,\text{s}^{-1}$ (13.000 Alarmmeldungen pro 24 Stunden). Über alle 59 Durchläufe werden 177.000 Alarmmeldungen verarbeitet, also etwa die Last von 13,6 Tagen. Die Anzahl der Alarmanlagen 50 ist groß genug, damit die Alarmmeldungen über den \texttt{x-consistent-hash} Exchange auf alle drei Queues verteilt werden. Pro Alarmanlage werden 60 Alarmmeldungen gesendet, damit die Reihenfolge über aufeinanderfolgende Alarmmeldungen einer Alarmanlage geprüft wird.
 
 \paragraph{Limitierungen}
 
