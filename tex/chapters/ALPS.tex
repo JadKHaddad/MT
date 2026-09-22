@@ -193,10 +193,29 @@ Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzu
     \end{tabular}
 \end{table}
 
-Wie zuvor beschrieben, wird jedes Experiment 59-mal durchgeführt. In diesem Experiment gilt ein Durchlauf erst dann als bestanden, wenn keine Alarmmeldung verloren geht und keine Alarmmeldung mehrfach verarbeitet wird, also $N_{\text{loss}} = 0$ und $N_{\text{dup}} = 0$. Zusätzlich muss im Durchlauf die Fehlerbedingung eingetreten sein, unter der \gls{lps} gescheitert ist: Die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} wird getrennt, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet. Tritt dieser Fall nicht ein, sagt der Durchlauf nichts über die Einhaltung der \textit{Exactly-Once-Delivery} aus und somit wird er aus der Auswertung ausgeschlossen. Dazu wird die Implementierung von \gls{alptwo} so modifiziert, dass die Timestamps, an denen die Alarmmeldungen an \gls{srv}~2 weitergeleitet werden, und die, an denen die Antworten von \gls{srv}~2 empfangen werden, in einer Datei gespeichert werden (\texttt{consumer-results.json}). Am Ende eines Durchlaufs werden Ergebnisse aus \texttt{consumer-results.json} und \texttt{tcp-proxy-results.json} verglichen, um zu prüfen, ob die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} getrennt wurde, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet.
+Wie zuvor beschrieben, wird jedes Experiment 59-mal durchgeführt. In diesem Experiment gilt ein Durchlauf erst dann als bestanden, wenn keine Alarmmeldung verloren geht und keine Alarmmeldung mehrfach verarbeitet wird, also $N_{\text{loss}} = 0$ und $N_{\text{dup}} = 0$. Zusätzlich muss im Durchlauf die Fehlerbedingung $F$ eingetreten sein, unter der \gls{lps} gescheitert ist: Die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} wird getrennt, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet. Tritt dieser Fall nicht ein, sagt der Durchlauf nichts über die Einhaltung der \textit{Exactly-Once-Delivery} aus und somit wird er aus der Auswertung ausgeschlossen. Dazu wird die Implementierung von \gls{alptwo} so modifiziert, dass die Timestamps, an denen die Alarmmeldungen an \gls{srv}~2 weitergeleitet werden, und die, an denen die Antworten von \gls{srv}~2 empfangen werden, in einer Datei gespeichert werden (\texttt{consumer-results.json}). Am Ende eines Durchlaufs werden Ergebnisse aus \texttt{consumer-results.json} und \texttt{tcp-proxy-results.json} verglichen, um zu prüfen, ob die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} getrennt wurde, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet.
 
-... \textit{to be continued}
+\paragraph{Ergebnisse} Nach 99 Durchläufen des Experiments is die Fehlerbedingung $F$ 59-mal aufgetreten und somit fassen sich die Ergebnisse des Experiments in Tabelle~\ref{tab:exp-alps-eod-results} zusammen:
 
+\begin{table}[H]
+    \centering
+    \caption{Ergebnisse des Experiments zur Einhaltung der Exactly-Once-Delivery in \gls{alps}.}
+    \label{tab:exp-alps-eod-results}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Parameter}    & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
+        \hline
+        $N_{\text{sent}}$     & 1                           & 59                     & 100{,}0\,\%   \\
+        $N_{\text{received}}$ & 1                           & 59                     & 100{,}0\,\%   \\
+        $N_{\text{unique}}$   & 1                           & 59                     & 100{,}0\,\%   \\
+        $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Da $N_{\text{dup}} = 0$ in allen 59 Durchläufen gilt, wurde keine Alarmmeldung mehrfach verarbeitet. Dies liegt an der Deduplizierungslogik von \gls{alpdedup}, die eine erneut übertragene Alarmmeldung erkennt und nicht ein zweites Mal an \gls{srvt} weiterleitet, selbst wenn sie durch den provozierten \gls{tcp}-Fehler zwischen Broker und \gls{alptwo} erneut gesendet wird. Da in keinem der 59 Durchläufe eine Verletzung der \textit{Exactly-Once-Delivery} auftrat, kann mit einer Konfidenz von $C = 95\,\%$ behauptet werden, dass \gls{alps} die \textit{Exactly-Once-Delivery} unter den geprüften Fehlerbedingungen mit einer Wahrscheinlichkeit von mindestens $R = 95\,\%$ einhält.
 \subsubsection{Phase~2: In-Order-Delivery}
 \label{sub-sub:exp-alps-phase-2}
 
@@ -234,7 +253,27 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
 Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-iod}. Für dieses Experiment, gilt ein Durchlauf als bestanden, wenn $N_{\text{loss}} = 0$ und $N_{\text{ooo}} = 0$. Es werden keine weiteren Bedingungen, wie in \textit{Phase~1}~\ref{sub-sub:exp-alps-phase-1}, geprüft, da die Verletzung der \textit{In-Order-Delivery} in \gls{lps} sich durch die parallele Verarbeitung von Alarmmeldungen durch mehrere \gls{lptwo} Instanzen (\textit{shared subscriptions}) erklärt. \gls{alps} unterbindet planmäßig die parallele Verarbeitung von Alarmmeldungen einzelner Alarmanlagen. Daher kann dieser Fall nicht auftreten.
 
-... \textit{to be continued}
+\paragraph{Ergebnisse} Die 59 Durchläufe des Experiments ergaben die in Tabelle~\ref{tab:exp-alps-iod-results} dargestellten Ergebnisse:
+
+\begin{table}[H]
+    \centering
+    \caption{Ergebnisse des Experiments zur Einhaltung der In-Order-Delivery in \gls{alps}.}
+    \label{tab:exp-alps-iod-results}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Parameter}    & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
+        \hline
+        $N_{\text{sent}}$     & 2                           & 118                    & 100{,}0\,\%   \\
+        $N_{\text{received}}$ & 2                           & 118                    & 100{,}0\,\%   \\
+        $N_{\text{unique}}$   & 2                           & 118                    & 100{,}0\,\%   \\
+        $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Da $N_{\text{loss}} = 0$ und $N_{\text{ooo}} = 0$ in allen 59 Durchläufen gelten, wurden alle Alarmmeldungen empfangen und in der richtigen Reihenfolge verarbeitet. Dies ist auf das Zusammenspiel von \texttt{x-consistent-hash}, \texttt{prefetch\_count = 1} und \texttt{x-single-active-\allowbreak consumer} zurückzuführen, das sicherstellt, dass Alarmmeldungen einer einzelnen Alarmanlage stets sequentiell von derselben \gls{alptwo}-Instanz verarbeitet werden. Da in keinem der 59 Durchläufe eine Verletzung der \textit{In-Order-Delivery} auftrat, kann mit einer Konfidenz von $C = 95\,\%$ behauptet werden, dass \gls{alps} die \textit{In-Order-Delivery} unter den geprüften Fehlerbedingungen mit einer Wahrscheinlichkeit von mindestens $R = 95\,\%$ einhält.
 
 \subsubsection{Phase~3: Realitätsnahe Fehlerbedingungen}
 \label{sub-sub:exp-alps-phase-3}
@@ -269,7 +308,7 @@ Die kommunikation zwischen den verschidenen Komponenten innerhalb des Experiment
 
 \paragraph{Parameter}
 
-Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-realistic-config} zusammengefasst, wobei \textit{Server-Proxy} die Verbindung zwischen \gls{alptwo} und \gls{srv}~2 bezeichnet, wäh\-rend \textit{\gls{amqp}-Proxy} die Verbindung zwischen \gls{alptwo} und dem Broker bezeichnet.
+Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-realistic-config} zusammengefasst, wobei \textit{Server-Proxy} die Verbindung zwischen \gls{alptwo} und dem \textit{Server-Simulator} bezeichnet, wäh\-rend \textit{\gls{amqp}-Proxy} die Verbindung zwischen \gls{alptwo} und dem Broker bezeichnet.
 
 \begin{table}[H]
     \centering
@@ -327,7 +366,14 @@ Die Auswahl der Parameter begründet sich wie folgt:
           Damit beträgt die Wahrscheinlichkeit, dass eine einzelne Verbindung zwischen \gls{alptwo} und dem Broker innerhalb eines Durchlaufs ($N_{\text{alarm}} \cdot I_{\text{alarm}} = 300\,\text{s}$) abbricht, ebenfalls etwa $20\,\%$.
 \end{itemize}
 
-% \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: Laut~\citep{rast22} verarbeitet \gls{marc} etwa 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. Würde ein Durchlauf diese Last in Echtzeit nachbilden, dauerte er 24 Stunden, und 59 Wiederholungen bräuchten 59 Tage. Das ist im zeitlichen Rahmen dieser Masterarbeit nicht möglich. Stattdessen werden die Parameter so gewählt, dass ein Durchlauf etwa 5 Minuten dauert und alle 59 Durchläufe zusammen etwa 5 Stunden benötigen. Die Dauer der Sendephase ergibt sich aus $N_{\text{alarm}} \cdot I_{\text{alarm}} = 60 \cdot 5\,\text{s} = 300\,\text{s} = 5\,\text{min}$. Die Alarmmeldungsrate beträgt $N_{\text{device}} / I_{\text{alarm}} = 50 / 5\,\text{s} = 10\,\text{s}^{-1}$, sodass pro Durchlauf insgesamt $N_{\text{device}} \cdot N_{\text{alarm}} = 3000$ Alarmmeldungen gesendet werden. Das entspricht etwa 23\,\% der Tageslast von \gls{marc}, zusammengedrängt auf 5 Minuten. Die Rate liegt damit deutlich über der durchschnittlichen Rate von etwa $0{,}15\,\text{s}^{-1}$ (13.000 Alarmmeldungen pro 24 Stunden). Über alle 59 Durchläufe werden 177.000 Alarmmeldungen verarbeitet, also etwa die Last von 13,6 Tagen. Die Anzahl der Alarmanlagen 50 ist groß genug, damit die Alarmmeldungen über den \texttt{x-consistent-hash} Exchange auf alle drei Queues verteilt werden. Pro Alarmanlage werden 60 Alarmmeldungen gesendet, damit die Reihenfolge über aufeinanderfolgende Alarmmeldungen einer Alarmanlage geprüft wird.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{./img/drawio/exp_alps.pdf}
+    \caption{Architektur des realitätsnahen Experiments zur Einhaltung der Delivery-Garantien in \gls{alps} und die Kommunikationspfade der beteiligten Komponenten.}
+    \label{fig:alps-exp-setup}
+\end{figure}
+
+Abbildung~\ref{fig:alps-exp-setup} veranschaulicht die Architektur des realitätsnahen Experiments sowie die Interaktionen der einzelnen Komponenten. Der \textit{Alarmanlagen-Simulator} generiert periodisch Alarmmeldungen und sendet sie an \textit{\gls{alpone}}. \textit{\gls{alpone}} nimmt die Alarmmeldungen entgegen und publiziert sie anhand der \texttt{device\_id} an den Broker. Die \textit{\gls{alptwo}}-Instanzen verbinden sich über den \textit{\gls{amqp}-Proxy} mit dem Broker und konsumieren die Alarmmeldungen. Der \textit{\gls{amqp}-Proxy} simuliert dabei gezielt Netzwerkfehler zwischen \gls{alptwo} und dem Broker, indem er Verbindungen nach Ablauf einer willkürlichen Dauer trennt. Nach dem Konsumieren einer Alarmmeldung leitet die jeweilige \gls{alptwo}-Instanz sie über den \textit{Server-Proxy} weiter. Analog zum \textit{\gls{amqp}-Proxy} simuliert auch der \textit{Server-Proxy} gezielt Netzwerkfehler, diesmal zwischen \gls{alptwo} und dem \textit{Server-Simulator}. Anschließend wird die Alarmmeldung an \gls{alpdedup} übergeben, welche unmittelbar vor dem \textit{Server-Simulator} positioniert ist und bereits verarbeitete Alarmmeldungen anhand des Tupels \texttt{(device\_id, triggertime)} erkennt und verwirft, bevor nur eindeutige Alarmmeldungen an den \textit{Server-Simulator} weitergeleitet werden. Der \textit{Server-Simulator} übernimmt dabei, wie schon im Experiment zu \gls{lps}, die Rolle der ursprünglichen Services \gls{srv}~2 und \gls{srv}~3 von \gls{marc}, verarbeitet die Alarmmeldungen anhand der durch das Vorhersagemodell bestimmten Verarbeitungszeit und speichert sie abschließend ab.
 
 \paragraph{Limitierungen}
 
@@ -345,8 +391,25 @@ Die folgenden Aspekte werden in diesem Experiment nicht betrachtet:
     \item \textbf{\gls{tcp}}: Latenz und Paketverlust werden nicht simuliert. Für die Delivery-Garantien ist ausschließlich relevant, ob eine Verbindung zu einem un\-güns\-ti\-gen Zeitpunkt abbricht. Paketverlust und hohe Latenz werden von \gls{tcp} durch Neuübertragungen ausgeglichen und wirken sich zunächst nur auf die Verzögerung aus~\citep{rfc9293, rfc6298}. Sie führen erst zu einem Verlust der Verbindung, wenn die Timeouts für Neuübertragungen überschritten werden~\citep{rfc9293, rfc1122}, und diese Konsequenz wird vom \textit{\gls{tcp}-Proxy} direkt provoziert.
 \end{itemize}
 
-% \subsection{Limitationen der Experimente}
-% \label{sub-sec:alps-limitationen-experimente}
+\paragraph{Ergebnisse} Die Ergebnisse der 59 Durchläufe des Experiments werden in Tabelle~\ref{tab:exp-alps-realistic-results} zusammengefasst.
+
+\begin{table}[H]
+    \centering
+    \caption{Ergebnisse des Experiments zur Einhaltung der Delivery-Ga\-ran\-ti\-en in \gls{alps}.}
+    \label{tab:exp-alps-realistic-results}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Parameter}    & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
+        \hline
+        $N_{\text{sent}}$     & 3000                        & 177000                 & 100{,}0\,\%   \\
+        $N_{\text{received}}$ & 3000                        & 177000                 & 100{,}0\,\%   \\
+        $N_{\text{unique}}$   & 3000                        & 177000                 & 100{,}0\,\%   \\
+        $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        \hline
+    \end{tabular}
+\end{table}
 
 % ... \textit{coming soon}
 
