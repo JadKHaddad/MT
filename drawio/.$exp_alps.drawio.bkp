@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="EuKg9iHixxb6_FVFBR4i">
-    <mxGraphModel dx="975" dy="536" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1664" dy="914" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -48,7 +48,7 @@
         <mxCell id="LHEF5ifGnGVtiFmOdgGF-42" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ALP 1" vertex="1">
           <mxGeometry height="60" width="60" x="425" y="445" as="geometry" />
         </mxCell>
-        <mxCell id="LHEF5ifGnGVtiFmOdgGF-43" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;" value="Advanced Legacy Proxy System (ALPS)" vertex="1">
+        <mxCell id="LHEF5ifGnGVtiFmOdgGF-43" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;fontFamily=Times New Roman;" value="Advanced Legacy Proxy System (ALPS)" vertex="1">
           <mxGeometry height="30" width="290" x="470" y="10" as="geometry" />
         </mxCell>
         <mxCell id="LHEF5ifGnGVtiFmOdgGF-44" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
@@ -137,13 +137,13 @@
         <mxCell id="LHEF5ifGnGVtiFmOdgGF-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Alarmanlagen&lt;div&gt;Simulator&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="120" x="210" y="274" as="geometry" />
         </mxCell>
-        <mxCell id="LHEF5ifGnGVtiFmOdgGF-76" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;TCP Proxy&lt;/span&gt;" vertex="1">
+        <mxCell id="LHEF5ifGnGVtiFmOdgGF-76" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;AMQP Proxy&lt;/span&gt;" vertex="1">
           <mxGeometry height="40" width="40" x="720" y="105.00999999999999" as="geometry" />
         </mxCell>
-        <mxCell id="LHEF5ifGnGVtiFmOdgGF-77" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;TCP Proxy&lt;/span&gt;" vertex="1">
+        <mxCell id="LHEF5ifGnGVtiFmOdgGF-77" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;AMQP Proxy&lt;/span&gt;" vertex="1">
           <mxGeometry height="40" width="40" x="720" y="285" as="geometry" />
         </mxCell>
-        <mxCell id="LHEF5ifGnGVtiFmOdgGF-78" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;TCP Proxy&lt;/span&gt;" vertex="1">
+        <mxCell id="LHEF5ifGnGVtiFmOdgGF-78" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;AMQP Proxy&lt;/span&gt;" vertex="1">
           <mxGeometry height="40" width="40" x="720" y="455" as="geometry" />
         </mxCell>
         <mxCell id="LHEF5ifGnGVtiFmOdgGF-80" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="ALP D" vertex="1">
@@ -163,13 +163,13 @@
         <mxCell id="LHEF5ifGnGVtiFmOdgGF-89" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Server&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Simulator&lt;/span&gt;" vertex="1">
           <mxGeometry height="30" width="60" x="1080" y="289" as="geometry" />
         </mxCell>
-        <mxCell id="LHEF5ifGnGVtiFmOdgGF-90" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;TCP Proxy&lt;/span&gt;" vertex="1">
+        <mxCell id="LHEF5ifGnGVtiFmOdgGF-90" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;Server Proxy&lt;/span&gt;" vertex="1">
           <mxGeometry height="40" width="40" x="953" y="104.37" as="geometry" />
         </mxCell>
-        <mxCell id="LHEF5ifGnGVtiFmOdgGF-91" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;TCP Proxy&lt;/span&gt;" vertex="1">
+        <mxCell id="LHEF5ifGnGVtiFmOdgGF-91" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;Server Proxy&lt;/span&gt;" vertex="1">
           <mxGeometry height="40" width="40" x="953" y="284.67" as="geometry" />
         </mxCell>
-        <mxCell id="LHEF5ifGnGVtiFmOdgGF-92" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;TCP Proxy&lt;/span&gt;" vertex="1">
+        <mxCell id="LHEF5ifGnGVtiFmOdgGF-92" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 10px;&quot;&gt;Server Proxy&lt;/span&gt;" vertex="1">
           <mxGeometry height="40" width="40" x="953" y="454.36" as="geometry" />
         </mxCell>
       </root>
