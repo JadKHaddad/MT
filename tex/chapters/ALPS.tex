@@ -385,9 +385,9 @@ Ein Durchlauf gilt als bestanden, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 
     \end{tabular}
 \end{table}
 
-Der Median der vorhergesagten Verarbeitungszeit über alle Durchläufe beträgt, aufgerundet auf die nächste ganze Zahl, $T_{\text{m}} = 16\,\text{ms}$. Dieser Wert dient in \textit{Phase~4} als Referenzwert für die Kalibrierung des \textit{Server-Proxy}.
+Da $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$ in allen 59 Durchläufen gelten, wurden alle 177.000 Alarmmeldungen genau einmal und in der richtigen Reihenfolge verarbeitet. Im Gegensatz zu \textit{Phase~1} und \textit{Phase~2} wurden hier mehrere \gls{alpone}- und \gls{alptwo}-Instanzen gleichzeitig betrieben, und die Alarmmeldungen von 50 Alarmanlagen wurden über den \texttt{x-consistent-hash} Exchange auf drei Queues verteilt. Die Kombination aus \texttt{x-single-active-\allowbreak consumer} und \texttt{prefetch\_count = 1} sorgt dabei dafür, dass jede Queue zu jeder Zeit nur von einer einzigen \gls{alptwo}-Instanz verarbeitet wird und diese \gls{alptwo}-Instanz immer nur eine Alarmmeldung gleichzeitig verarbeitet. Dadurch werden Alarmmeldungen verschiedener Alarmanlagen parallel von verschiedenen \gls{alptwo}-Instanzen verarbeitet, während Alarmmeldungen einer einzelnen Alarmanlage weiterhin sequentiell von derselben \gls{alptwo}-Instanz verarbeitet werden. Die Ergebnisse zeigen, dass die Delivery-Garantien auch bei paralleler Verarbeitung und realitätsnaher Last erhalten bleiben. Da in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien auftrat, kann mit einer Konfidenz von $C = 95\,\%$ behauptet werden, dass \gls{alps} die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} im Normalbetrieb unter realitätsnaher Last mit einer Wahrscheinlichkeit von mindestens $R = 95\,\%$ einhält.
 
-% TODO: Interpretation der Ergebnisse.
+Der Median der vorhergesagten Verarbeitungszeit über alle Durchläufe beträgt, aufgerundet auf die nächste ganze Zahl, $T_{\text{m}} = 16\,\text{ms}$. Dieser Wert dient in \textit{Phase~4} als Referenzwert für die Kalibrierung des \textit{Server-Proxy}.
 
 \subsubsection{Phase~4: Realitätsnahe Fehlerbedingungen}
 \label{sub-sub:exp-alps-phase-4}
@@ -449,7 +449,7 @@ Die folgenden Aspekte werden in diesem Experiment nicht betrachtet:
 \begin{itemize}
     \item \textbf{\gls{amqp}-Broker}: Es wird ein einzelner Broker ohne Cluster verwendet, und es werden keine Broker-Ausfälle simuliert. Die Ausfallsicherheit liegt in der Verantwortung des Brokers, da gängige Broker wie \textit{RabbitMQ} Hochverfügbarkeit durch replizierte Queues bieten. Vorausgesetzt wird, dass der Broker akzeptierte Alarmmeldungen dauerhaft speichert und nicht verliert.
 
-    \item \textbf{\gls{alpone}}: Es werden keine \gls{alpone}-Ausfälle simuliert. Die \gls{alpone}-Instanzen sind stateless und werden bei einem Ausfall automatisch neu gestartet.
+    \item \textbf{\gls{alpone}}: Es werden keine \gls{alpone}-Ausfälle noch \gls{tcp}-Fehler vor \gls{alpone} oder zwischen \gls{alpone} und dem Broker simuliert. Netzwerkfehler oder hohe Latenzen auf dieser Strecke können weiterhin dazu führen, dass Alarmmeldungen in der falschen Reihenfolge im Broker landen (siehe Abbildung~\ref{fig:in-order-diagram} in Abschnitt~\ref{sec:design-smells}, wobei \gls{marc} durch \gls{alpone}, \textit{Datenbank} durch den Broker und \textit{Mitarbeiter} durch \gls{alptwo} ersetzt werden). Aus diesen Grund beschränkt sich die Einhaltung der \textit{In-Order-Delivery} nur noch auf dem Pfad: \textit{Broker $\rightarrow$ \gls{alptwo} $\rightarrow$ \gls{srv}}
 
     \item \textbf{\gls{alptwo}}: Es werden keine \gls{alptwo}-Ausfälle simuliert. Die \gls{alptwo}-Instanzen sind ebenfalls stateless und werden bei einem Ausfall automatisch neu gestartet. Außerdem hat ein \gls{alptwo}-Ausfall auf die Delivery-Garantien dieselbe Wirkung wie ein \gls{tcp}-Fehler zwischen Broker und \gls{alptwo}: Der Broker erkennt den Verbindungsverlust und aktiviert einen anderen Consumer. Dieser Fall wird durch die \gls{tcp}-Fehler im Experiment bereits abgedeckt.
 
@@ -478,7 +478,15 @@ Die folgenden Aspekte werden in diesem Experiment nicht betrachtet:
     \end{tabular}
 \end{table}
 
-% TODO: Interpretation der Ergebnisse.
+Da $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$ in allen 59 Durchläufen gelten, wurde trotz der provozierten Netzwerkfehler keine Alarmmeldung verloren, mehrfach verarbeitet oder außer Reihenfolge empfangen. Die Ergebnisse sind damit identisch mit denen aus \textit{Phase~3}. Die provozierten Netzwerkfehler haben also keinen Einfluss auf die Delivery-Garantien. Dies lässt sich anhand der beiden Fehlerarten erklären:
+
+\begin{itemize}
+    \item \textbf{Fehler im \textit{Server-Proxy}}: Bricht die Verbindung zwischen \gls{alptwo} und dem \textit{Server-Simulator} ab, bekommt \gls{alptwo} keine positive Bestätigung. Die Alarmmeldung wird daher negativ mit \texttt{requeue = true} bestätigt und an ihre originale Position in der Queue zurückgestellt. Danach wird ein anderer Consumer aktiviert, der die Alarmmeldung erneut weiterleitet. Dadurch geht keine Alarmmeldung verloren, und die Reihenfolge bleibt erhalten (Anforderung \textbf{A~4}). Falls die Alarmmeldung vor dem Abbruch bereits verarbeitet wurde, erkennt \gls{alpdedup} die wiederholte Alarmmeldung anhand des Tupels \texttt{(device\_id, triggertime)} und leitet sie nicht erneut weiter.
+
+    \item \textbf{Fehler im \textit{\gls{amqp}-Proxy}}: Bricht die Verbindung zwischen \gls{alptwo} und dem Broker ab, erkennt der Broker den Verbindungsverlust und aktiviert einen anderen Consumer für die Queue. Dieser konsumiert die noch nicht bestätigte Alarmmeldung erneut und leitet sie weiter. Dies entspricht der kritischen Fehlerkonstellation $F$ aus \textit{Phase~1}. Auch hier verhindert \gls{alpdedup}, dass die Alarmmeldung ein zweites Mal an den \textit{Server-Simulator} weitergeleitet wird.
+\end{itemize}
+
+Da in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien auftrat, kann mit einer Konfidenz von $C = 95\,\%$ behauptet werden, dass \gls{alps} die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} unter realitätsnahen Fehlerbedingungen mit einer Wahrscheinlichkeit von mindestens $R = 95\,\%$ einhält. Diese Aussage gilt unter den oben genannten Limitierungen, insbesondere ohne Ausfälle von \gls{alpone}, des Brokers und von \gls{alpdedup}.
 
 \subsubsection{Ausführung der Experimente}
 \label{sub-sub:exp-alps-execution}
