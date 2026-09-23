@@ -1,0 +1,32 @@
+\chapter{Ausblick}
+\label{ch:ausblick}
+
+Die in dieser Masterarbeit durchgeführte Evaluation von \gls{alps} konzentriert sich auf die Einhaltung der Delivery-Garantien unter kontrollierten Bedingungen. Aus den in Abschnitt~\ref{sub-sub:exp-alps-phase-4} beschriebenen Limitierungen ergeben sich mehrere Ansatzpunkte für zukünftige Arbeiten, die in diesem Kapitel vorgestellt werden.
+
+\section{Evaluation unter realen Cloud- und On-Premise-Bedingungen}
+\label{sec:ausblick-reale-bedingungen}
+
+Alle Experimente in dieser Masterarbeit wurden mithilfe von \textit{Docker Compose} auf jeweils einem einzelnen Host durchgeführt. Netzwerkfehler wurden durch \gls{tcp}-Proxies simuliert, die Verbindungen gezielt trennen. Latenz und Paketverlust wurden hingegen nicht simuliert, und die Services \gls{srv}~2 und \gls{srv}~3 wurden durch den \textit{Server-Simulator} nachgebildet. Das reale \gls{marc}-System ist jedoch über drei Rechenzentren repliziert, sodass die Komponenten von \gls{alps} in einem produktiven Einsatz über mehrere Standorte verteilt wären. Eine zukünftige Arbeit sollte \gls{alps} daher in einer verteilten Umgebung evaluieren, die der realen Infrastruktur von \gls{marc} entspricht. Dabei sollten insbesondere Ausfälle weiterer Komponenten betrachtet werden, da in dieser Masterarbeit weder Ausfälle des Brokers noch Ausfälle von \gls{alpone} simuliert wurden. Insbesondere sollte der Broker als Cluster mit replizierten Queues betrieben und das Verhalten von \gls{alps} bei Broker-Ausfällen untersucht werden, da diese potenziell zu einem Verlust von Alarmmeldungen führen können. Ebenso sollten \gls{tcp}-Fehler zwischen \gls{alpone} und dem Broker betrachtet werden, da die \textit{In-Order-Delivery} derzeit nur auf dem Pfad \textit{Broker $\rightarrow$ \gls{alptwo} $\rightarrow$ \gls{srvt}} gewährleistet wird.
+
+
+\section{Validierung des Mnesia-Clusterings unter Netzwerkpartitionierung}
+\label{sec:ausblick-mnesia}
+
+Wie in Abschnitt~\ref{sub-sec:alpdedup} beschrieben, wird die Datenbank von \gls{alpdedup} als \textit{Mnesia}-Cluster betrieben, der nach einer Netzwerkpartitionierung mithilfe der Bibliothek \textit{unsplit} die Datensätze aller Knoten zusammenführt. Ausfälle einzelner Knoten, \gls{tcp}-Fehler zwischen den Knoten sowie Netzwerkpartitionierungen wurden in dieser Masterarbeit jedoch nicht simuliert. Die Zusammenführung der Datensätze nach einer Netzwerkpartitionierung stellt zwar die Konsistenz der Datenbank wieder her, verhindert jedoch nicht, dass während der Partitionierung Duplikate an \gls{srvt} weitergeleitet werden. Zukünftige Arbeiten sollten daher untersuchen, wie häufig und unter welchen Bedingungen während einer Netzwerkpartitionierung Verletzungen der \textit{Exactly-Once-Delivery} auftreten. Zusätzlich sollten Strategien zur Bereinigung der Daten\-sätze untersucht werden, da die Tabelle von \gls{alpdedup} momentan mit jeder verarbeiteten Alarmmeldung unbegrenzt wächst.
+
+\section{Evaluation der Performance sowie Skalierbarkeit von ALPS}
+\label{sec:ausblick-performance}
+
+Die experimentelle Evaluation in Abschnitt~\ref{sub-sec:alps-experimentelle-evaluation} konzentriert sich ausschließlich auf die Einhaltung der Delivery-Garantien. Antwortzeiten und Durchsatz von \gls{alps} wurden nicht gemessen. Dazu sollten folgende Aspekte untersucht werden:
+
+\begin{itemize}
+    \item \textbf{Overhead durch \gls{alpdedup}}: Jede Alarmmeldung erfordert eine Lese- und eine Schreiboperation in der replizierten Datenbank. Bei einer Replikation über mehrere Rechenzentren kann dies die Verarbeitungszeit erhöhen.
+
+    \item \textbf{Durchsatz unter hoher Last}: Durch \texttt{x-single-active-\allowbreak consumer} und \texttt{prefetch\_count = 1} verarbeitet jeder Consumer innerhalb \gls{alptwo} zu jeder Zeit nur eine Alarmmeldung. Der maximale Durchsatz von \gls{alps} ist somit durch die Anzahl $N$ der Queues begrenzt. Es sollte untersucht werden, wie sich der Durchsatz bei steigender Last und steigendem $N$ verhält.
+
+    \item \textbf{Engpass durch fehlschlagende Alarmmeldungen}: Da fehlgeschlagene Alarmmeldungen in die Queue zurückgestellt werden, blockiert eine wiederholt fehlschlagende Alarmmeldung die gesamte Queue und damit alle Alarmanlagen, die dieser Queue zugeordnet sind. Zukünftige Arbeiten sollten Strategien untersuchen, die diesen Engpass auflösen, ohne die \textit{In-Order-Delivery} pro Alarmanlage zu verletzen.
+
+    \item \textbf{Dynamische Skalierung}: Die Anzahl $N$ der Queues wird beim Starten von \gls{alpone} festgelegt und kann nicht dynamisch angepasst werden. Eine Änderung erfordert den Neustart von \gls{alpone} und aller \gls{alptwo}-Instanzen. Zudem verändert eine Änderung von $N$ die Zuordnung der Alarmanlagen zu den Queues, sodass sich zum Zeitpunkt der Änderung Alarmmeldungen derselben Alarmanlage in verschiedenen Queues befinden können. Mechanismen für eine dynamische Skalierung unter Einhaltung der \textit{In-Order-Delivery}  pro Alarmanlage sollten daher untersucht werden.
+
+    \item \textbf{Betriebsaufwand}: \gls{alps} führt zusätzliche Komponenten ein, die betrieben, überwacht und gewartet werden müssen. Eine Bewertung des dadurch entstehenden Betriebsaufwands im Verhältnis zum Nutzen wäre für den produktiven Einsatz relevant.
+\end{itemize}
