@@ -9,18 +9,50 @@ Design Smells bezeichnen strukturelle Probleme in einem Softwaresystem, die die 
 \section{Reengineering und Refactoring}
 \label{sec:grundlagen-reengineering-refactoring}
 
-\textit{Refactoring} bezeichnet die Umstrukturierung von bestehendem Code, bei der die interne Struktur verbessert wird, ohne das externe Verhalten des Systems zu verändern~\citep{laguna_systematic_2013}. Neben diesem \textit{Code-Refactoring} gibt es \textit{Architectural Refactoring}, das statt einzelner Codeabschnitte die Architektur eines Systems betrifft, beispielsweise Kommunikationspfade oder Betriebsmodi. \textit{Reengineering} ist weiter gefasst und bezeichnet die Untersuchung und Veränderung eines bestehenden Systems, um es in eine neue Form zu überführen~\citep{laguna_systematic_2013}. Es ist besonders für Legacy-Systeme relevant, die weiterhin betrieben werden, aber nur schwer oder mit hohem Risiko geändert werden können~\citep{stevens_systems_1998}. In dieser Masterarbeit wird ein \textit{Architektur-Reengineering} betrachtet. Dabei wird nicht der Code des Legacy-Systems geändert, sondern die Art, wie die Komponente des Systems miteinander interagieren. Dadurch werden die Auswirkungen der Design Smells reduziert, ohne die bestehende Funktionalität zu verändern.
+\textit{Refactoring} bezeichnet die Umstrukturierung von bestehendem Code, bei der die interne Struktur verbessert wird, ohne das externe Verhalten des Systems zu verändern~\citep{laguna_systematic_2013}. Neben diesem \textit{Code-Refactoring} gibt es \textit{Architectural Refactoring}, das statt einzelner Codeabschnitte die Architektur eines Systems betrifft, beispielsweise Kommunikationspfade oder Betriebsmodi. \textit{Reengineering} ist weiter gefasst und bezeichnet die Untersuchung und Veränderung eines bestehenden Systems, um es in eine neue Form zu überführen~\citep{laguna_systematic_2013}. Es ist besonders für Legacy-Systeme relevant, die weiterhin betrieben werden, aber nur schwer oder mit hohem Risiko geändert werden können~\citep{stevens_systems_1998}. In dieser Masterarbeit wird ein \textit{Architektur-Reengineering} betrachtet. Dabei wird nicht der Code des Legacy-Systems geändert, sondern die Art, wie die Komponenten des Systems miteinander interagieren. Dadurch werden die Auswirkungen der Design Smells reduziert, ohne die bestehende Funktionalität zu verändern.
 
 \section{Legacy Proxy System}
 \label{sec:grundlagen-lps}
 
 \gls{lps} ist ein \textit{Architektur-Reengineering-Ansatz} für verteilte Legacy-Systeme. Dabei wird eine \textit{Proxy-Schicht} zwischen den bestehenden Services des Legacy-Systems eingefügt, die deren synchrone Kommunikation über einen Message Broker in eine asynchrone Kommunikation überführt. Dadurch werden Design Smells wie \textit{synchrone Request-Response-Ketten} reduziert, ohne den Quellcode der Services zu ändern. Die Architektur und die Komponenten von \gls{lps} werden im Abschnitt~\ref{sec:lps} im Detail beschrieben.
 
-\section{Messaging-Protokolle in verteilten Architekturen}
+\section{Asynchrone Messaging-Protokolle}
 \label{sec:grundlagen-messaging-protocolls}
+
+Asynchrone Messaging-Protokolle bilden die Grundlage sowohl des bestehenden \gls{lps} als auch des in dieser Masterarbeit entwickelten \gls{alps}. Sie ermögli\-chen eine räumliche und zeitliche Entkopplung von verteilten Systemkomponenten. Anstatt Services über synchrone, blockierende Aufrufe wie \gls{http} miteinander zu verbinden, wird die Kommunikation über einen Message Broker geleitet~\citep{hohpe2004enterprise}.
 
 \subsection{Message Queuing Telemetry Transport}
 \label{sub:grundlagen-mqtt}
+
+\gls{mqtt} ist ein leichtgewichtiges Protokoll, das ursprünglich für Umgebungen mit eingeschränkter Bandbreite und instabilen Netzwerken entwickelt wurde~\citep{thangavel2014performance}. \gls{lps} verwendet die Protokollversion \gls{mqtt}~5.0. Diese erweitert frühere Versionen unter anderem um ein verbessertes Session-Management und detaillierte Fehlercodes~\citep{oasis2019mqtt, hivemq_mqtt5_essentials}. Die Kommunikation folgt einer \textit{Client-Broker-Architektur}~\footnote{Clients kommunizieren nie direkt miteinander, sondern ausschließlich über den Broker. Dadurch sind sie räumlich voneinander entkoppelt~\citep{eugster2003many}.}~\citep{oasis2019mqtt}. Das Routing der Nachrichten basiert auf einer hierarchischen \textit{Topic-Struktur}: \textit{Publisher} senden Nachrichten an \textit{Topics}, und \textit{Subscriber} abonnieren die \textit{Topics}, deren Nachrichten sie empfangen möchten~\citep{oasis2019mqtt, eugster2003many}. Ein zentrales Merkmal von \gls{mqtt} sind die \gls{qos}-Stufen, die das Zustellverhalten von Nachrichten festlegen~\citep{oasis2019mqtt}. Eine \gls{qos}-Stufe gilt dabei jeweils nur für die Übertragung zwischen zwei direkt verbundenen Teilnehmern, also zwischen \textit{Publisher} und Broker bzw.~zwischen Broker und \textit{Subscriber}. Die Spezifikation unterscheidet drei Stufen, die jeweils einen unterschiedlichen Kompromiss zwischen Protokoll-Overhead und Zuverlässigkeit darstellen.
+
+\subsubsection{QoS~0 (At-Most-Once)}
+
+Bei \gls{qos}~0 wird eine Nachricht ohne Bestätigung nach dem \textit{Best-Effort}-Prinzip zugestellt. Der Sender speichert die Nachricht nicht und überträgt sie auch nicht erneut. Ob die Nachricht ankommt, hängt somit ausschließlich von der zugrunde liegenden \gls{tcp}-Verbindung ab. Da keine Bestätigungen ausgetauscht werden, besitzt \gls{qos}~0 den geringsten Proto\-koll-Overhead und die geringste Latenz~\citep{oasis2019mqtt, hivemq_mqtt5_essentials}.
+
+\subsubsection{QoS~1 (At-Least-Once)}
+
+Bei \gls{qos}~1 wird garantiert, dass eine Nachricht mindestens einmal zugestellt wird. Der Sender speichert die Nachricht so lange, bis der Empfänger den Erhalt mit einem \texttt{PUBACK}-Paket bestätigt. Bleibt diese Bestätigung aus, wird die Nachricht erneut übertragen. Geht jedoch nicht die Nachricht selbst, sondern nur das \texttt{PUBACK}-Paket verloren, erhält der Empfänger dieselbe Nachricht mehrfach. Dadurch können Duplikate entstehen~\citep{oasis2019mqtt}. Abbildung~\ref{fig:mqtt-qos-1} zeigt neben dem Normalbetrieb das Verhalten bei einem solchen Paketverlust. Da die Bestätigung ausbleibt, überträgt der Publisher die Nachricht erneut, wodurch beim Broker ein Duplikat entsteht.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{./img/mermaid/mqtt_qos_1.pdf}
+    \caption{Nachrichtenfluss unter \gls{qos}~1 mit möglicher Duplikatbildung bei ausbleibendem \texttt{PUBACK}.}
+    \label{fig:mqtt-qos-1}
+\end{figure}
+
+\subsubsection{QoS~2 (Exactly-Once)}
+
+\gls{qos}~2 ist die höchste Stufe und garantiert, dass eine Nachricht genau einmal zugestellt wird. Dafür wird ein zweiphasiger Handshake aus insgesamt vier Paketen verwendet. Zunächst sendet der Sender das \texttt{PUBLISH}-Paket, dessen Erhalt der Empfänger mit dem \texttt{PUBREC}-Paket bestätigt. Danach sendet der Sender ein \texttt{PUBREL}-Paket, das der Empfänger abschließend mit \texttt{PUBCOMP}-Paket bestätigt~\citep{oasis2019mqtt}. Bis zum Empfang vom \texttt{PUBREL}-Paket speichert der Empfänger die Paket-\gls{id} der Nachricht. Wird dieselbe Nachricht aufgrund eines Netzwerkfehlers erneut übertragen, erkennt der Empfänger sie anhand der gespeicherten Paket-\gls{id} als bereits empfangen. Durch diesen zusätzlichen Koordinationsaufwand steigen jedoch sowohl das übertragene Datenvolumen als auch die Latenz deutlich an~\citep{thangavel2014performance}. Abbildung~\ref{fig:mqtt-qos-2} zeigt den Ablauf dieses Handshakes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{./img/mermaid/mqtt_qos_2.pdf}
+    \caption{Vierstufiger Handshake unter \gls{qos}~2 zur Duplikatvermeidung.}
+    \label{fig:mqtt-qos-2}
+\end{figure}
+
+\subsubsection{Shared Topics}
 
 \subsection{Advanced Message Queuing Protocol}
 \label{sub:grundlagen-amqp}

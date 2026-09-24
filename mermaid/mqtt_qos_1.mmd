@@ -13,6 +13,6 @@ sequenceDiagram
         Broker--xClient: Kein PUBACK
         Note over Client: Timeout
         Client->>Broker: PUBLISH (erneute Übertagung)
-        Note over Broker: Duplikat erkannt
+        Note over Broker: Duplikat
         Broker-->>Client: PUBACK
     end
