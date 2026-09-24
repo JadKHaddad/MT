@@ -54,9 +54,54 @@ Bei \gls{qos}~1 wird garantiert, dass eine Nachricht mindestens einmal zugestell
 
 \subsubsection{Shared Topics}
 
+
 \subsection{Advanced Message Queuing Protocol}
 \label{sub:grundlagen-amqp}
 
+Während \gls{mqtt} ursprünglich für ressourcenbeschränkte Umgebungen entwickelt wurde~\citep{thangavel2014performance}, ist \gls{amqp} ein Protokoll für den zuverlässigen Nachrichtenaustausch in Enterprise-Systemen~\citep{vinoski2006advanced, ohara2007toward}. Von \gls{amqp} existieren zwei Versionen, die sich grundlegend unterscheiden. Version~1.0 ist ein OASIS-Standard und legt nur fest, wie Nachrichten zwischen zwei Teilnehmern übertragen werden~\citep{oasis2012amqp10}. Version~0-9-1 definiert zusätzlich ein Modell für den internen Aufbau des Brokers~\citep{amqp091}. Der in dieser Masterarbeit verwendete Broker \textit{RabbitMQ}~\citep{rabbitmq_broker} basiert auf Version~0-9-1. Daher beziehen sich die folgenden Abschnitte auf diese Version.
+
+\subsubsection{Komponentenmodell}
+
+Bei \gls{mqtt} senden Publisher ihre Nachrichten direkt an Topics. \gls{amqp} verwendet dagegen ein Modell aus vier Komponenten: \textit{Producer}, \textit{Exchange}, \textit{Queue} und \textit{Consumer}~\citep{amqp091}. Ein Producer sendet Nachrichten nie direkt an eine Queue, sondern immer an einen Exchange. Der Exchange ist eine Routing-Komponente innerhalb des Brokers. Er entscheidet anhand von Regeln, an welche Queues eine Nachricht weitergeleitet wird. Diese Regeln werden als \textit{Bindings} bezeichnet. Eine Queue speichert die Nachrichten so lange, bis ein Consumer sie abruft und verarbeitet~\citep{amqp091, hohpe2004enterprise}. Abbildung~\ref{fig:amqp_topology} zeigt dieses Modell anhand einer typischen Broker-Topologie.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{./img/drawio/amqp_topo.pdf}
+    \caption{Komponentenmodell und Routingpfad einer typischen \acrshort{amqp}-basierten Broker-Topologie.}
+    \label{fig:amqp_topology}
+\end{figure}
+
+\subsubsection{Exchange-Typen}
+
+Das Routing zwischen Exchange und Queue basiert auf zwei Schlüsseln. Den \textit{Routing Key} hängt der Producer an die Nachricht an. Den \textit{Binding Key} legt man fest, wenn eine Queue an einen Exchange gebunden wird. Wie die beiden Schlüssel miteinander verglichen werden, hängt vom Typ des Exchanges ab. Die wichtigsten Typen sind~\citep{amqp091}:
+
+\begin{itemize}
+    \item \textbf{Direct Exchange}~\citep{rabbitmq_exchange_direct}: Eine Nachricht wird nur an die Queues weitergeleitet, deren Binding Key genau dem Routing Key der Nachricht entspricht. Dadurch lassen sich Nachrichten gezielt an bestimmte Consumer verteilen~\citep{rabbitmq_tut_work_queues, eip_competing_consumers}.
+
+    \item \textbf{Fanout Exchange}~\citep{rabbitmq_exchange_fanout}: Der Routing Key wird ignoriert. Jede Nachricht wird in alle Queues kopiert, die an den Exchange gebunden sind. Dadurch lässt sich eine One-to-Many-Kommunikation einfach umsetzen~\citep{rabbitmq_tut_pubsub}.
+
+    \item \textbf{Topic Exchange}~\citep{rabbitmq_exchange_topic}: Der Routing Key besteht aus Wörtern, die durch Punkte getrennt sind, z.\,B.~\texttt{regions.na.cities.boston}. Binding Keys können Wildcards enthalten: \texttt{*} steht für genau ein Wort und \texttt{\#} für null oder mehrere Wörter.
+\end{itemize}
+
+\subsubsection{Bestätigungen und Flusskontrolle}
+
+Damit keine Nachrichten verloren gehen, verwendet \gls{amqp} \textit{Consumer Acknowledgments}. Der Broker löscht eine Nachricht erst dann aus der Queue, wenn der Consumer ihre erfolgreiche Verarbeitung mit einem \gls{amqp}-\gls{ack} bestätigt. Kann der Consumer eine Nachricht nicht verarbeiten, sendet er ein \gls{amqp}-\gls{nack}\footnote{Das \gls{amqp}-\gls{nack} ist eine Erweiterung von RabbitMQ. Die Spezifikation selbst sieht dafür \texttt{basic.reject} vor, das jedoch nur einzelne Nachrichten ablehnen kann~\citep{rabbitmq_confirms}.}. Ist dabei der Parameter \texttt{requeue=true} gesetzt, legt der Broker die Nachricht zurück in die Queue, damit sie erneut zugestellt werden kann~\citep{rabbitmq_confirms}. Bricht die Verbindung zum Consumer ab, bevor er eine Nachricht bestätigt hat, legt der Broker diese Nachricht automatisch zurück in die Queue~\citep{amqp091}.
+
+Der Parameter \texttt{prefetch\_count} steuert zusätzlich die Flusskontrolle. Er legt fest, wie viele unbestätigte Nachrichten ein Consumer gleichzeitig vom Broker erhalten darf. Ein \texttt{prefetch\_count} von~1 erzwingt eine \textit{Stop-and-Wait-Semantik}\footnote{Stop-and-Wait-Semantik bezeichnet ein Kommunikationsverfahren, bei dem der Sender nach dem Versand einer Nachricht wartet und erst nach Erhalt einer expliziten Bestätigung die nächste Nachricht übermittelt~\citep{tanenbaum2011computer}.}: Der Broker liefert die nächste Nachricht erst aus, wenn die vorherige bestätigt wurde.
+
+\subsubsection{Reihenfolge und Partitionierung}
+
+\gls{amqp} garantiert die Reihenfolge von Nachrichten nur unter engen Bedingungen. Die Nachrichten müssen über denselben Kanal gesendet, über denselben Pfad in dieselbe Queue geleitet und von einem einzigen Consumer nacheinander verarbeitet werden~\citep{amqp091}. Verarbeiten mehrere Consumer dieselbe Queue parallel, kann die Reihenfolge verloren gehen. Für Systeme, die eine geordnete Verarbeitung pro Entität brauchen und gleichzeitig horizontal skalieren sollen, reicht das nicht aus.
+
+Eine Lösung dafür ist das Konzept der \textit{Partitioned Logs}. Dabei werden Nachrichten anhand eines Schlüssels immer derselben Partition zugeordnet. Dadurch bleibt die Reihenfolge pro Schlüssel erhalten~\citep{kleppmann2017designing}. In dieser Masterarbeit wird dieses Konzept mit zwei Erweiterungen von RabbitMQ umgesetzt, die über den \gls{amqp}-Standard hinausgehen:
+
+\begin{itemize}
+    \item \textbf{Consistent-Hash-Routing (\texttt{x-consistent-hash})}: Ein spezieller Exchange-Typ, der den Hashwert des Routing Keys berechnet und die Nachricht anhand dieses Werts einer von mehreren Queues zuordnet~\citep{rabbitmq_consistent_hash_exchange}. Solange sich die Menge der gebundenen Queues nicht ändert, landen alle Nachrichten mit demselben Routing Key in derselben Queue.
+
+    \item \textbf{Single Active Consumer (\texttt{x-single-active-consumer})}: Eine Eigenschaft einer Queue, die sicherstellt, dass immer nur ein einziger Consumer Nachrichten aus dieser Queue erhält, auch wenn mehrere Consumer registriert sind~\citep{cogoluegnes2022rabbitmq}. Fällt dieser Consumer aus, übernimmt ein anderer registrierter Consumer.
+\end{itemize}
+
+Die Umsetzung in dieser Masterarbeit ist zwar auf RabbitMQ zugeschnitten, die verwendeten Konzepte sind jedoch nicht auf RabbitMQ beschränkt. Andere Message Broker bieten vergleichbare Funktionen an. Dadurch wird ein starker \textit{Vendor-Lock-in}\footnote{Vendor-Lock-in bezeichnet die starke technische Abhängigkeit von einem konkreten Anbieter oder Produkt.} vermieden. So unterstützt beispielsweise \textit{LavinMQ}~\citep{lavinmq_broker} ebenfalls \textit{Consistent-Hash-Routing}~\citep{lavinmq_consistent_hash} und \textit{Single Active Consumer}~\citep{lavinmq_single_active_consumer}. \textit{Apache ActiveMQ Artemis}~\citep{artemis_broker} bietet mit \textit{Message Grouping}~\citep{artemis_message_grouping} eine vergleichbare Funktion zum \textit{Consistent-Hash-Routing} und setzt das Prinzip des \textit{Single Active Consumers} mit \textit{Exclusive Queues}~\citep{artemis_exclusive_queues} um.
 \section{Erlang}
 \label{sec:grundlagen-erlang}
 
