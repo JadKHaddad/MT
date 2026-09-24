@@ -1,8 +1,31 @@
 \chapter{Grundlagen}
-\label{ch:grundladen}
+\label{ch:grundlagen}
 
-\section{Advanced Message Queuing Protocol}
-\label{sec:amqp}
+\section{Design Smells}
+\label{sec:grundlagen-design-smells}
+
+Design Smells bezeichnen strukturelle Probleme in einem Softwaresystem, die die Qualität des Systems negativ beeinflussen~\citep{software_design_smell_detection}. Sie führen nicht unbedingt zu Fehlern beim Übersetzen oder Ausführen des Systems. Das bedeutet, dass ein System trotz Design Smells korrekt funktionieren kann. Jedoch erschweren Design Smells das Verstehen, Testen, Erweitern und Warten des Systems~\citep{software_design_smell_detection}. Daher dienen sie als Hinweise auf Wartbarkeitsprobleme und zeigen, an welchen Stellen ein Refactoring oder Reengineering sinnvoll sein kann. Design Smells können auf verschiedenen Ebenen auftreten. Manche betreffen nur einzelne Codeabschnitte, beispielsweise eine zu lange Methode. Andere betreffen die Architektur des Systems und damit mehrere Komponenten gleichzeitig. Solche Smells werden als \textit{Architektur-Smells} bezeichnet und wirken sich auf das Gesamtsystem aus~\citep{refactoring_for_software_architecture_smells}. In verteilten Legacy-Systemen entstehen Architektur-Smells häufig dadurch, wie Services miteinander kommunizieren und wie sie redundant betrieben werden. Beispiele dafür sind \textit{synchrone Request-Response-Ketten}~\citep{tiwari_unveiling_2024, liebig_2025_architectural_refactoring} und \textit{heterogene Redundanzmodi}~\citep{choudhary_rajesh_high_2025, liebig_2025_architectural_refactoring}. \textit{Architektur-Smells} liegen nicht in einem einzelnen Codeabschnitt, sondern verteilen sich über die Kommunikationspfade, Abhängigkeiten und Betriebsmodi mehrerer Services. Daher reicht ein lokales Code-Refactoring oft nicht aus. Stattdessen kann ein Reengineering auf Architekturebene notwendig sein. Aus diesem Grund werden im nächsten Abschnitt die Begriffe \textit{Reengineering} und \textit{Refactoring} voneinander abgegrenzt.
+
+\section{Reengineering und Refactoring}
+\label{sec:grundlagen-reengineering-refactoring}
+
+\textit{Refactoring} bezeichnet die Umstrukturierung von bestehendem Code, bei der die interne Struktur verbessert wird, ohne das externe Verhalten des Systems zu verändern~\citep{laguna_systematic_2013}. Neben diesem \textit{Code-Refactoring} gibt es \textit{Architectural Refactoring}, das statt einzelner Codeabschnitte die Architektur eines Systems betrifft, beispielsweise Kommunikationspfade oder Betriebsmodi. \textit{Reengineering} ist weiter gefasst und bezeichnet die Untersuchung und Veränderung eines bestehenden Systems, um es in eine neue Form zu überführen~\citep{laguna_systematic_2013}. Es ist besonders für Legacy-Systeme relevant, die weiterhin betrieben werden, aber nur schwer oder mit hohem Risiko geändert werden können~\citep{stevens_systems_1998}. In dieser Masterarbeit wird ein \textit{Architektur-Reengineering} betrachtet. Dabei wird nicht der Code des Legacy-Systems geändert, sondern die Art, wie die Komponente des Systems miteinander interagieren. Dadurch werden die Auswirkungen der Design Smells reduziert, ohne die bestehende Funktionalität zu verändern.
+
+\section{Legacy Proxy System}
+\label{sec:grundlagen-lps}
+
+\gls{lps} ist ein \textit{Architektur-Reengineering-Ansatz} für verteilte Legacy-Systeme. Dabei wird eine \textit{Proxy-Schicht} zwischen den bestehenden Services des Legacy-Systems eingefügt, die deren synchrone Kommunikation über einen Message Broker in eine asynchrone Kommunikation überführt. Dadurch werden Design Smells wie \textit{synchrone Request-Response-Ketten} reduziert, ohne den Quellcode der Services zu ändern. Die Architektur und die Komponenten von \gls{lps} werden im Abschnitt~\ref{sec:lps} im Detail beschrieben.
+
+\section{Messaging-Protokolle in verteilten Architekturen}
+\label{sec:grundlagen-messaging-protocolls}
+
+\subsection{Message Queuing Telemetry Transport}
+\label{sub:grundlagen-mqtt}
+
+\subsection{Advanced Message Queuing Protocol}
+\label{sub:grundlagen-amqp}
+
+\section{Erlang}
+\label{sec:grundlagen-erlang}
 
 ... \textit{coming soon}
-

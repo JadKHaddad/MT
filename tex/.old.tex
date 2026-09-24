@@ -68,7 +68,7 @@ Die Masterarbeit ist wie folgt strukturiert: Kapitel~\ref{ch:einleitung} motivie
 \label{ch:grundlagen}
 
 \section{Design Smells}
-\label{sec:grundlagen_design-smells}
+
 
 Design Smells bezeichnen strukturelle Auffälligkeiten in einem Softwaresystem, die nicht zwingend zu unmittelbaren Laufzeit- oder Übersetzungsfehlern führen, aber Qualitätsattribute wie Verständlichkeit, Testbarkeit, Erweiterbarkeit und Wartbarkeit negativ beeinflussen können~\citep{software_design_smell_detection}. Sie dienen damit als Hinweise auf Wartbarkeitsprobleme und mögliche Ansatzpunkte für Refactoring oder Reengineering.
 
@@ -79,21 +79,18 @@ Da solche Smells häufig nicht isoliert in einzelnen Codeabschnitten liegen, son
 \section{Reengineering und Refactoring}
 \label{sec:reengineering_refactoring}
 
-% Review-Punkt 12: Refactoring-Begriffsumfang (Code vs. Architektur) explizit machen
 Reengineering und Refactoring sind verwandte Konzepte der Software-Evo\-lu\-ti\-on, unterscheiden sich jedoch im Umfang der vorgenommenen Änderungen. Im engeren Sinn bezeichnet \textit{Code-Refactoring} eine Umstrukturierung eines bestehenden Codebestands, bei der die interne Struktur verbessert wird, ohne das externe Verhalten des Systems zu verändern~\citep{laguna_systematic_2013}. Der Fokus liegt damit auf internen Qua\-li\-täts\-merk\-ma\-len wie Verständlichkeit, Wartbarkeit und Änderbarkeit. Daneben wird \textit{Architectural Refactoring} als architektonische Umstrukturierung verstanden, die Kommunikationspfade, Komponentengrenzen oder Betriebsmodi betrifft und ebenfalls ohne Änderung der fachlich beobachtbaren Funktionalität auskommen kann.
 
 Reengineering ist weiter gefasst. Es umfasst die Untersuchung und Ver\-än\-de\-rung eines bestehenden Systems, um es in eine neue Form zu überführen~\citep{laguna_systematic_2013}. Dies kann Quellcode, Modelle oder Architektur betreffen. Für Legacy-Systeme ist Reengineering besonders relevant, wenn ein System weiterhin geschäftlichen Wert besitzt, aber Änderungen nur schwer oder mit hohem Risiko möglich sind~\citep{stevens_systems_1998}.
 
-% Review-Punkt 13: Mentor-Formulierung zu Architektur-Reengineering
 Für diese Masterarbeit ist vor allem Architektur-Reengineering relevant. Die betrachtete Klasse von verteilten Legacy-Systemen soll nicht durch lokale Code-Än\-de\-run\-gen verbessert werden, sondern durch eine strukturelle Anpassung ihrer Architektur. Auf diese Weise vermeidet Architektur-Reengineering das hohe Risiko direkter Code-Änderungen an Legacy-Systemen, indem Eingriffe in die bestehende Implementierung der Fachkomponenten vermieden und stattdessen die Interaktionsstruktur angepasst werden. Dadurch sollen die Auswirkungen der identifizierten Design Smells reduziert werden, während die bestehende Funktionalität erhalten bleibt.
 
-\section{\acrfull{lps}}
-\label{sec:grundlagen_lps}
+\section{Legacy Proxy System}
+\label{sec:grundlagen-lps}
 
-Das \gls{lps} ist ein Architektur-Reengineering-Ansatz für verteilte Legacy-Systeme. Ziel ist es, strukturelle Probleme in der Kommunikation zwischen bestehenden Services zu reduzieren, ohne den Quellcode dieser Services anzupassen~\citep{liebig_2025_architectural_refactoring}. % Review-Punkt 15: „klassisch“ als gewählte Variante (nicht „traditionell“)
+Das \gls{lps} ist ein Architektur-Reengineering-Ansatz für verteilte Legacy-Systeme. Ziel ist es, strukturelle Probleme in der Kommunikation zwischen bestehenden Services zu reduzieren, ohne den Quellcode dieser Services anzupassen~\citep{liebig_2025_architectural_refactoring}.
 Damit unterscheidet sich \gls{lps} von klassischem Code-Refactoring: Nicht die interne Implementierung einzelner Komponenten wird verändert, sondern die Interaktion zwischen ihnen.
 
-% Review-Punkt 16: aktive Formulierung der Proxy-Schicht
 Hierzu fügt \gls{lps} eine zusätzliche Proxy-Schicht zwischen bestehenden Service-Komponenten des Legacy-Systems ein. Diese Zwischenschicht entkoppelt synchrone Kommunikation und überführt sie über einen Message Broker in eine asynchrone Verarbeitung~\citep{liebig_2025_architectural_refactoring}. Auf diese Weise können insbesondere Design Smells adressiert werden, die aus synchronen Request-Response-Ketten, Redundanzentscheidungen oder fehlender Entkopplung entstehen.
 
 Die konkrete Architektur, die einzelnen Komponenten des \gls{lps} sowie die Art, wie dadurch die Design Smells des betrachteten Legacy-Systems adressiert werden, werden in Abschnitt~\ref{sec:lps} beschrieben.
@@ -105,7 +102,6 @@ Die konkrete Architektur, die einzelnen Komponenten des \gls{lps} sowie die Art,
 \newpage
 
 \section{Messaging-Protokolle in verteilten Architekturen}
-\label{sec:grundlagen_messaging}
 
 Messaging-Protokolle bilden das fundamentale Rückgrat sowohl des bestehenden \gls{lps} als auch des in dieser Masterarbeit entwickelten \gls{alps}. Sie dienen der räumlichen und zeitlichen Entkopplung verteilter Systemkomponenten. Anstatt Dienste über synchrone, blockierende Aufrufe (wie \gls{http}) direkt miteinander zu verknüpfen, wird die Kommunikation über einen dedizierten Message Broker geleitet~\citep{hohpe2004enterprise}.
 
