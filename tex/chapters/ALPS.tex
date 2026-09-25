@@ -494,8 +494,8 @@ Da in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien auftrat, 
 Alle Experimente in diesem Abschnitt wurden mithilfe von \textit{Docker Compose} durchgeführt und sind anhand von Konfigurationsdateien reproduzierbar. Weitere Informationen zum Ausführen der Experimente werden im Abschnitt~\ref{sec:appendix-reproducibility} erläutert. Die Experimente erfolgten auf zwei Hosts:
 
 \begin{itemize}
-    \item \textbf{Host~1}: Ein lokaler Host mit einer \textit{Intel(R) Core(TM) i5-9600K} CPU, 16\,GB RAM und \textit{Ubuntu} 24.04.4.
-    \item \textbf{Host~2}: Eine virtuelle Maschine bei \textit{Contabo}~\citep{contabo} mit 4 geteilten virtuellen CPUs (2{,}0\,GHz), 8\,GB RAM und \textit{Ubuntu} 24.04.3.
+    \item \textbf{Host~1}: Ein lokaler Host mit einer \textit{Intel(R) Core(TM) i5-9600K} CPU, 16\,GB \gls{ram} und \textit{Ubuntu} 24.04.4.
+    \item \textbf{Host~2}: Eine virtuelle Maschine bei \textit{Contabo}~\citep{contabo} mit 4 geteilten virtuellen CPUs (2{,}0\,GHz), 8\,GB \gls{ram} und \textit{Ubuntu} 24.04.3.
 \end{itemize}
 
 Die in \textit{Phase~3} und \textit{Phase~4} angegebenen absoluten Werte, wie $T_{\text{m}}$ und die davon abgeleiteten Werten, stammen von \textbf{Host~1}. Auf \textbf{Host~2} ergaben sich andere Werte, die hier nicht gesondert dargestellt werden. Die Parameter des \textit{Server-Proxy} wurden dort analog anhand des gemessenen $T_{\text{m}}$ kalibriert. Die Ergebnisse hinsichtlich der Delivery-Garantien sind jedoch auf beiden Hosts identisch.
