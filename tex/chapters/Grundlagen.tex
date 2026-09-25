@@ -102,4 +102,39 @@ Die Implementierung von \gls{alps} ist zwar auf \textit{RabbitMQ} zugeschnitten,
 \section{Erlang}
 \label{sec:grundlagen-erlang}
 
-... \textit{coming soon}
+\textit{Erlang} ist eine funktionale Programmiersprache, die ursprünglich für ne\-ben\-läu\-fi\-ge, verteilte und fehlertolerante Telekommunikationssysteme entwickelt wurde~\citep{armstrong2003making, virding1996concurrent}. Erlang-Programme werden auf der virtuellen Maschine \gls{beam} ausgeführt~\citep{stenman2015erlang, beam_vm}. In dieser Masterarbeit wird Erlang für die Implementierung einer verteilten Deduplizierungsschicht verwendet, da viele Eigenschaften, die ein verteiltes und fehlertolerantes System benötigt, bereits in der Sprache und ihrer Laufzeitumgebung enthalten sind.
+
+\subsection{Prozessmodell}
+\label{sub:grundlagen-erlang-prozessmodell}
+
+Erlang setzt das \textit{Actor-Modell}~\citep{agha1986actors} um. Klassische Thread-Modelle des \gls{os} arbeiten auf einem gemeinsamen Speicherbereich. Der Zugriff darauf muss mit Mechanismen wie Mutexen oder Semaphoren synchronisiert werden. Erlang folgt dagegen einer \textit{Share-Nothing-Architektur}: Prozesse teilen keinen Speicher und kommunizieren ausschließlich über Nachrichten~\citep{armstrong2003making}. Dieses Modell basiert auf drei Eigenschaften der \gls{beam}:
+
+\begin{itemize}
+    \item \textbf{Leichtgewichtige Prozesse}: Ein Erlang-Prozess ist kein Prozess oder Thread des \gls{os}, sondern wird von der \gls{beam} selbst verwaltet. Er belegt beim Start nur wenige Kilobyte Speicher. Dadurch können innerhalb einer einzigen \gls{beam}-Instanz Millionen von Prozessen gleichzeitig laufen~\citep{armstrong2003making, armstrong2007programming}.
+
+    \item \textbf{Asynchroner Nachrichtenaustausch}: Prozesse kommunizieren, indem sie Nachrichten an andere Prozesse senden. Eine Nachricht wird dabei in die \textit{Mailbox} des Empfängerprozesses kopiert. Der Senderprozess blockiert nicht und wartet nicht auf die Verarbeitung der Nachricht~\citep{agha1986actors, armstrong2007programming}. Da kein Speicher geteilt wird, kann der Absturz eines Prozesses den Zustand anderer Prozesse nicht beschädigen~\citep{armstrong2003making, virding1996concurrent}.
+
+    \item \textbf{Präemptives Scheduling}: Die \gls{beam} verteilt die Rechenzeit fair auf alle Prozesse. Jeder Prozess darf nur eine begrenzte Anzahl von \textit{Reductions}\footnote{Eine Reduction entspricht vereinfacht einem Funktionsaufruf.} ausführen, bevor er unterbrochen wird und ein anderer Prozess an die Reihe kommt~\citep{cesarini2009erlang, christakis2013systematic}. Dadurch kann ein einzelner rechenintensiver Prozess die anderen Prozesse nicht blockieren, und die Antwortzeiten des Systems bleiben auch unter hoher Last stabil.
+\end{itemize}
+
+Mehrere \gls{beam}-Instanzen, sogenannte Knoten (\textit{Nodes}), können zu einem Cluster verbunden werden. Prozesse auf unterschiedlichen Knoten kommunizieren dabei auf die gleiche Weise wie Prozesse auf demselben Knoten~\citep{armstrong2003making}.
+
+\subsection{Fehlertoleranz mit OTP}
+\label{sub:grundlagen-otp}
+
+Neben der Sprache und der \gls{beam} gehört das Framework \gls{otp} zu Erlang. Es stellt Bibliotheken und Entwurfsmuster für fehlertolerante Systeme bereit~\citep{logan2011erlang}. Ein zentrales Prinzip ist \enquote{\textit{Let it crash}}: Tritt in einem Prozess ein unerwarteter Fehler auf, soll der Prozess nicht versuchen, den Fehler mit aufwendiger defensiver Fehlerbehandlung abzufangen. Stattdessen terminiert er~\citep{logan2011erlang}. Ein übergeordneter \textit{Supervisor}-Prozess überwacht ihn und startet ihn in einem definierten Anfangszustand neu. Supervisoren und die von ihnen überwachten Prozesse bilden einen \textit{Supervision Tree}. Dadurch bleiben Fehler auf einzelne Prozesse begrenzt und breiten sich nicht auf das Gesamtsystem aus~\citep{logan2011erlang, armstrong2003making}.
+
+\subsection{Mnesia}
+\label{sub:grundlagen-mnesia}
+
+\textit{Mnesia} ist ein verteiltes Datenbankmanagementsystem, das Teil von \gls{otp} ist~\citep{mattsson1999mnesia, mnesia}. Es wurde für Anwendungen entwickelt, die kontinuierlich verfügbar sein müssen, geringe Zugriffszeiten benötigen und ihre Daten transaktional über mehrere Knoten replizieren~\citep{mattsson1999mnesia}. \textit{Mnesia} kann in einem Cluster aus mehreren Erlang-Knoten laufen. Tabellen können auf mehrere dieser Knoten repliziert werden. Fällt ein Knoten aus, bleiben die Daten auf den übrigen Knoten verfügbar~\citep{mattsson1999mnesia}. Zusätzlich wird für jede Tabelle festgelegt, wie ihre Daten auf einem Knoten gespeichert werden. Diese Entscheidung wirkt sich direkt auf die Latenz und die Persistenz aus~\citep{mnesia}. \textit{Mnesia} unterscheidet dabei drei Speichertypen~\citep{mnesia}:
+
+\begin{itemize}
+    \item \textbf{\texttt{ram\_copies}}: Die Daten werden nur im \gls{ram} gehalten. Dadurch sind die Zugriffe sehr schnell. Fallen jedoch alle Knoten gleichzeitig aus, gehen die Daten verloren.
+
+    \item \textbf{\texttt{disc\_copies}}: Die Daten werden im \gls{ram} gehalten und zusätzlich in einem Transaktionslog auf dem Festspeicher protokolliert. Lesezugriffe sind dadurch so schnell wie bei \texttt{ram\_copies}, und die Daten bleiben auch nach dem Neustart eines Knotens erhalten.
+
+    \item \textbf{\texttt{disc\_only\_copies}}: Die Daten werden nur auf dem Festspeicher gehalten. Dadurch wird wenig \gls{ram} benötigt, allerdings sind die Zugriffe deutlich langsamer.
+\end{itemize}
+
+Nach dem \gls{cap}-Theorem kann ein verteiltes System bei einer Netzwerkpartitionierung nicht gleichzeitig Konsistenz und Verfügbarkeit garantieren~\citep{gilbert2002brewer}. \textit{Mnesia} verhält sich in diesem Fall wie ein \gls{ap}-System und bevorzugt die Verfügbarkeit. Die Knoten in den getrennten Teilnetzen akzeptieren weiterhin Schreibzugriffe auf ihre lokalen Datenkopien. Dadurch entstehen voneinander abweichende Datenbestände. Dieser Zustand wird als \textit{Split-Brain-Szenario} bezeichnet\footnote{Erlang-Knoten können nicht zuverlässig unterscheiden, ob ein anderer Knoten abgestürzt ist oder nur die Netzwerkverbindung unterbrochen wurde. Daher arbeitet jedes Teilnetz unabhängig auf seiner lokalen Datenkopie weiter~\citep{cesarini2015designing}.}. \textit{Mnesia} löst die daraus entstehenden Konflikte nicht automatisch. Nach der Wiederherstellung der Verbindung erzeugt \textit{Mnesia} lediglich ein \texttt{inconsistent\_database}-Event. Mit welcher Strategie der Cluster wieder in einen konsistenten Zustand gebracht wird, muss der Entwickler selbst festlegen~\citep{mnesia}. Wie dieses Problem in \gls{alps} gelöst wird, wird in Abschnitt~\ref{sub-sec:alpdedup} beschrieben.
