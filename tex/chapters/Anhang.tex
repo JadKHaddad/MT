@@ -3,211 +3,197 @@
 \chapter{Anhang}
 \label{ch:anhang}
 
-% \section{Reproduzierbarkeit der Experimente}
-% \label{sec:appendix-reproducibility}
+\section{Reproduzierbarkeit der Experimente}
+\label{sec:appendix-reproducibility}
 
-% Die in Abschnitt~\ref{sec:mqtt-proxy-experimente} und Kapitel~\ref{ch:eval} beschriebenen Experimente sind reproduzierbar, indem die benötigten Docker-Images geladen, eigene Konfigurationsdateien erstellt und die Simulationen anschließend gestartet werden.
+Die in Abschnitt~\ref{sub-sec:lps-experimente} und Abschnitt~\ref{sub-sec:alps-experimentelle-evaluation} beschriebenen Experimente sind reproduzierbar, indem die benötigten Docker-Images geladen, eigene Konfigurationsdateien erstellt und die Simulationen anschließend gestartet werden.
 
-% \subsection{Voraussetzungen}
+\subsection{Voraussetzungen}
 
-% \begin{itemize}
-%     \item Installiertes Docker~\citep{docker_2023}.
-%     \item Installiertes Docker Compose~\citep{docker_compose}.
-% \end{itemize}
+\begin{itemize}
+    \item Installiertes Docker~\citep{docker_2023}.
+    \item Installiertes Docker Compose~\citep{docker_compose}.
+\end{itemize}
 
-% \subsection{Docker-Images laden}
+\subsection{Docker-Images laden}
 
-% \begin{verbatim}
-% docker pull rabbitmq:4-management
-% docker pull jadkhaddad/lps-rs
-% docker pull jadkhaddad/lps-gleam
-% docker pull jadkhaddad/lps-scripts
-% docker pull jadkhaddad/lps-mqtt-python
-% docker pull jadkhaddad/lps-mqtt-hivemq
-% \end{verbatim}
+Die folgenden Befehle laden alle benötigten Docker-Images.
 
-% \subsection{Bedeutung der Docker-Images}
+\begin{bashcode}[title={Docker-Images laden}]
+# RabbitMQ-Broker
+docker pull rabbitmq:4-management
+# Simulation-Runner und Kernkomponenten von ALPS
+# (ALP I, ALP II, Alarmanlagen-Simulator, Server-Simulator, Validator, TCP-Proxy)
+docker pull jadkhaddad/lps-rs
+# ALP Dedup
+docker pull jadkhaddad/lps-gleam
+# Auswertungsskripte zur Plot-Erzeugung
+docker pull jadkhaddad/lps-scripts
+# Kernkomponenten von LPS
+# (SRV I PROXY, SRV II PROXY, LP I, LP II)
+docker pull jadkhaddad/lps-mqtt-python
+# HiveMQ-Broker mit den verwendeten Plugins
+docker pull jadkhaddad/lps-mqtt-hivemq
+\end{bashcode}
 
-% \begin{itemize}
-%     \item \texttt{rabbitmq:4-management}: RabbitMQ-Broker für das \gls{amqp}-Szenario.
-%     \item \texttt{jadkhaddad/lps-rs}: Enthält die Simulation-Runner sowie die Kern-Komponenten (u.\,a. Alarmanlagen-Simulator, \gls{alpone}, \gls{lptwo}, Server-Simulator, Validator, \gls{tcp}-Proxy).
-%     \item \texttt{jadkhaddad/lps-gleam}: Enthält die Deduplizierungs-Komponente (\gls{alpdedup}) für \gls{alps}.
-%     \item \texttt{jadkhaddad/lps-scripts}: Enthält Auswertungsskripte zur Plot-Erzeugung.
-%     \item \texttt{jadkhaddad/lps-mqtt-python}: Enthält die \gls{mqtt}-bezogenen Proxy-Skripte (u.\,a. \gls{srv}~1, \gls{srv}~2, \gls{lpone}, \gls{lptwo}).
-%     \item \texttt{jadkhaddad/lps-mqtt-hivemq}: Enthält den HiveMQ-Broker mit den verwendeten Plugins für das \gls{mqtt}-Szenario.
-% \end{itemize}
+\subsection{Docker-Netzwerk erstellen}
 
-% \subsection{Docker-Netzwerk erstellen}
+Vor dem Start wird ein Docker-Netzwerk angelegt, über das die Komponenten miteinander kommunizieren.
 
-% Vor dem Start wird ein Docker-Netzwerk angelegt, über das die Komponenten mit einander kommunizieren.
+\begin{bashcode}[title={Docker-Netzwerk erstellen}]
+docker network create lps-simulation-net
+\end{bashcode}
 
-% \begin{verbatim}
-% docker network create lps-simulation-net
-% \end{verbatim}
+\subsection{Konfigurationsdateien anlegen}
 
-% \subsection{Konfigurationsdateien anlegen}
+Vor dem Start werden die benötigten Simulationskonfigurationen als \gls{yaml}-Dateien angelegt. Diese Dateien enthalten die Parameter für Last, Fehlerprofile und Laufzeit der Experimente. Eine Konfigurationsdatei besteht aus einem allgemeinen Teil und einem szenariospezifischen Teil, entweder für \gls{alps} oder für \gls{lps}. Parameter, die mit \texttt{(optional)} gekennzeichnet sind, können weggelassen werden. Fehlerraten werden als Wahrscheinlichkeit zwischen \texttt{0} und \texttt{1} angegeben. Zeitwerte werden als Dauerangaben angegeben, z.\,B.~\texttt{500ms} oder \texttt{10s}.
 
-% Vor dem Start werden die benötigten Simulationskonfigurationen als \gls{yaml}-Dateien angelegt (z.\,B. eine \gls{amqp}-Konfiguration und eine \gls{mqtt}-Konfiguration).
-% Diese Dateien enthalten die jeweiligen Parameter für Last, Fehlerprofile und Laufzeit der Experimente.
+\begin{yamlcode}[title={Allgemeiner Teil}]
+# Zielverzeichnis der erzeugten Simulationsartefakte
+simulation_dir: "simulation"
+# Externes Docker-Netzwerk, in dem die Services gestartet werden
+simulation_docker_network: "lps-simulation-net"
 
-% \subsubsection*{Beispiel: \gls{amqp}-Konfiguration}
+# Image für Simulation-Runner und Kernkomponenten von ALPS
+lps_rust_image: "jadkhaddad/lps-rs"
+# Image für die Auswertungsskripte
+lps_scripts_image: "jadkhaddad/lps-scripts"
+# Image für ALP Dedup
+lps_gleam_image: "jadkhaddad/lps-gleam"
+# Image für die die Kernkomponenten von LPS
+lps_mqtt_python_image: "jadkhaddad/lps-mqtt-python"
+# Image für den HiveMQ-Broker
+lps_mqtt_hivemq_image: "jadkhaddad/lps-mqtt-hivemq"
 
-% \begin{verbatim}
-% simulation_dir: "simulation"
-% simulation_docker_network: "lps-simulation-net"
+# Simulierte Alarmanlagen
+devices:
+  # Anzahl simulierter Alarmanlagen
+  devices_count: 100
+  # Maximales Intervall zwischen zwei Meldungen pro Alarmanlage
+  max_event_interval: 500ms
+  # (optional) Minimales Intervall zwischen zwei Meldungen
+  min_event_interval: 100ms
+  # Maximale Anzahl erzeugter Meldungen pro Alarmanlage
+  max_events: 100
+  # Wartezeit bis zum erneuten Sendeversuch nach einem Fehler
+  retry_duration: 500ms
+# Server-Simulator
+server:
+  # Adresse, unter der der Server-Simulator erreichbar ist
+  socket_addr: "0.0.0.0:3000"
+  # (optional) Nach außen freigegebene Adresse des Servers
+  expose_socket_addr: "0.0.0.0:3000"
+  # Anzahl gestarteter Server-Instanzen (mindestens 1)
+  server_count: 3
+  # (optional) Aktiviert ALP Dedup
+  deduplication: true
+  # (optional) Server beendet sich nach dieser Leerlaufzeit, wenn keine Anfragen mehr eintreffen
+  shutdown_after_idle_duration: 30s
 
-% lps_rust_image: "jadkhaddad/lps-rs"
-% lps_scripts_image: "jadkhaddad/lps-scripts"
-% lps_gleam_image: "jadkhaddad/lps-gleam"
+  # Zufallsbasiertes Verhalten (ignoriert bei use_gs_prod_workload: true)
 
-% devices:
-%   devices_count: 100
-%   max_event_interval: 500ms
-%   retry_duration: 500ms
-%   max_events: 100
+  # Wahrscheinlichkeit für Fehlerantworten
+  failure_rate: 0.1
+  # (optional) Maximale Bearbeitungszeit einer Anfrage
+  max_work_duration: 50ms
+  # (optional) Minimale Bearbeitungszeit einer Anfrage
+  min_work_duration: 10ms
+  # (optional) Maximale zusätzliche Antwortverzögerung
+  max_response_duration: 50ms
+  # (optional) Minimale zusätzliche Antwortverzögerung
+  min_response_duration: 10ms
 
-% server:
-%   failure_rate: 0.1
-%   max_work_duration: 50ms
-%   max_response_duration: 50ms
-%   deduplication: true
-%   server_count: 3
+  # (optional) Bearbeitungszeiten werden vom Vorhersagemodell bestimmt
+  use_gs_prod_workload: false
+  # (optional) Hintergrundlast in Anfragen pro Sekunde
+  # (nur wirksam bei use_gs_prod_workload: true)
+  background_load_per_second: 10.0
+\end{yamlcode}
 
-% amqp:
-%   queues_count: 10
-%   producers:
-%     producers_count: 3
-%   consumers:
-%     consumers_count: 3
-%     reconnect_duration: 500ms
-%     amqp_proxy:
-%       failure_rate: 0.1
-%       max_up_duration: 10s
-% \end{verbatim}
+\newpage
 
-% \subsubsection*{Beispiel: \gls{mqtt}-Konfiguration}
+\begin{yamlcode}[title={ALPS-spezifischer Teil}]
+amqp:
+  # Anzahl der Broker-Queues
+  queues_count: 10
+  producers:
+    # Anzahl der ALP I-Instanzen (mindestens 1)
+    producers_count: 3
+    # Adresse der HTTP-Schnittstelle von ALP I
+    socket_addr: "0.0.0.0:8080"
+  consumers:
+    # Anzahl der ALP II-Instanzen (mindestens 1)
+    consumers_count: 3
+    # Wartezeit vor dem Reconnect nach einem Verbindungsabbruch
+    reconnect_duration: 500ms
+  # (optional) Fehlerproxy zwischen ALP II und Broker
+  amqp_proxy:
+    # Adresse des Fehlerproxys
+    socket_addr: "0.0.0.0:5673"
+    # Wahrscheinlichkeit eines künstlichen Verbindungsfehlers
+    failure_rate: 0.1
+    # Maximale Dauer einer Verbindung vor erzwungener Trennung
+    max_up_duration: 10s
+    # (optional) Minimale Dauer einer Verbindung
+    min_up_duration: 1s
+  # (optional) Fehlerproxy zwischen ALP II und Server
+  server_proxy:
+    socket_addr: "0.0.0.0:3001"
+    failure_rate: 0.1
+    max_up_duration: 10s
+    min_up_duration: 1s
+\end{yamlcode}
 
-% \begin{verbatim}
-% simulation_dir: "simulation-mqtt"
-% simulation_docker_network: "lps-simulation-net"
+\newpage
 
-% lps_rust_image: "jadkhaddad/lps-rs"
-% lps_scripts_image: "jadkhaddad/lps-scripts"
-% lps_gleam_image: "jadkhaddad/lps-gleam"
-% lps_mqtt_python_image: "jadkhaddad/lps-mqtt-python"
-% lps_mqtt_hivemq_image: "jadkhaddad/lps-mqtt-hivemq"
+\begin{yamlcode}[title={LPS-spezifischer Teil}]
+mqtt:
+  # (optional) Verwendet Mosquitto statt HiveMQ als Broker
+  use_mosquitto: false
+  producers:
+    # Anzahl der LP I-Instanzen (mindestens 1)
+    producers_count: 3
+  consumers:
+    # Anzahl der LP II-Instanzen (mindestens 1)
+    consumers_count: 3
+  # (optional) Fehlerproxy zwischen LP II und Broker
+  mqtt_proxy:
+    socket_addr: "0.0.0.0:1884"
+    failure_rate: 0.1
+    max_up_duration: 10s
+    min_up_duration: 1s
+\end{yamlcode}
 
-% devices:
-%   devices_count: 100
-%   max_event_interval: 500ms
-%   retry_duration: 500ms
-%   max_events: 100
+\subsection{Simulationen starten}
 
-% server:
-%   failure_rate: 0.1
-%   max_work_duration: 50ms
-%   max_response_duration: 50ms
-%   server_count: 3
+Die Simulationen werden aus dem Verzeichnis gestartet, in dem die Konfigurationsdateien liegen.
 
-% mqtt:
-%   producers:
-%     producers_count: 3
-%   consumers:
-%     consumers_count: 3
-%     mqtt_proxy:
-%       failure_rate: 0.1
-%       max_up_duration: 10s
-% \end{verbatim}
+\begin{bashcode}[title={ALPS-Simulation starten}]
+docker run --rm -it \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v "$(pwd):/app" \
+    jadkhaddad/lps-rs \
+    simulation-runner \
+    --config-file <amqp-config.yaml> \
+    --root-abs-path $(pwd)
+\end{bashcode}
 
-% \subsubsection*{Bedeutung der Parameter}
+\begin{bashcode}[title={LPS-Simulation starten}]
+docker run --rm -it \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v "$(pwd):/app" \
+    jadkhaddad/lps-rs \
+    mqtt-simulation-runner \
+    --config-file <mqtt-config.yaml> \
+    --root-abs-path $(pwd)
+\end{bashcode}
 
-% \paragraph{Allgemein}
-% \begin{itemize}
-%     \item \texttt{simulation\_dir}: Zielverzeichnis der erzeugten Simulationsartefakte.
-%     \item \texttt{simulation\_docker\_network}: Externes Docker-Netzwerk, in dem die Services gestartet werden.
-%     \item \texttt{lps\_rust\_image}: Image-Name für die Simulation-Runner und Kernkomponenten.
-%     \item \texttt{lps\_scripts\_image}: Image-Name für die Auswertungsskripte.
-%     \item \texttt{lps\_gleam\_image}: Image-Name für die Deduplizierungs-Komponente (\gls{alpdedup}).
-%     \item \texttt{lps\_mqtt\_python\_image}: Image-Name für die Python-basierten \gls{mqtt}-Proxy-Komponenten.
-%     \item \texttt{lps\_mqtt\_hivemq\_image}: Image-Name für den HiveMQ-Broker im \gls{mqtt}-Szenario.
-% \end{itemize}
+\subsection{Ergebnisse}
 
-% \paragraph{Block \texttt{devices}}
-% \begin{itemize}
-%     \item \texttt{devices\_count}: Anzahl simulierter Alarmanlagen.
-%     \item \texttt{max\_event\_interval}: Maximales Intervall zwischen zwei erzeugten Meldungen pro Alarmanlage.
-%     \item \texttt{retry\_duration}: Wartezeit bis zum erneuten Sendeversuch bei fehlgeschlagener Übertragung.
-%     \item \texttt{max\_events}: Maximale Anzahl erzeugter Meldungen pro Alarmanlage.
-% \end{itemize}
-
-% \paragraph{Block \texttt{server}}
-% \begin{itemize}
-%     \item \texttt{failure\_rate}: Wahrscheinlichkeit für Fehlerantworten des Server-Simulators.
-%     \item \texttt{max\_work\_duration}: Maximale Bearbeitungszeit einer Anfrage im Server.
-%     \item \texttt{max\_response\_duration}: Maximale zusätzliche Antwortverzögerung.
-%     \item \texttt{server\_count}: Anzahl gestarteter Server-Instanzen.
-%     \item \texttt{deduplication} (optional): Aktiviert die zusätzliche Deduplizierungs-Komponente (\gls{alps}-Szenario).
-% \end{itemize}
-
-% \paragraph{Block \texttt{amqp}}
-% \begin{itemize}
-%     \item \texttt{queues\_count}: Anzahl der Broker-Queues.
-%     \item \texttt{producers.producers\_count}: Anzahl \gls{amqp}-Producer-Instanzen (\gls{alpone}).
-%     \item \texttt{consumers.consumers\_count}: Anzahl \gls{amqp}-Consumer-Instanzen (\gls{alptwo}).
-%     \item \texttt{consumers.reconnect\_duration}: Wartezeit vor Reconnect eines Consumers nach Verbindungsabbruch.
-%     \item \texttt{consumers.amqp\_proxy} (optional): Fehlerproxy zwischen Consumer und Broker.
-%           \begin{itemize}
-%               \item \texttt{failure\_rate}: Wahrscheinlichkeit eines künstlichen Verbindungsfehlers.
-%               \item \texttt{max\_up\_duration}: Maximale Dauer einer Verbindung vor erzwungener Trennung.
-%           \end{itemize}
-% \end{itemize}
-
-% \paragraph{Block \texttt{mqtt}}
-% \begin{itemize}
-%     \item \texttt{producers.producers\_count}: Anzahl \gls{mqtt}-Producer-Instanzen (\gls{lpone}).
-%     \item \texttt{consumers.consumers\_count}: Anzahl \gls{mqtt}-Consumer-Instanzen (\gls{lptwo}).
-%     \item \texttt{consumers.mqtt\_proxy} (optional): Fehlerproxy zwischen \gls{mqtt}-Consumer-Pfad und Broker.
-%           \begin{itemize}
-%               \item \texttt{failure\_rate}: Wahrscheinlichkeit eines künstlichen Verbindungsfehlers.
-%               \item \texttt{max\_up\_duration}: Maximale Dauer einer Verbindung vor erzwungener Trennung.
-%           \end{itemize}
-% \end{itemize}
-
-% \paragraph{Dauerangaben}
-% Zeitwerte werden als Dauerangaben angegeben (z.\,B. \texttt{500ms}, \texttt{10s}).
-
-% \subsection{Simulationen starten}
-
-% \subsubsection*{\gls{amqp}}
-
-% \begin{verbatim}
-% docker run --rm -it \
-%   -v /var/run/docker.sock:/var/run/docker.sock \
-%   -v "$(pwd):/app" \
-%   jadkhaddad/lps-rs \
-%   simulation-runner \
-%   --config-file <amqp-config.yaml> \
-%   --root-abs-path $(pwd)
-% \end{verbatim}
-
-% \subsubsection*{\gls{mqtt}}
-
-% \begin{verbatim}
-% docker run --rm -it \
-%   -v /var/run/docker.sock:/var/run/docker.sock \
-%   -v "$(pwd):/app" \
-%   jadkhaddad/lps-rs \
-%   mqtt-simulation-runner \
-%   --config-file <mqtt-config.yaml> \
-%   --root-abs-path $(pwd)
-% \end{verbatim}
-
-% \subsection{Ergebnisse}
-
-% Nach Abschluss eines Laufs befinden sich die erzeugten Ergebnisse unter\newline \texttt{\$(pwd)/mount}.
+Nach Abschluss eines Laufs befinden sich die erzeugten Ergebnisse im Verzeichnis  \texttt{\$(pwd)/<simulation\_dir>/mount}
 
 % \section{Quellcode}
-% \label{s:source-code}
+% \label{sec:source-code}
 
 % Dieses Projekt ist ein Open-Source-Projekt~\citep{source} und unter der \textit{MIT License}~\citep{MIT} lizenziert.
 

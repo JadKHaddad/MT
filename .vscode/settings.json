@@ -1,4 +1,10 @@
 {
     "latex-workshop.formatting.latex": "latexindent",
-    "latex-workshop.latex.outDir": "%DIR%/.build"
+    "latex-workshop.latex.outDir": "%DIR%/.build",
+    "latex-workshop.formatting.latexindent.args": [
+        "-c",
+        "%DIR%/",
+        "%TMPFILE%",
+        "-y=defaultIndent: '%INDENT%',verbatimEnvironments:yamlcode:1;bashcode:1"
+    ]
 }

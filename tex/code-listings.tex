@@ -1,0 +1,80 @@
+% ---------------------------------------------------------------
+% Code-Blöcke für YAML und Bash (in die Präambel einbinden)
+%   \input{code_listings}
+% ---------------------------------------------------------------
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+
+% Farben
+\definecolor{codebg}{HTML}{F6F8FA}
+\definecolor{codeframe}{HTML}{D0D7DE}
+\definecolor{codetitlebg}{HTML}{EAEEF2}
+\definecolor{codetitle}{HTML}{24292F}
+\definecolor{codecomment}{HTML}{6E7781}
+\definecolor{codekey}{HTML}{0550AE}
+\definecolor{codestring}{HTML}{0A3069}
+\definecolor{codevalue}{HTML}{953800}
+\definecolor{codekeyword}{HTML}{CF222E}
+
+% Gemeinsame Basis (inkl. Umlaute in Listings)
+\lstdefinestyle{codebase}{
+basicstyle=\ttfamily\small,
+columns=flexible,
+keepspaces=true,
+showstringspaces=false,
+breaklines=true,
+breakatwhitespace=true,
+postbreak=\mbox{\textcolor{codecomment}{$\hookrightarrow$}\space},
+tabsize=2,
+extendedchars=true,
+literate={ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+{Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1 {ß}{{\ss}}1,
+}
+
+% YAML: Schlüssel blau, Werte orange, Strings dunkelblau, Kommentare grau
+\newcommand\YAMLcolonstyle{\color{codecomment}}
+\newcommand\YAMLvaluestyle{\color{codevalue}}
+\lstdefinelanguage{yaml}{
+    comment=[l]{\#},
+    morestring=[b]",
+    morestring=[b]',
+    moredelim=**[il][\YAMLcolonstyle{:}\YAMLvaluestyle]{:},
+    keywords={true,false,null},
+    sensitive=false,
+}
+\lstdefinestyle{yaml}{
+    style=codebase,
+    language=yaml,
+    basicstyle=\ttfamily\small,
+    commentstyle=\color{codecomment},
+    stringstyle=\color{codestring},
+    keywordstyle=\color{codekeyword},
+}
+
+% Bash
+\lstdefinestyle{bash}{
+    style=codebase,
+    language=bash,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codekeyword},
+    morekeywords={docker,pull,run,network,create},
+    commentstyle=\color{codecomment},
+    stringstyle=\color{codestring},
+}
+
+% Rahmen für beide Blocktypen; optionales Argument z.B. [title={config.yaml}]
+\tcbset{
+    codebox/.style={
+            enhanced, breakable, listing only,
+            colback=codebg, colframe=codeframe,
+            colbacktitle=codetitlebg, coltitle=codetitle,
+            fonttitle=\small\ttfamily,
+            boxrule=0.5pt, arc=3pt,
+            left=6pt, right=6pt, top=3pt, bottom=3pt,
+            toptitle=2pt, bottomtitle=2pt,
+        }
+}
+% colupper setzt die Grundfarbe (YAML-Schlüssel), auch über Seitenumbrüche hinweg
+\newtcblisting{yamlcode}[1][]{codebox, colupper=codekey, listing options={style=yaml}, #1}
+\newtcblisting{bashcode}[1][]{codebox, colupper=codetitle, listing options={style=bash}, #1}
