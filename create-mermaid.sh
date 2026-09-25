@@ -5,3 +5,5 @@ done
 for f in mermaid/svg/*.svg; do
    rsvg-convert -f pdf -o "img/mermaid/$(basename "${f%.svg}.pdf")" "$f"
 done
+
+python3 mermaid/patch.py mermaid/svg tex/chapters
