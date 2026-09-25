@@ -9,7 +9,7 @@ Matching is by file name stem: an SVG "diagrams/flow.svg" matches
 \\includegraphics[...]{/path/path/flow.pdf}, {figs/flow}, {flow.svg}, ...
 
 Usage:
-    python patch_widths.py SVG_DIR TEX_DIR [--dry-run] [--no-backup] [--digits 3]
+    python patch.py SVG_DIR TEX_DIR [--dry-run] [--no-backup] [--digits 3]
 """
 
 import argparse
