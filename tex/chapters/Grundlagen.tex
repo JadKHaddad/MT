@@ -64,7 +64,7 @@ Während \gls{mqtt} ursprünglich für ressourcenbeschränkte Umgebungen entwick
 
 \subsubsection{Komponentenmodell}
 
-Bei \gls{mqtt} senden Publisher ihre Nachrichten direkt an Topics. \gls{amqp} verwendet dagegen ein Modell aus vier Komponenten: \textit{Producer}, \textit{Exchange}, \textit{Queue} und \textit{Consumer}~\citep{amqp091}. Ein Producer sendet Nachrichten nie direkt an eine Queue, sondern immer an einen Exchange. Der Exchange ist eine Routing-Komponente innerhalb des Brokers. Er entscheidet anhand von Regeln, an welche Queues eine Nachricht weitergeleitet wird. Diese Regeln werden als Bindings bezeichnet. Eine Queue speichert die Nachrichten so lange, bis ein Consumer sie konsumiert~\citep{amqp091, hohpe2004enterprise}. Abbildung~\ref{fig:amqp_topology} zeigt dieses Modell anhand einer typischen Broker-Topologie.
+\gls{amqp} verwendet dagegen ein Modell aus vier Komponenten: \textit{Producer}, \textit{Exchange}, \textit{Queue} und \textit{Consumer}~\citep{amqp091}. Ein Producer sendet Nachrichten nie direkt an eine Queue, sondern immer an einen Exchange. Der Exchange ist eine Routing-Komponente innerhalb des Brokers. Er entscheidet anhand von Regeln, an welche Queues eine Nachricht weitergeleitet wird. Diese Regeln werden als Bindings bezeichnet. Eine Queue speichert die Nachrichten so lange, bis ein Consumer sie konsumiert~\citep{amqp091, hohpe2004enterprise}. Abbildung~\ref{fig:amqp_topology} zeigt dieses Modell anhand einer typischen Broker-Topologie.
 
 \begin{figure}[H]
     \centering
