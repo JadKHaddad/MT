@@ -57,7 +57,7 @@ Der optimale Einsatz von \gls{alpdedup} erfordert, dass \gls{alpdedup} unmittelb
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/mermaid/a_lps_dedup_exactly_once_delivery_violation_sequence.pdf}
-    \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Idempotenz in \gls{alpdedup}.}
+    \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Idempotenz in \acrshort{alpdedup}.}
     \label{fig:alp-dedup-exactly-once-delivery-violation-sequence}
 \end{figure}
 
@@ -99,7 +99,7 @@ Die Implementierung von \gls{alptwo} besteht aus $N$ \gls{amqp}-Consumern, die b
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/mermaid/alps_normal_sequence.pdf}
-    \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen in \gls{alps}.}
+    \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen in \acrshort{alps}.}
     \label{fig:alps-normal-sequence}
 \end{figure}
 
@@ -108,7 +108,7 @@ Abbildung~\ref{fig:alps-retry-sequence} zeigt die Verarbeitungslogik von Alarmme
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/mermaid/alps_retry_sequence.pdf}
-    \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen in \gls{alps} beim Auftreten von Fehlern.}
+    \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen in \acrshort{alps} beim Auftreten von Fehlern.}
     \label{fig:alps-retry-sequence}
 \end{figure}
 
@@ -117,7 +117,7 @@ Jedoch sind die benutzten \gls{amqp}-Mechanismen und die Verarbeitungslogik von 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/mermaid/a_lps_exactly_once_delivery_dup.pdf}
-    \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Exactly-Once-Delivery in \gls{alps}.}
+    \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Exactly-Once-Delivery in \acrshort{alps}.}
     \label{fig:alps-exactly-once-delivery-violation-sequence}
 \end{figure}
 
@@ -150,7 +150,7 @@ In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} gepr�
 
 \begin{table}[H]
     \centering
-    \caption{Konfiguration des Experiments zur Einhaltung der Exactly-Once-Delivery in \gls{alps}.}
+    \caption{Konfiguration des Experiments zur Einhaltung der Exactly-Once-Delivery in \acrshort{alps}.}
     \label{tab:exp-alps-eod-config}
     \begin{tabular}{|l|l|l|}
         \hline
@@ -181,7 +181,7 @@ Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzu
 
 \begin{table}[H]
     \centering
-    \caption{Weitere Parameter zur Durchführung der Experimente in \gls{alps}.}
+    \caption{Weitere Parameter zur Durchführung der Experimente in \acrshort{alps}.}
     \label{tab:exp-alps-more-metrics}
     \begin{tabular}{|l|l|}
         \hline
@@ -203,7 +203,7 @@ Wie zuvor beschrieben, wird jedes Experiment 59-mal durchgeführt. In diesem Exp
 
 \begin{table}[H]
     \centering
-    \caption{Ergebnisse des Experiments zur Einhaltung der Exactly-Once-Delivery in \gls{alps}.}
+    \caption{Ergebnisse des Experiments zur Einhaltung der Exactly-Once-Delivery in \acrshort{alps}.}
     \label{tab:exp-alps-eod-results}
     \begin{tabular}{|l|l|l|l|}
         \hline
@@ -228,7 +228,7 @@ In diesem Abschnitt wird die Einhaltung der \textit{In-Order-Delivery} geprüft.
 
 \begin{table}[H]
     \centering
-    \caption{Konfiguration des Experiments zur Einhaltung der In-Order-Delivery in \gls{alps}.}
+    \caption{Konfiguration des Experiments zur Einhaltung der In-Order-Delivery in \acrshort{alps}.}
     \label{tab:exp-alps-iod-config}
     \begin{tabular}{|l|l|l|}
         \hline
@@ -262,7 +262,7 @@ Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzu
 
 \begin{table}[H]
     \centering
-    \caption{Ergebnisse des Experiments zur Einhaltung der In-Order-Delivery in \gls{alps}.}
+    \caption{Ergebnisse des Experiments zur Einhaltung der In-Order-Delivery in \acrshort{alps}.}
     \label{tab:exp-alps-iod-results}
     \begin{tabular}{|l|l|l|l|}
         \hline
@@ -317,7 +317,7 @@ Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-normal-config} z
 
 \begin{table}[H]
     \centering
-    \caption{Konfiguration des realitätsnahen Experiments im Normalbetrieb in \gls{alps}.}
+    \caption{Konfiguration des realitätsnahen Experiments im Normalbetrieb in \acrshort{alps}.}
     \label{tab:exp-alps-normal-config}
     \begin{tabular}{|l|l|l|}
         \hline
@@ -357,7 +357,7 @@ Die Auswahl der Parameter begründet sich wie folgt:
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/drawio/exp_alps.pdf}
-    \caption{Architektur der realitätsnahen Experimente zur Einhaltung der Delivery-Garantien in \gls{alps} und die Kommunikationspfade der beteiligten Komponenten.}
+    \caption{Architektur der realitätsnahen Experimente zur Einhaltung der Delivery-Garantien in \acrshort{alps} und die Kommunikationspfade der beteiligten Komponenten.}
     \label{fig:alps-exp-setup}
 \end{figure}
 
@@ -369,7 +369,7 @@ Ein Durchlauf gilt als bestanden, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 
 
 \begin{table}[H]
     \centering
-    \caption{Ergebnisse des realitätsnahen Experiments im Normalbetrieb in \gls{alps}.}
+    \caption{Ergebnisse des realitätsnahen Experiments im Normalbetrieb in \acrshort{alps}.}
     \label{tab:exp-alps-normal-results}
     \begin{tabular}{|l|l|l|l|}
         \hline
@@ -404,7 +404,7 @@ Tabelle~\ref{tab:exp-alps-realistic-config} fasst die Parameter zusammen, die si
 
 \begin{table}[H]
     \centering
-    \caption{Geänderte und zusätzliche Parameter des realitätsnahen Experiments unter Fehlerbedingungen in \gls{alps} gegenüber \textit{Phase~3}.}
+    \caption{Geänderte und zusätzliche Parameter des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps} gegenüber \textit{Phase~3}.}
     \label{tab:exp-alps-realistic-config}
     \begin{tabular}{|l|l|l|}
         \hline
@@ -462,7 +462,7 @@ Die folgenden Aspekte werden in diesem Experiment nicht betrachtet:
 
 \begin{table}[H]
     \centering
-    \caption{Ergebnisse des realitätsnahen Experiments zur Einhaltung der Delivery-Ga\-ran\-ti\-en unter Fehlerbedingungen in \gls{alps}.}
+    \caption{Ergebnisse des realitätsnahen Experiments zur Einhaltung der Delivery-Ga\-ran\-ti\-en unter Fehlerbedingungen in \acrshort{alps}.}
     \label{tab:exp-alps-realistic-results}
     \begin{tabular}{|l|l|l|l|}
         \hline
