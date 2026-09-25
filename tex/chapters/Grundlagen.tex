@@ -52,8 +52,10 @@ Bei \gls{qos}~1 wird garantiert, dass eine Nachricht mindestens einmal zugestell
     \label{fig:mqtt-qos-2}
 \end{figure}
 
-\subsubsection{Shared Topics}
+\subsubsection{Shared Subscriptions}
+\label{sub-sub:grundlagen-mqtt-shared-subscriptions}
 
+Abonnieren mehrere Subscriber dasselbe Topic, erhält normalerweise jeder Subscriber eine Kopie jeder Nachricht. Mit \gls{mqtt}~5.0 wurden zusätzlich \textit{Shared Subscriptions} eingeführt~\citep{oasis2019mqtt}. Dabei bilden mehrere Subscriber eine gemeinsame Gruppe, und jede Nachricht wird nur an einen einzigen Subscriber dieser Gruppe zugestellt~\citep{oasis2019mqtt, hivemq_mqtt5_essentials}. Eine Shared Subscription wird über einen speziellen Topic-Filter der Form \texttt{\$share/<ShareName>/<TopicFilter>} angelegt. Alle Subscriber mit demselben \texttt{ShareName} gehören zur selben Gruppe~\citep{oasis2019mqtt}. Dadurch lässt sich die Last auf mehrere Subscriber verteilen und das System horizontal skalieren. Wie der Broker die Nachrichten auf die Subscriber einer Gruppe verteilt, legt die Spezifikation nicht fest~\citep{oasis2019mqtt}. Aufeinanderfolgende Nachrichten können daher von verschiedenen Subscribern gleichzeitig verarbeitet werden. Die Reihenfolge der Nachrichten ist innerhalb einer Gruppe somit nicht garantiert.
 
 \subsection{Advanced Message Queuing Protocol}
 \label{sub:grundlagen-amqp}
