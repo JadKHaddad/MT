@@ -41,13 +41,9 @@
 % and you think this stuff is worth it, you can buy us a beer in return.
 %  --------------------------------------------------------------------------
 
-\documentclass[a4paper, twoside, openright, 12pt, bibliography=totoc, listof=totoc, numbers=noenddot]{scrbook} % Layout-Einstellungen für das Dokument / layout settings
+\documentclass[a4paper, twoside, openright, 12pt, bibliography=totoc, listof=totoc, numbers=noenddot]{scrbook}
 
 \raggedbottom
-
-\usepackage{ifthen}
-\newboolean{en}
-\setboolean{en}{false} % auf false setzen für deutsch, / set to true for english
 
 \input{tex/packages}
 \input{tex/code-listings}
@@ -56,30 +52,17 @@
 \begin{document}
 \pagenumbering{roman}
 
-% Titelblatt / title page
 \begin{titlepage}
-    \ifthenelse{\boolean{en}}{
-        \include{tex/titlepage}
-    }{
-        \include{tex/Titelblatt}
-    }
+    \include{tex/Titelblatt}
 \end{titlepage}
 
-%Danksagung (falls gewünscht) / acknowledgement (if desired)
-%\include{tex/acks} 
-
-% Inhaltsverzeichnis / Table of Contents
-\cleardoublepage\pdfbookmark{\contentsname}{toc} % Fügt eine Marke für das Inhaltsverzeichnis im pdf hinzu / adds a tag for the TOC in the pdf
+\cleardoublepage\pdfbookmark{\contentsname}{toc}
 \tableofcontents
 
-% Abbildungs- und Tabellenverzeichnis; wenn nötig, anpassen / Lists of figures and tables; adjust if required
 \listoffigures
 \listoftables
-% \listofalgorithms
-% \lstlistoflistings
 \printnoidxglossary[type=acronym]
 
-% \cleardoublepage
 \pagenumbering{arabic}
 
 \include{tex/chapters/Abstrakt}
@@ -91,7 +74,6 @@
 \include{tex/chapters/Future}
 \include{tex/chapters/Anhang}
 
-% Literaturverzeichnis / bibliography
 \bibliographystyle{plainnat}
 \bibliography{cites}
 
