@@ -40,5 +40,7 @@
         "währ",
         "Wartbarkeitsprobleme"
     ],
-    "ignorePaths": []
+    "ignorePaths": [
+        "cites.bib",
+    ]
 }
