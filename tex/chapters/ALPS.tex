@@ -185,14 +185,14 @@ Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzu
     \label{tab:exp-alps-more-metrics}
     \begin{tabular}{|l|l|}
         \hline
-        \textbf{Parameter}    & \textbf{Beschreibung}                                   \\
+        \textbf{Parameter}    & \textbf{Beschreibung}                       \\
         \hline
-        $N_{\text{sent}}$     & Anzahl der insgesamt gesendeten Alarmmeldungen          \\
-        $N_{\text{received}}$ & Anzahl der insgesamt empfangenen Alarmmeldungen         \\
-        $N_{\text{loss}}$     & Anzahl der verlorenen Alarmmeldungen                    \\
-        $N_{\text{ooo}}$      & Anzahl der außer Reihenfolge empfangenen Alarmmeldungen \\
-        $N_{\text{unique}}$   & Anzahl der eindeutigen empfangenen Alarmmeldungen       \\
-        $N_{\text{dup}}$      & Anzahl der doppelt empfangenen Alarmmeldungen           \\
+        $N_{\text{sent}}$     & Insgesamt gesendete Alarmmeldungen          \\
+        $N_{\text{received}}$ & Insgesamt empfangene Alarmmeldungen         \\
+        $N_{\text{loss}}$     & Verlorene Alarmmeldungen                    \\
+        $N_{\text{ooo}}$      & Außer Reihenfolge empfangene Alarmmeldungen \\
+        $N_{\text{unique}}$   & Eindeutige empfangene Alarmmeldungen        \\
+        $N_{\text{dup}}$      & Doppelt empfangene Alarmmeldungen           \\
         \hline
     \end{tabular}
 \end{table}
@@ -309,7 +309,7 @@ Um das Modell ins Experiment zu integrieren, wird der \textit{Server-Simulator} 
 
 \paragraph{Kommunikation}
 
-Die Kommunikation zwischen \gls{alptwo} und dem Broker sowie zwischen \gls{alptwo} und dem \textit{Server-Simulator} erfolgt über je einen \textit{\gls{tcp}-Proxy}. Dabei bezeichnet \textit{Server-Proxy} die Verbindung zwischen \gls{alptwo} und dem \textit{Server-Simulator}, während \textit{\gls{amqp}-Proxy} die Verbindung zwischen \gls{alptwo} und dem Broker bezeichnet. In dieser Phase leiten beide Proxys den Datenverkehr lediglich weiter, ohne Verbindungen zu trennen ($E_{\text{tcp}} = 0\,\%$). Sie werden dennoch eingesetzt, damit der Aufbau mit dem von \textit{Phase~4} identisch ist und sich beide Phasen ausschließlich in den provozierten Netzwerkfehlern unterscheiden.
+Die Kommunikation zwischen \gls{alptwo} und dem Broker sowie zwischen \gls{alptwo} und dem \textit{Server-Simulator} erfolgt über je einen \textit{\gls{tcp}-Proxy}. Dabei bezeichnet der \textit{Server-Proxy} die Verbindung zwischen \gls{alptwo} und dem \textit{Server-Simulator}, während der \textit{\gls{amqp}-Proxy} die Verbindung zwischen \gls{alptwo} und dem Broker bezeichnet. In dieser Phase leiten beide Proxys den Datenverkehr lediglich weiter, ohne Verbindungen zu trennen ($E_{\text{tcp}} = 0\,\%$). Sie werden dennoch eingesetzt, damit der Aufbau mit dem von \textit{Phase~4} identisch ist und sich beide Phasen ausschließlich in den provozierten Netzwerkfehlern unterscheiden.
 
 \paragraph{Parameter}
 
@@ -321,19 +321,19 @@ Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-normal-config} z
     \label{tab:exp-alps-normal-config}
     \begin{tabular}{|l|l|l|}
         \hline
-        \textbf{Parameter}  & \textbf{Beschreibung}                                                       & \textbf{Wert} \\
+        \textbf{Parameter}  & \textbf{Beschreibung}                                                  & \textbf{Wert} \\
         \hline
-        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                                               & 3             \\
-        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                                               & 3             \\
-        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                                                    & 3             \\
-        $N_{\text{device}}$ & Anzahl Alarmanlagen                                                         & 50            \\
-        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage                                       & 60            \\
-        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage                                  & 5\,s          \\
-        $R_{\text{bg}}$     & Hintergrundlast                                                             & 70\,s$^{-1}$  \\
-        $T_{\text{idle}}$   & Server-Idle-Zeit                                                            & 5\,s          \\
-        $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate in \textit{Server-Proxy} und \textit{\gls{amqp}-Proxy} & 0{,}0\,\%     \\
-        $T_{\text{sp}}$     & Maximale Verbindungsdauer im \textit{Server-Proxy}                          & $\infty$      \\
-        $T_{\text{ap}}$     & Maximale Verbindungsdauer im \textit{\gls{amqp}-Proxy}                      & $\infty$      \\
+        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                                          & 3             \\
+        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                                          & 3             \\
+        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                                               & 3             \\
+        $N_{\text{device}}$ & Anzahl Alarmanlagen                                                    & 50            \\
+        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage                                  & 60            \\
+        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage                             & 5\,s          \\
+        $R_{\text{bg}}$     & Hintergrundlast                                                        & 70\,s$^{-1}$  \\
+        $T_{\text{idle}}$   & Server-Idle-Zeit                                                       & 5\,s          \\
+        $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate in \textit{Server-} und \textit{\gls{amqp}-Proxy} & 0{,}0\,\%     \\
+        $T_{\text{sp}}$     & Maximale Verbindungsdauer im \textit{Server-Proxy}                     & $\infty$      \\
+        $T_{\text{ap}}$     & Maximale Verbindungsdauer im \textit{\gls{amqp}-Proxy}                 & $\infty$      \\
         \hline
     \end{tabular}
 \end{table}
@@ -427,7 +427,7 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
     \item $E_{\text{tcp}}$: Entspricht dem Wert der Messungen von Cloudflare~\citep{valenta2024}. Er wird einheitlich für den \textit{Server-Proxy} und den \textit{\gls{amqp}-Proxy} verwendet. Zwischen \gls{alpone} und dem Broker wird hingegen kein Proxy eingesetzt und somit keine \gls{tcp}-Fehler provoziert: Ein Verbindungsabbruch auf dieser Strecke betrifft eine Alarmmeldung, bevor sie den Broker erreicht hat, und liegt damit außerhalb der Delivery-Garantien.
 
-    \item $T_{\text{sp,min}}$, $T_{\text{sp,max}}$: Verbindungsdauern werden log-gleichverteilt zwischen den Grenzen gezogen, sodass ihr Median
+    \item $T_{\text{sp,min}}$, $T_{\text{sp,max}}$: Verbindungsdauern werden zwischen den Grenzen log-gleichverteilt gezogen, sodass ihr Median
           \begin{equation}
               M_{\text{sp}} = \sqrt{T_{\text{sp,min}} \cdot T_{\text{sp,max}}} \approx 24\,\text{ms}
           \end{equation}

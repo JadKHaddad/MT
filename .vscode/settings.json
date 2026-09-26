@@ -6,5 +6,5 @@
         "%DIR%/",
         "%TMPFILE%",
         "-y=defaultIndent: '%INDENT%',verbatimEnvironments:yamlcode:1;bashcode:1"
-    ]
+    ],
 }

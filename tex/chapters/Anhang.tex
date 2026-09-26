@@ -11,8 +11,8 @@ Die in Abschnitt~\ref{sub-sec:lps-experimente} und Abschnitt~\ref{sub-sec:alps-e
 \subsection{Voraussetzungen}
 
 \begin{itemize}
-    \item Installiertes Docker~\citep{docker_2023}.
-    \item Installiertes Docker Compose~\citep{docker_compose}.
+  \item Installiertes Docker~\citep{docker_2023}.
+  \item Installiertes Docker Compose~\citep{docker_compose}.
 \end{itemize}
 
 \subsection{Docker-Images laden}
@@ -46,7 +46,7 @@ docker network create lps-simulation-net
 
 \subsection{Konfigurationsdateien anlegen}
 
-Vor dem Start werden die benötigten Simulationskonfigurationen als \gls{yaml}-Dateien angelegt. Diese Dateien enthalten die Parameter für Last, Fehlerprofile und Laufzeit der Experimente. Eine Konfigurationsdatei besteht aus einem allgemeinen Teil und einem szenariospezifischen Teil, entweder für \gls{alps} oder für \gls{lps}. Parameter, die mit \texttt{(optional)} gekennzeichnet sind, können weggelassen werden. Fehlerraten werden als Wahrscheinlichkeit zwischen \texttt{0} und \texttt{1} angegeben. Zeitwerte werden als Dauerangaben angegeben, z.\,B.~\texttt{500ms} oder \texttt{10s}.
+Vor dem Start der Experimente werden die benötigten Konfigurationen als \gls{yaml}-Dateien angelegt. Diese Dateien enthalten die Parameter für Last, Fehlerprofile und Laufzeit der Experimente. Eine Konfigurationsdatei besteht aus einem allgemeinen Teil und einem szenariospezifischen Teil, entweder für \gls{alps} oder für \gls{lps}. Parameter, die mit \texttt{(optional)} gekennzeichnet sind, können weggelassen werden. Fehlerraten werden als Wahrscheinlichkeit zwischen \texttt{0} und \texttt{1} angegeben. Zeitwerte werden als Dauerangaben angegeben, z.\,B.~\texttt{500ms} oder \texttt{10s}.
 
 \begin{yamlcode}[title={Allgemeiner Teil}]
 # Zielverzeichnis der erzeugten Simulationsartefakte
@@ -198,8 +198,8 @@ Nach Abschluss eines Laufs befinden sich die erzeugten Ergebnisse im Verzeichnis
 Dieses Projekt ist ein Open-Source-Projekt~\citep{source} und unter der \textit{MIT License}~\citep{MIT} lizenziert.
 
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.4\textwidth]{./qrcode/qrcode.pdf}
-    \caption{Quellcode}
-    \label{fig:source-code}
+  \centering
+  \includegraphics[width=0.4\textwidth]{./qrcode/qrcode.pdf}
+  \caption{Quellcode}
+  \label{fig:source-code}
 \end{figure}
