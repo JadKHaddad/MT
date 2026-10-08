@@ -16,12 +16,16 @@
         "durchge",
         "ermögli",
         "Gebr",
+        "Gorlatch",
+        "Haddad",
         "hivemq",
         "jadkhaddad",
+        "Juri",
         "keit",
         "koll",
         "Konfidenz",
         "Lavin",
+        "Mitigierung",
         "Mnesia",
         "Mosquitto",
         "mqtt",
@@ -41,6 +45,6 @@
         "Wartbarkeitsprobleme"
     ],
     "ignorePaths": [
-        "cites.bib",
+        "cites.bib"
     ]
 }
