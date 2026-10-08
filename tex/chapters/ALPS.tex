@@ -39,11 +39,11 @@ Um die die \textit{In-Order-Delivery} zu garantieren, sollen mithilfe von \gls{a
 \begin{itemize}
     \item \textbf{A~1}: Alarmmeldungen sollen von \gls{lptwo} immer in der Reihenfolge verarbeitet werden, in der sie von \gls{alpone} empfangen wurden.
 
-    \item \textbf{A~2}: Alarmmeldungen pro Alarmanlage sollen immer von einer bestimmten \gls{lptwo} Instanz verarbeitet werden: Beliebige Verteilung von Alarmmeldungen auf beliebige \gls{lptwo} Instanzen soll unterbunden werden.
+    \item \textbf{A~2}: Alarmmeldungen pro Alarmanlage sollen immer von einer bestimmten \gls{lptwo} Instanz verarbeitet werden: Beliebige Verteilung von Alarmmeldungen auf beliebige \gls{lptwo}-Instanzen soll unterbunden werden.
 
     \item \textbf{A~3}: Alarmmeldungen pro Alarmanlage sollen immer sequentiell von einer einzigen \gls{lptwo} Instanz verarbeitet werden: Parallele Verarbeitung von Alarmmeldungen einer einzelnen Alarmanlage soll unterbunden werden. Jedoch ist die parallele Verarbeitung von Alarmmeldungen verschiedener Alarmanlagen weiterhin erlaubt.
 
-    \item \textbf{A~4}: Übertragungsfehler in \gls{lptwo} Instanzen sollen nicht zu einer Verlust führen: Alarmmeldungen, die von einer \gls{lptwo} Instanz nicht verarbeitet werden können, sollen neu übertragen werden, bis sie erfolgreich verarbeitet wurden. Dabei soll die Reihenfolge der Alarmmeldungen pro Alarmanlage beibehalten werden.
+    \item \textbf{A~4}: Übertragungsfehler in \gls{lptwo}-Instanzen sollen nicht zu einer Verlust führen: Alarmmeldungen, die von einer \gls{lptwo} Instanz nicht verarbeitet werden können, sollen neu übertragen werden, bis sie erfolgreich verarbeitet wurden. Dabei soll die Reihenfolge der Alarmmeldungen pro Alarmanlage beibehalten werden.
 \end{itemize}
 
 Die Erfüllung dieser Anforderungen garantiert die \textit{In-Order-Delivery} pro Alarmanlage.
@@ -94,7 +94,7 @@ Die Implementierung von \gls{alpone} setzt voraus, dass die Alarmmeldungen minde
 \subsection{Advanced Legacy Proxy II}
 \label{sub-sec:alptwo}
 
-Die Implementierung von \gls{alptwo} besteht aus $N$ \gls{amqp}-Consumern, die beim Starten jeweils mit einer der $N$ Queues verbunden werden. Jeder Consumer konsumiert Nachrichten bzw.~Alarmmeldungen mit der \texttt{prefetch\_count = 1} Eigenschaft aus der Queue. Dadurch wird garantiert, dass zu jeder Zeit nur eine Alarmmeldung pro Consumer verarbeitet wird. Außerdem sind die Queues mit der \texttt{x-single-active-consumer} Eigenschaft verbunden. Dadurch erlaubt der Broker, dass nur ein einzelner Consumer pro Queue aktiv ist. Falls ein Consumer ausfällt oder dessen Verbindung zum Broker verloren geht, wird der Broker automatisch einen anderen Consumer aktivieren. Die Kombination aus \texttt{x-single-active-consumer}, \texttt{x-consistent-hash} und \texttt{prefetch\_count = 1} garantiert, dass Alarmmeldungen einer einzelnen Alarmanlage immer von einer einzigen \gls{alptwo} Instanz bzw.~einem einzigen Consumer innerhalb von \gls{alptwo} verarbeitet werden, und somit werden die Anforderungen \textbf{A~2} und \textbf{A~3} erfüllt. Wenn ein Consumer eine Alarmmeldung aus der Queue konsumiert, leitet er die an den nachgelagerten Service weiter. Nach erfolgreicher Verarbeitung der Alarmmeldung durch den nachgelagerten Service, wird die Alarmmeldung vom Consumer als erfolgreich verarbeitet betrachtet und aus der Queue entfernt. Falls die Verarbeitung der Alarmmeldung durch den nachgelagerten Service fehlschlägt, wird die Alarmmeldung als fehlgeschlagen betrachtet und negativ mit \texttt{requeue = true} an die Queue bestätigt werden. Dadurch wird die Alarmmeldung erneut in die selbe Queue in deren originalen Position zurückgestellt. Danach trennt sich der Consumer von Broker und startet sich wieder neu. Der Broker erkennt, dass der Consumer nicht mehr aktiv ist und aktiviert automatisch einen anderen Consumer für die Queue. Der neue Consumer konsumiert die zuvor fehlgeschlagene Alarmmeldung erneut aus der Queue und leitet sie an den nachgelagerten Service weiter. Dieser Prozess wiederholt sich, bis die Alarmmeldung erfolgreich verarbeitet wurde. Dadurch wird die Anforderung \textbf{A~4} erfüllt und somit die \textit{In-Order-Delivery} pro Alarmanlage garantiert. Abbildung~\ref{fig:alps-normal-sequence} visualisiert einen beispielhaften Verarbeitungsablauf von Alarmmeldung von zwei verschiedenen Alarmanlagen \textit{A} und \textit{B} innerhalb von \gls{alptwo} im Zusammenhang mit \gls{srv}~2 als ein Sequenzdiagramm. Die Abbildung verdeutlicht, dass Alarmmeldungen verschiedener Alarmanlagen von verschiedenen \gls{alptwo} Instanzen parallel verarbeitet werden können.
+Die Implementierung von \gls{alptwo} besteht aus $N$ \gls{amqp}-Consumern, die beim Starten jeweils mit einer der $N$ Queues verbunden werden. Jeder Consumer konsumiert Nachrichten bzw.~Alarmmeldungen mit der \texttt{prefetch\_count = 1} Eigenschaft aus der Queue. Dadurch wird garantiert, dass zu jeder Zeit nur eine Alarmmeldung pro Consumer verarbeitet wird. Außerdem sind die Queues mit der \texttt{x-single-active-consumer} Eigenschaft verbunden. Dadurch erlaubt der Broker, dass nur ein einzelner Consumer pro Queue aktiv ist. Falls ein Consumer ausfällt oder dessen Verbindung zum Broker verloren geht, wird der Broker automatisch einen anderen Consumer aktivieren. Die Kombination aus \texttt{x-single-active-consumer}, \texttt{x-consistent-hash} und \texttt{prefetch\_count = 1} garantiert, dass Alarmmeldungen einer einzelnen Alarmanlage immer von einer einzigen \gls{alptwo} Instanz bzw.~einem einzigen Consumer innerhalb von \gls{alptwo} verarbeitet werden, und somit werden die Anforderungen \textbf{A~2} und \textbf{A~3} erfüllt. Wenn ein Consumer eine Alarmmeldung aus der Queue konsumiert, leitet er die an den nachgelagerten Service weiter. Nach erfolgreicher Verarbeitung der Alarmmeldung durch den nachgelagerten Service, wird die Alarmmeldung vom Consumer als erfolgreich verarbeitet betrachtet und aus der Queue entfernt. Falls die Verarbeitung der Alarmmeldung durch den nachgelagerten Service fehlschlägt, wird die Alarmmeldung als fehlgeschlagen betrachtet und negativ mit \texttt{requeue = true} an die Queue bestätigt werden. Dadurch wird die Alarmmeldung erneut in die selbe Queue in deren originalen Position zurückgestellt. Danach trennt sich der Consumer von Broker und startet sich wieder neu. Der Broker erkennt, dass der Consumer nicht mehr aktiv ist und aktiviert automatisch einen anderen Consumer für die Queue. Der neue Consumer konsumiert die zuvor fehlgeschlagene Alarmmeldung erneut aus der Queue und leitet sie an den nachgelagerten Service weiter. Dieser Prozess wiederholt sich, bis die Alarmmeldung erfolgreich verarbeitet wurde. Dadurch wird die Anforderung \textbf{A~4} erfüllt und somit die \textit{In-Order-Delivery} pro Alarmanlage garantiert. Abbildung~\ref{fig:alps-normal-sequence} visualisiert einen beispielhaften Verarbeitungsablauf von Alarmmeldung von zwei verschiedenen Alarmanlagen \textit{A} und \textit{B} innerhalb von \gls{alptwo} im Zusammenhang mit \gls{srv}~2 als ein Sequenzdiagramm. Die Abbildung verdeutlicht, dass Alarmmeldungen verschiedener Alarmanlagen von verschiedenen \gls{alptwo}-Instanzen parallel verarbeitet werden können.
 
 \begin{figure}[H]
     \centering
@@ -156,8 +156,8 @@ In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} gepr�
         \hline
         \textbf{Parameter}      & \textbf{Beschreibung}                        & \textbf{Wert} \\
         \hline
-        $N_{\text{alp~1}}$      & Anzahl \gls{alpone} Instanzen                & 1             \\
-        $N_{\text{alp~2}}$      & Anzahl \gls{alptwo} Instanzen                & 1             \\
+        $N_{\text{alp~1}}$      & Anzahl \gls{alpone}-Instanzen                & 1             \\
+        $N_{\text{alp~2}}$      & Anzahl \gls{alptwo}-Instanzen                & 1             \\
         $N_{\text{queue}}$      & Anzahl \gls{amqp}-Queues                     & 1             \\
         $N_{\text{device}}$     & Anzahl Alarmanlagen                          & 1             \\
         $N_{\text{alarm}}$      & Anzahl Alarmmeldungen pro Alarmanlage        & 1             \\
@@ -234,8 +234,8 @@ In diesem Abschnitt wird die Einhaltung der \textit{In-Order-Delivery} geprüft.
         \hline
         \textbf{Parameter}      & \textbf{Beschreibung}                        & \textbf{Wert} \\
         \hline
-        $N_{\text{alp~1}}$      & Anzahl \gls{alpone} Instanzen                & 1             \\
-        $N_{\text{alp~2}}$      & Anzahl \gls{alptwo} Instanzen                & 2             \\
+        $N_{\text{alp~1}}$      & Anzahl \gls{alpone}-Instanzen                & 1             \\
+        $N_{\text{alp~2}}$      & Anzahl \gls{alptwo}-Instanzen                & 2             \\
         $N_{\text{queue}}$      & Anzahl \gls{amqp}-Queues                     & 2             \\
         $N_{\text{device}}$     & Anzahl Alarmanlagen                          & 1             \\
         $N_{\text{alarm}}$      & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
@@ -253,10 +253,10 @@ Die Auswahl der Parameter begründet sich wie folgt:
 \begin{itemize}
     \item $N_{\text{alp~1}}$: Entspricht $N_{\text{lp~1}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-iod}.
     \item $N_{\text{alp~2}}$: Entspricht $N_{\text{lp~2}}$ in Abschnitt~\ref{sub-sub:alp-verletzung-iod}.
-    \item $N_{\text{queue}}$: Minimale Anzahl an Queues, die die parallele Verarbeitung von Alarmmeldungen durch zwei \gls{alptwo} Instanzen erlaubt.
+    \item $N_{\text{queue}}$: Minimale Anzahl an Queues, die die parallele Verarbeitung von Alarmmeldungen durch zwei \gls{alptwo}-Instanzen erlaubt.
 \end{itemize}
 
-Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-iod}. Für dieses Experiment gilt ein Durchlauf als bestanden, wenn $N_{\text{loss}} = 0$ und $N_{\text{ooo}} = 0$. Es werden keine weiteren Bedingungen wie in \textit{Phase~1} geprüft, da die Verletzung der \textit{In-Order-Delivery} in \gls{lps} sich durch die parallele Verarbeitung von Alarmmeldungen durch mehrere \gls{lptwo} Instanzen (\textit{shared subscriptions}) erklärt. \gls{alps} unterbindet planmäßig die parallele Verarbeitung von Alarmmeldungen einzelner Alarmanlagen. Daher kann dieser Fall nicht auftreten.
+Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-iod}. Für dieses Experiment gilt ein Durchlauf als bestanden, wenn $N_{\text{loss}} = 0$ und $N_{\text{ooo}} = 0$. Es werden keine weiteren Bedingungen wie in \textit{Phase~1} geprüft, da die Verletzung der \textit{In-Order-Delivery} in \gls{lps} sich durch die parallele Verarbeitung von Alarmmeldungen durch mehrere \gls{lptwo}-Instanzen (\textit{shared subscriptions}) erklärt. \gls{alps} unterbindet planmäßig die parallele Verarbeitung von Alarmmeldungen einzelner Alarmanlagen. Daher kann dieser Fall nicht auftreten.
 
 \paragraph{Ergebnisse} Die 59 Durchläufe des Experiments ergaben die in Tabelle~\ref{tab:exp-alps-iod-results} dargestellten Ergebnisse:
 
@@ -323,8 +323,8 @@ Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-normal-config} z
         \hline
         \textbf{Parameter}  & \textbf{Beschreibung}                                                  & \textbf{Wert} \\
         \hline
-        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                                          & 3             \\
-        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                                          & 3             \\
+        $N_{\text{alp~1}}$  & Anzahl \gls{alpone}-Instanzen                                          & 3             \\
+        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo}-Instanzen                                          & 3             \\
         $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                                               & 3             \\
         $N_{\text{device}}$ & Anzahl Alarmanlagen                                                    & 50            \\
         $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage                                  & 60            \\
@@ -341,7 +341,7 @@ Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-normal-config} z
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-    \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen der Anzahl der \gls{srv}~1 und \gls{srv}~2 Instanzen in \gls{marc}.
+    \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen der Anzahl der \gls{srv}~1 und \gls{srv}~2-Instanzen in \gls{marc}.
 
     \item $N_{\text{queue}}$: Minimale Anzahl an Queues, bei der jede \gls{alptwo} Instanz eine Queue aktiv verarbeiten kann.
 
