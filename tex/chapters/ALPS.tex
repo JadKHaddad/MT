@@ -154,17 +154,17 @@ In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} gepr√
     \label{tab:exp-alps-eod-config}
     \begin{tabular}{|l|l|l|}
         \hline
-        \textbf{Parameter}  & \textbf{Beschreibung}                        & \textbf{Wert} \\
+        \textbf{Parameter}      & \textbf{Beschreibung}                        & \textbf{Wert} \\
         \hline
-        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                & 1             \\
-        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                & 1             \\
-        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                     & 1             \\
-        $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 1             \\
-        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 1             \\
-        $T_{\text{server}}$ & Maximale Server-Antwortzeit                  & 5\,s          \\
-        $E_{\text{server}}$ & Serverfehlerrate                             & 0{,}0\,\%     \\
-        $T_{\text{idle}}$   & Server-Idle-Zeit                             & 5\,s          \\
-        $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & 4\,s          \\
+        $N_{\text{alp~1}}$      & Anzahl \gls{alpone} Instanzen                & 1             \\
+        $N_{\text{alp~2}}$      & Anzahl \gls{alptwo} Instanzen                & 1             \\
+        $N_{\text{queue}}$      & Anzahl \gls{amqp}-Queues                     & 1             \\
+        $N_{\text{device}}$     & Anzahl Alarmanlagen                          & 1             \\
+        $N_{\text{alarm}}$      & Anzahl Alarmmeldungen pro Alarmanlage        & 1             \\
+        $T_{\text{max,server}}$ & Maximale Server-Verarbeitungszeit            & 5\,s          \\
+        $E_{\text{server}}$     & Serverfehlerrate                             & 0{,}0\,\%     \\
+        $T_{\text{idle}}$       & Server-Idle-Zeit                             & 5\,s          \\
+        $T_{\text{max,tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & 4\,s          \\
         \hline
     \end{tabular}
 \end{table}
@@ -232,18 +232,18 @@ In diesem Abschnitt wird die Einhaltung der \textit{In-Order-Delivery} gepr√ºft.
     \label{tab:exp-alps-iod-config}
     \begin{tabular}{|l|l|l|}
         \hline
-        \textbf{Parameter}  & \textbf{Beschreibung}                        & \textbf{Wert} \\
+        \textbf{Parameter}      & \textbf{Beschreibung}                        & \textbf{Wert} \\
         \hline
-        $N_{\text{alp~1}}$  & Anzahl \gls{alpone} Instanzen                & 1             \\
-        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo} Instanzen                & 2             \\
-        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                     & 2             \\
-        $N_{\text{device}}$ & Anzahl Alarmanlagen                          & 1             \\
-        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
-        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage   & 100\,ms       \\
-        $T_{\text{server}}$ & Maximale Server-Antwortzeit                  & 5\,s          \\
-        $E_{\text{server}}$ & Serverfehlerrate                             & 0{,}0\,\%     \\
-        $T_{\text{idle}}$   & Server-Idle-Zeit                             & 5\,s          \\
-        $T_{\text{tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & $\infty$      \\
+        $N_{\text{alp~1}}$      & Anzahl \gls{alpone} Instanzen                & 1             \\
+        $N_{\text{alp~2}}$      & Anzahl \gls{alptwo} Instanzen                & 2             \\
+        $N_{\text{queue}}$      & Anzahl \gls{amqp}-Queues                     & 2             \\
+        $N_{\text{device}}$     & Anzahl Alarmanlagen                          & 1             \\
+        $N_{\text{alarm}}$      & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
+        $I_{\text{alarm}}$      & Alarmmeldungsendeintervall pro Alarmanlage   & 100\,ms       \\
+        $T_{\text{max,server}}$ & Maximale Server-Verarbeitungszeit            & 5\,s          \\
+        $E_{\text{server}}$     & Serverfehlerrate                             & 0{,}0\,\%     \\
+        $T_{\text{idle}}$       & Server-Idle-Zeit                             & 5\,s          \\
+        $T_{\text{max,tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & $\infty$      \\
         \hline
     \end{tabular}
 \end{table}
