@@ -10,17 +10,17 @@ sequenceDiagram
     
     Note over NET: Hohe Latenz
 
-    B->>L1: konsumiert Alarmmeldung A
+    B->>L1: Konsumiert Alarmmeldung A
     L1->>NET: Weiterleitung A
 
-    B->>L2: konsumiert Alarmmeldung B
+    B->>L2: Konsumiert Alarmmeldung B
     L1->>NET: Weiterleitung B
 
     NET->>S: Weiterleitung B
-    S->>DB: persistiert Alarmmeldung B
+    S->>DB: Persistiert Alarmmeldung B
 
     NET->>S: Weiterleitung A
-    S->>DB: persistiert Alarmmeldung A
+    S->>DB: Persistiert Alarmmeldung A
 
     Note over S,DB: In-Order-Delivery verletzt
 
