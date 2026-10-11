@@ -129,19 +129,7 @@ Wie im Abschnitt~\ref{sub-sec:alps-exactly-once-delivery-garantie} beschrieben, 
 \subsection{Experimentelle Evaluation}
 \label{sub-sec:alps-experimentelle-evaluation}
 
-In diesem Abschnitt wird die Implementierung von \gls{alps} experimentell evaluiert. Ziel der Evaluation ist es, die Einhaltung der Delivery-Garantien \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} im Normalbetrieb sowie unter Fehlerszenarien wie Netzwerkfehlern und negativen Verarbeitungsbestätigungen von Alarmmeldungen zu überprüfen. Die Experimente sind stochastisch, da die Fehler und die Verarbeitungszeiten zufällig erzeugt werden. Aus dem Ergebnis eines einzelnen Durchlaufs lässt sich daher keine belastbare Aussage über die Einhaltung der Delivery-Garantien ableiten. Ein erfolgreicher Durchlauf kann auch darauf beruhen, dass eine kritische Fehlerkonstellation zufällig nicht aufgetreten ist. Aus diesem Grund werden die Experimente mehrfach wiederholt. Die Anzahl der benötigten Wiederholungen $n$ wird nach dem \textit{Success-Run-Theorem}~\citep{joshi2023, kececioglu1992} bestimmt:
-
-\begin{equation}
-    n = \frac{\ln(1 - C)}{\ln(R)}
-\end{equation}
-
-Dabei ist $R$ die Zuverlässigkeit (\textit{Reliability}): Die minimale Wahrscheinlichkeit, mit der ein einzelner Durchlauf die Delivery-Garantien einhält. $C$ ist die Konfidenz (\textit{Confidence}), mit der diese Aussage getroffen werden soll. Im Folgenden werden $R = 95\,\%$ und $C = 95\,\%$ verwendet. Diese Kombination ist in der Zuverlässigkeitsprüfung und Prozessvalidierung gängig~\citep{qualitymag, schenkelberg2024}. Daraus ergibt sich:
-
-\begin{equation}
-    n = \frac{\ln(1 - 0{,}95)}{\ln(0{,}95)} \approx 58{,}4 \;\rightarrow\; n = 59
-\end{equation}
-
-Die Experimente werden somit 59-mal wiederholt. Wird in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien festgestellt, kann mit einer Konfidenz von 95\,\% behauptet werden, dass \gls{alps} die Delivery-Garantien mit einer Wahrscheinlichkeit von mindestens 95\,\% einhält. Tritt hingegen in mindestens einem Durchlauf eine Verletzung auf, kann diese Aussage nicht getroffen werden. Die Experimente in diesem Abschnitt gliedern sich in vier Phasen. In den ersten beiden Phasen werden dieselben Fehlerbedingungen wie in Abschnitt~\ref{sub-sec:lps-experimente} provoziert, unter denen \gls{lps} die Delivery-Garantien verletzt hat. In der dritten Phase wird \gls{alps} unter realitätsnahen Bedingungen im Normalbetrieb, also ohne provozierte Fehler, evaluiert. Dafür werden die Verarbeitungszeiten des Legacy-Systems mithilfe eines trainierten Vorhersagemodells nachgebildet. In der vierten Phase werden unter denselben realitätsnahen Bedingungen zusätzlich Netzwerkfehler simuliert, deren Häufigkeit auf Messungen von \textit{Cloudflare}~\citep{cloudflare} basiert~\citep{valenta2024}.
+In diesem Abschnitt wird die Implementierung von \gls{alps} experimentell evaluiert. Ziel der Evaluation ist es, die Einhaltung der Delivery-Garantien \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} im Normalbetrieb sowie unter Fehlerszenarien wie Netzwerkfehlern und negativen Verarbeitungsbestätigungen von Alarmmeldungen zu überprüfen. Wie die vorherigen Experimente zu \gls{lps} in Abschnitt~\ref{sub-sec:lps-experimente} sind auch diese Experimente stochastisch, da die Fehler und die Verarbeitungszeiten zufällig erzeugt werden. Ein erfolgreicher Durchlauf kann daher auch darauf beruhen, dass eine kritische Fehlerkonstellation zufällig nicht aufgetreten ist. Aus diesem Grund wird die Anzahl der Durchläufe ebenfalls nach dem in Abschnitt~\ref{sub-sub:lps-methodik} eingeführten \textit{Success-Run-Theorem} (Gleichung~\ref{eq:success-run}) mit $R = 95\,\%$ und $C = 95\,\%$ bestimmt. Jedes Experiment wird somit $n = 59$-mal wiederholt (Gleichung~\ref{eq:success-run-n}). Im Gegensatz zu den Experimenten zu \gls{lps} gilt ein Durchlauf hier als erfolgreich, wenn die Delivery-Garantien eingehalten werden. Wird in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien festgestellt, kann mit einer Konfidenz von 95\,\% behauptet werden, dass \gls{alps} die Delivery-Garantien mit einer Wahrscheinlichkeit von mindestens 95\,\% einhält. Tritt hingegen in mindestens einem Durchlauf eine Verletzung auf, kann diese Aussage nicht getroffen werden. Die Experimente in diesem Abschnitt gliedern sich in vier Phasen. In den ersten beiden Phasen werden dieselben Fehlerbedingungen wie in Abschnitt~\ref{sub-sec:lps-experimente} provoziert, unter denen \gls{lps} die Delivery-Garantien verletzt hat. In der dritten Phase wird \gls{alps} unter realitätsnahen Bedingungen im Normalbetrieb, also ohne provozierte Fehler, evaluiert. Dafür werden die Verarbeitungszeiten des Legacy-Systems mithilfe eines trainierten Vorhersagemodells nachgebildet. In der vierten Phase werden unter denselben realitätsnahen Bedingungen zusätzlich Netzwerkfehler simuliert, deren Häufigkeit auf Messungen von \textit{Cloudflare}~\citep{cloudflare} basiert~\citep{valenta2024}.
 
 \subsubsection{Phase~1: Exactly-Once-Delivery}
 \label{sub-sub:exp-alps-phase-1}
@@ -161,10 +149,14 @@ In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} gepr�
         $N_{\text{queue}}$      & Anzahl \gls{amqp}-Queues                     & 1             \\
         $N_{\text{device}}$     & Anzahl Alarmanlagen                          & 1             \\
         $N_{\text{alarm}}$      & Anzahl Alarmmeldungen pro Alarmanlage        & 1             \\
+        $T_{\text{min,server}}$ & Minimale Server-Verarbeitungszeit            & 0\,s          \\
         $T_{\text{max,server}}$ & Maximale Server-Verarbeitungszeit            & 5\,s          \\
         $E_{\text{server}}$     & Serverfehlerrate                             & 0{,}0\,\%     \\
         $T_{\text{idle}}$       & Server-Idle-Zeit                             & 5\,s          \\
+        $E_{\text{tcp}}$        & \gls{tcp}-Fehlerrate                         & 0{,}0\,\%     \\
+        $T_{\text{min,tcp}}$    & Minimale Verbindungsdauer im \gls{tcp}-Proxy & 0\,s          \\
         $T_{\text{max,tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & 4\,s          \\
+        $S$                     & Seed des Pseudozufallszahlengenerators       & 3             \\
         \hline
     \end{tabular}
 \end{table}
@@ -192,14 +184,14 @@ Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzu
         $N_{\text{loss}}$     & Verlorene Alarmmeldungen                    \\
         $N_{\text{ooo}}$      & Außer Reihenfolge empfangene Alarmmeldungen \\
         $N_{\text{unique}}$   & Eindeutige empfangene Alarmmeldungen        \\
-        $N_{\text{dup}}$      & Doppelt empfangene Alarmmeldungen           \\
+        $N_{\text{dup}}$      & Mehrfach empfangene Alarmmeldungen          \\
         \hline
     \end{tabular}
 \end{table}
 
 Wie zuvor beschrieben, wird jedes Experiment 59-mal durchgeführt. In diesem Experiment gilt ein Durchlauf erst dann als bestanden, wenn keine Alarmmeldung verloren geht und keine Alarmmeldung mehrfach verarbeitet wird, also $N_{\text{loss}} = 0$ und $N_{\text{dup}} = 0$. Zusätzlich muss im Durchlauf die Fehlerbedingung $F$ eingetreten sein, unter der \gls{lps} gescheitert ist: Die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} wird getrennt, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet. Tritt dieser Fall nicht ein, sagt der Durchlauf nichts über die Einhaltung der \textit{Exactly-Once-Delivery} aus und somit wird er aus der Auswertung ausgeschlossen. Dazu wird die Implementierung von \gls{alptwo} so modifiziert, dass die Timestamps, an denen die Alarmmeldungen an \gls{srv}~2 weitergeleitet werden, und die, an denen die Antworten von \gls{srv}~2 empfangen werden, in einer Datei gespeichert werden (\texttt{consumer-results.json}). Am Ende eines Durchlaufs werden Ergebnisse aus \texttt{consumer-results.json} und \texttt{tcp-proxy-results.json} verglichen, um zu prüfen, ob die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} getrennt wurde, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet.
 
-\paragraph{Ergebnisse} Nach 99 Durchläufen des Experiments ist die Fehlerbedingung $F$ 59-mal aufgetreten und somit fassen sich die Ergebnisse des Experiments in Tabelle~\ref{tab:exp-alps-eod-results} zusammen:
+\paragraph{Ergebnisse} Nach 59 Durchläufen des Experiments ist die Fehlerbedingung $F$ 59-mal aufgetreten und somit fassen sich die Ergebnisse des Experiments in Tabelle~\ref{tab:exp-alps-eod-results} zusammen:
 
 \begin{table}[H]
     \centering
@@ -232,18 +224,21 @@ In diesem Abschnitt wird die Einhaltung der \textit{In-Order-Delivery} geprüft.
     \label{tab:exp-alps-iod-config}
     \begin{tabular}{|l|l|l|}
         \hline
-        \textbf{Parameter}      & \textbf{Beschreibung}                        & \textbf{Wert} \\
+        \textbf{Parameter}      & \textbf{Beschreibung}                  & \textbf{Wert} \\
         \hline
-        $N_{\text{alp~1}}$      & Anzahl \gls{alpone}-Instanzen                & 1             \\
-        $N_{\text{alp~2}}$      & Anzahl \gls{alptwo}-Instanzen                & 2             \\
-        $N_{\text{queue}}$      & Anzahl \gls{amqp}-Queues                     & 2             \\
-        $N_{\text{device}}$     & Anzahl Alarmanlagen                          & 1             \\
-        $N_{\text{alarm}}$      & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
-        $I_{\text{alarm}}$      & Alarmmeldungsendeintervall pro Alarmanlage   & 100\,ms       \\
-        $T_{\text{max,server}}$ & Maximale Server-Verarbeitungszeit            & 5\,s          \\
-        $E_{\text{server}}$     & Serverfehlerrate                             & 0{,}0\,\%     \\
-        $T_{\text{idle}}$       & Server-Idle-Zeit                             & 5\,s          \\
-        $T_{\text{max,tcp}}$    & Maximale Verbindungsdauer im \gls{tcp}-Proxy & $\infty$      \\
+        $N_{\text{alp~1}}$      & Anzahl \gls{alpone}-Instanzen          & 1             \\
+        $N_{\text{alp~2}}$      & Anzahl \gls{alptwo}-Instanzen          & 2             \\
+        $N_{\text{queue}}$      & Anzahl \gls{amqp}-Queues               & 2             \\
+        $N_{\text{device}}$     & Anzahl Alarmanlagen                    & 1             \\
+        $N_{\text{alarm}}$      & Anzahl Alarmmeldungen pro Alarmanlage  & 2             \\
+        $I_{\text{alarm}}$      & Sendeintervall pro Alarmanlage         & 100\,ms       \\
+        $T_{\text{min,server}}$ & Minimale Server-Verarbeitungszeit      & 0\,s          \\
+        $T_{\text{max,server}}$ & Maximale Server-Verarbeitungszeit      & 5\,s          \\
+        $E_{\text{server}}$     & Serverfehlerrate                       & 0{,}0\,\%     \\
+        $T_{\text{idle}}$       & Server-Idle-Zeit                       & 5\,s          \\
+        $E_{\text{tcp}}$        & \gls{tcp}-Fehlerrate                   & 0{,}0\,\%     \\
+        $T_{\text{tcp}}$        & Verbindungsdauer im \gls{tcp}-Proxy    & $\infty$      \\
+        $S$                     & Seed des Pseudozufallszahlengenerators & 2             \\
         \hline
     \end{tabular}
 \end{table}
@@ -279,6 +274,10 @@ Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzu
 \end{table}
 
 Da $N_{\text{loss}} = 0$ und $N_{\text{ooo}} = 0$ in allen 59 Durchläufen gelten, wurden alle Alarmmeldungen empfangen und in der richtigen Reihenfolge verarbeitet. Dies ist auf das Zusammenspiel von \texttt{x-consistent-hash}, \texttt{prefetch\_count = 1} und \texttt{x-single-active-\allowbreak consumer} zurückzuführen, das sicherstellt, dass Alarmmeldungen einer einzelnen Alarmanlage stets sequentiell von derselben \gls{alptwo}-Instanz verarbeitet werden. Da in keinem der 59 Durchläufe eine Verletzung der \textit{In-Order-Delivery} auftrat, kann mit einer Konfidenz von $C = 95\,\%$ behauptet werden, dass \gls{alps} die \textit{In-Order-Delivery} unter den geprüften Fehlerbedingungen mit einer Wahrscheinlichkeit von mindestens $R = 95\,\%$ einhält.
+
+\paragraph{Zufallswerte}
+
+Im Gegensatz zu \textit{Phase~1} und \textit{Phase~2} wird in \textit{Phase~3} und \textit{Phase~4} kein Seed festgelegt. Die Pseudozufallszahlengeneratoren der Hilfsservices werden in jedem Durchlauf mit einem anderen, nicht festgelegten Wert initialisiert. Grund dafür ist: \textit{Phase~1} und \textit{Phase~2} sollen genau die Fehlerkonstellationen reproduzieren, unter denen \gls{lps} die Delivery-Garantien verletzt hat. Der Seed legt diese Konstellationen fest. \textit{Phase~3} und \textit{Phase~4} sollen \gls{alps} hingegen unter realitätsnahen Bedingungen evaluieren. Dafür sollen sich die zufällig generierten Werte von Durchlauf zu Durchlauf unterscheiden, damit die 59 Durchläufe möglichst viele verschiedene Konstellationen abdecken.
 
 \subsubsection{Phase~3: Realitätsnahe Bedingungen im Normalbetrieb}
 \label{sub-sub:exp-alps-phase-3}
@@ -328,12 +327,12 @@ Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-normal-config} z
         $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                                               & 3             \\
         $N_{\text{device}}$ & Anzahl Alarmanlagen                                                    & 50            \\
         $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage                                  & 60            \\
-        $I_{\text{alarm}}$  & Alarmmeldungsendeintervall pro Alarmanlage                             & 5\,s          \\
+        $I_{\text{alarm}}$  & Sendeintervall pro Alarmanlage                                         & 5\,s          \\
         $R_{\text{bg}}$     & Hintergrundlast                                                        & 70\,s$^{-1}$  \\
-        $T_{\text{idle}}$   & Server-Idle-Zeit                                                       & 5\,s          \\
         $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate in \textit{Server-} und \textit{\gls{amqp}-Proxy} & 0{,}0\,\%     \\
-        $T_{\text{sp}}$     & Maximale Verbindungsdauer im \textit{Server-Proxy}                     & $\infty$      \\
-        $T_{\text{ap}}$     & Maximale Verbindungsdauer im \textit{\gls{amqp}-Proxy}                 & $\infty$      \\
+        $T_{\text{sp}}$     & Verbindungsdauer im \textit{Server-Proxy}                              & $\infty$      \\
+        $T_{\text{ap}}$     & Verbindungsdauer im \textit{\gls{amqp}-Proxy}                          & $\infty$      \\
+        $S$                 & Seed des Pseudozufallszahlengenerators                                 & $-$           \\
         \hline
     \end{tabular}
 \end{table}
@@ -349,9 +348,11 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
     \item $R_{\text{bg}}$: Entspricht dem Wert aus~\citep{rast22}.
 
-    \item $T_{\text{idle}}$: Entspricht \textit{Phase~1} und \textit{Phase~2}.
-
     \item $E_{\text{tcp}}$, $T_{\text{sp}}$, $T_{\text{ap}}$: Im Normalbetrieb werden keine Netzwerkfehler provoziert. Die Verbindungen in beiden Proxys bleiben daher unbegrenzt bestehen.
+
+    \item $S$: Es wird kein Seed festgelegt, damit sich die Durchläufe unabhängig voneinander unterscheiden.
+
+    \item $T_{\text{server}}$: Entfällt in dieser Phase, da die Verarbeitungszeit durch das Vorhersagemodell bestimmt wird.
 \end{itemize}
 
 \begin{figure}[H]

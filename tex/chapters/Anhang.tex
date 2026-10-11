@@ -21,28 +21,24 @@ Die folgenden Befehle laden alle benötigten Docker-Images.
 
 \begin{bashcode}[title={Docker-Images laden}]
 # RabbitMQ-Broker
-docker pull rabbitmq:4-management
+docker pull rabbitmq:4.3.6-management
+# Mosquitto-Broker
+docker pull eclipse-mosquitto:2.1.2-alpine
 # Simulation-Runner und Kernkomponenten von ALPS
 # (ALP I, ALP II, Alarmanlagen-Simulator, Server-Simulator, Validator, TCP-Proxy)
-docker pull jadkhaddad/lps-rs
+docker pull jadkhaddad/lps-rs:0.1.0
 # ALP Dedup
-docker pull jadkhaddad/lps-gleam
+docker pull jadkhaddad/lps-gleam:0.1.0
 # Auswertungsskripte zur Plot-Erzeugung
-docker pull jadkhaddad/lps-scripts
+docker pull jadkhaddad/lps-scripts:0.1.0
 # Kernkomponenten von LPS
 # (SRV I PROXY, SRV II PROXY, LP I, LP II)
-docker pull jadkhaddad/lps-mqtt-python
+docker pull jadkhaddad/lps-mqtt-python:0.1.0
 # HiveMQ-Broker mit den verwendeten Plugins
-docker pull jadkhaddad/lps-mqtt-hivemq
+docker pull jadkhaddad/lps-mqtt-hivemq:0.1.0
 \end{bashcode}
 
-\subsection{Docker-Netzwerk erstellen}
-
-Vor dem Start wird ein Docker-Netzwerk angelegt, über das die Komponenten miteinander kommunizieren.
-
-\begin{bashcode}[title={Docker-Netzwerk erstellen}]
-docker network create lps-simulation-net
-\end{bashcode}
+\newpage
 
 \subsection{Konfigurationsdateien anlegen}
 
@@ -55,16 +51,23 @@ simulation_dir: "simulation"
 simulation_docker_network: "lps-simulation-net"
 
 # Image für Simulation-Runner und Kernkomponenten von ALPS
-lps_rust_image: "jadkhaddad/lps-rs"
+lps_rust_image: "jadkhaddad/lps-rs:0.1.0"
 # Image für die Auswertungsskripte
-lps_scripts_image: "jadkhaddad/lps-scripts"
+lps_scripts_image: "jadkhaddad/lps-scripts:0.1.0"
 # Image für ALP Dedup
-lps_gleam_image: "jadkhaddad/lps-gleam"
+lps_gleam_image: "jadkhaddad/lps-gleam:0.1.0"
 # Image für die die Kernkomponenten von LPS
-lps_mqtt_python_image: "jadkhaddad/lps-mqtt-python"
+lps_mqtt_python_image: "jadkhaddad/lps-mqtt-python:0.1.0"
 # Image für den HiveMQ-Broker
-lps_mqtt_hivemq_image: "jadkhaddad/lps-mqtt-hivemq"
+lps_mqtt_hivemq_image: "jadkhaddad/lps-mqtt-hivemq:0.1.0"
 
+# (optional) Zufallsgenerator-Seed
+seed: 1
+\end{yamlcode}
+
+\newpage
+
+\begin{yamlcode}[title={Allgemeiner Teil}]
 # Simulierte Alarmanlagen
 devices:
   # Anzahl simulierter Alarmanlagen
@@ -77,6 +80,13 @@ devices:
   max_events: 100
   # Wartezeit bis zum erneuten Sendeversuch nach einem Fehler
   retry_duration: 500ms
+  # Wartezeit bis zum ersten Sendeversuch nach dem Start der Simulation
+  wait_before_start: 3s
+\end{yamlcode}
+
+\newpage
+
+\begin{yamlcode}[title={Allgemeiner Teil}]
 # Server-Simulator
 server:
   # Adresse, unter der der Server-Simulator erreichbar ist
@@ -94,16 +104,16 @@ server:
 
   # Wahrscheinlichkeit für Fehlerantworten
   failure_rate: 0.1
-  # (optional) Maximale Bearbeitungszeit einer Anfrage
+  # (optional) Maximale Verarbeitungszeit einer Anfrage
   max_work_duration: 50ms
-  # (optional) Minimale Bearbeitungszeit einer Anfrage
+  # (optional) Minimale Verarbeitungszeit einer Anfrage
   min_work_duration: 10ms
   # (optional) Maximale zusätzliche Antwortverzögerung
   max_response_duration: 50ms
   # (optional) Minimale zusätzliche Antwortverzögerung
   min_response_duration: 10ms
 
-  # (optional) Bearbeitungszeiten werden vom Vorhersagemodell bestimmt
+  # (optional) Verarbeitungszeiten werden vom Vorhersagemodell bestimmt
   use_gs_prod_workload: false
   # (optional) Hintergrundlast in Anfragen pro Sekunde
   # (nur wirksam bei use_gs_prod_workload: true)
@@ -126,22 +136,22 @@ amqp:
     consumers_count: 3
     # Wartezeit vor dem Reconnect nach einem Verbindungsabbruch
     reconnect_duration: 500ms
-  # (optional) Fehlerproxy zwischen ALP II und Broker
-  amqp_proxy:
-    # Adresse des Fehlerproxys
-    socket_addr: "0.0.0.0:5673"
-    # Wahrscheinlichkeit eines künstlichen Verbindungsfehlers
-    failure_rate: 0.1
-    # Maximale Dauer einer Verbindung vor erzwungener Trennung
-    max_up_duration: 10s
-    # (optional) Minimale Dauer einer Verbindung
-    min_up_duration: 1s
-  # (optional) Fehlerproxy zwischen ALP II und Server
-  server_proxy:
-    socket_addr: "0.0.0.0:3001"
-    failure_rate: 0.1
-    max_up_duration: 10s
-    min_up_duration: 1s
+    # (optional) Fehlerproxy zwischen ALP II und Broker
+    amqp_proxy:
+      # Adresse des Fehlerproxys
+      socket_addr: "0.0.0.0:5673"
+      # Wahrscheinlichkeit eines künstlichen Verbindungsfehlers
+      failure_rate: 0.1
+      # Maximale Dauer einer Verbindung vor erzwungener Trennung
+      max_up_duration: 10s
+      # (optional) Minimale Dauer einer Verbindung
+      min_up_duration: 1s
+    # (optional) Fehlerproxy zwischen ALP II und Server
+    server_proxy:
+      socket_addr: "0.0.0.0:3001"
+      failure_rate: 0.1
+      max_up_duration: 10s
+      min_up_duration: 1s
 \end{yamlcode}
 
 \newpage
@@ -156,15 +166,23 @@ mqtt:
   consumers:
     # Anzahl der LP II-Instanzen (mindestens 1)
     consumers_count: 3
-  # (optional) Fehlerproxy zwischen LP II und Broker
-  mqtt_proxy:
-    socket_addr: "0.0.0.0:1884"
-    failure_rate: 0.1
-    max_up_duration: 10s
-    min_up_duration: 1s
+    # (optional) Fehlerproxy zwischen LP II und Broker
+    mqtt_proxy:
+      socket_addr: "0.0.0.0:1884"
+      failure_rate: 0.1
+      max_up_duration: 10s
+      min_up_duration: 1s
 \end{yamlcode}
 
+\newpage
+
 \subsection{Simulationen starten}
+
+Vor dem Start wird ein Docker-Netzwerk angelegt, über das die Komponenten miteinander kommunizieren.
+
+\begin{bashcode}[title={Docker-Netzwerk erstellen}]
+docker network create lps-simulation-net
+\end{bashcode}
 
 Die Simulationen werden aus dem Verzeichnis gestartet, in dem die Konfigurationsdateien liegen.
 
@@ -191,6 +209,8 @@ docker run --rm -it \
 \subsection{Ergebnisse}
 
 Nach Abschluss eines Laufs befinden sich die erzeugten Ergebnisse im Verzeichnis  \texttt{\$(pwd)/<simulation\_dir>/mount}
+
+\newpage
 
 \section{Quellcode}
 \label{sec:source-code}
