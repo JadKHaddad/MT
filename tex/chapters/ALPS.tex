@@ -388,7 +388,7 @@ Ein Durchlauf gilt als bestanden, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 
 
 Da $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$ in allen 59 Durchläufen gelten, wurden alle 177.000 Alarmmeldungen genau einmal und in der richtigen Reihenfolge verarbeitet. Im Gegensatz zu \textit{Phase~1} und \textit{Phase~2} wurden hier mehrere \gls{alpone}- und \gls{alptwo}-Instanzen gleichzeitig betrieben, und die Alarmmeldungen von 50 Alarmanlagen wurden über den \texttt{x-consistent-hash} Exchange auf drei Queues verteilt. Die Kombination aus \texttt{x-single-active-\allowbreak consumer} und \texttt{prefetch\_count = 1} sorgt dabei dafür, dass jede Queue zu jeder Zeit nur von einer einzigen \gls{alptwo}-Instanz verarbeitet wird und diese \gls{alptwo}-Instanz immer nur eine Alarmmeldung gleichzeitig verarbeitet. Dadurch werden Alarmmeldungen verschiedener Alarmanlagen parallel von verschiedenen \gls{alptwo}-Instanzen verarbeitet, während Alarmmeldungen einer einzelnen Alarmanlage weiterhin sequentiell von derselben \gls{alptwo}-Instanz verarbeitet werden. Die Ergebnisse zeigen, dass die Delivery-Garantien auch bei paralleler Verarbeitung und realitätsnaher Last erhalten bleiben. Da in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien auftrat, kann mit einer Konfidenz von $C = 95\,\%$ behauptet werden, dass \gls{alps} die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} im Normalbetrieb unter realitätsnaher Last mit einer Wahrscheinlichkeit von mindestens $R = 95\,\%$ einhält.
 
-Der Median der vorhergesagten Verarbeitungszeit über alle Durchläufe beträgt, aufgerundet auf die nächste ganze Zahl, $T_{\text{m}} = 16\,\text{ms}$. Dieser Wert dient in \textit{Phase~4} als Referenzwert für die Kalibrierung des \textit{Server-Proxy}.
+Der Median der vorhergesagten Verarbeitungszeit über alle Durchläufe beträgt, aufgerundet auf die nächste ganze Zahl, $T_{\text{m}} = 8\,\text{ms}$. Dieser Wert dient in \textit{Phase~4} als Referenzwert für die Kalibrierung des \textit{Server-Proxy}.
 
 \subsubsection{Phase~4: Realitätsnahe Fehlerbedingungen}
 \label{sub-sub:exp-alps-phase-4}
@@ -411,10 +411,10 @@ Tabelle~\ref{tab:exp-alps-realistic-config} fasst die Parameter zusammen, die si
         \hline
         \textbf{Parameter}  & \textbf{Beschreibung}                                                       & \textbf{Wert} \\
         \hline
-        $T_{\text{m}}$      & Median der Verarbeitungszeit (aus \textit{Phase~3})                         & 16\,ms        \\
+        $T_{\text{m}}$      & Median der Verarbeitungszeit (aus \textit{Phase~3})                         & 8\,ms         \\
         $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate in \textit{Server-Proxy} und \textit{\gls{amqp}-Proxy} & 20{,}0\,\%    \\
-        $T_{\text{sp,min}}$ & Minimale Verbindungsdauer im \textit{Server-Proxy}                          & 12\,ms        \\
-        $T_{\text{sp,max}}$ & Maximale Verbindungsdauer im \textit{Server-Proxy}                          & 48\,ms        \\
+        $T_{\text{sp,min}}$ & Minimale Verbindungsdauer im \textit{Server-Proxy}                          & 6\,ms         \\
+        $T_{\text{sp,max}}$ & Maximale Verbindungsdauer im \textit{Server-Proxy}                          & 24\,ms        \\
         $T_{\text{ap,min}}$ & Minimale Verbindungsdauer im \textit{\gls{amqp}-Proxy}                      & 227\,s        \\
         $T_{\text{ap,max}}$ & Maximale Verbindungsdauer im \textit{\gls{amqp}-Proxy}                      & 909\,s        \\
         \hline
@@ -430,9 +430,9 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
     \item $T_{\text{sp,min}}$, $T_{\text{sp,max}}$: Verbindungsdauern werden zwischen den Grenzen log-gleichverteilt gezogen, sodass ihr Median
           \begin{equation}
-              M_{\text{sp}} = \sqrt{T_{\text{sp,min}} \cdot T_{\text{sp,max}}} \approx 24\,\text{ms}
+              M_{\text{sp}} = \sqrt{T_{\text{sp,min}} \cdot T_{\text{sp,max}}} = 12\,\text{ms}
           \end{equation}
-          beträgt. Bei einer Referenzverarbeitungszeit von $T_{\text{m}} = 16\,\text{ms}$ ergibt sich daraus eine Wahrscheinlichkeit von etwa $20\,\%$, dass die Verbindung zwischen \gls{alptwo} und \gls{srv}~2 abbricht, während eine Alarmmeldung verarbeitet wird. Das entspricht der kritischen Fehlerkonstellation aus \textit{Phase~1}.
+          beträgt. Bei einer Referenzverarbeitungszeit von $T_{\text{m}} = 8\,\text{ms}$ ergibt sich daraus eine Wahrscheinlichkeit von etwa $20\,\%$, dass die Verbindung zwischen \gls{alptwo} und \gls{srv}~2 abbricht, während eine Alarmmeldung verarbeitet wird. Das entspricht der kritischen Fehlerkonstellation aus \textit{Phase~1}.
 
     \item $T_{\text{ap,min}}$, $T_{\text{ap,max}}$: Analog dazu ergibt sich ein Median von
           \begin{equation}
