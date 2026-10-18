@@ -5,7 +5,7 @@ sequenceDiagram
     participant L1 as LP 2 Instanz A
     participant L2 as LP 2 Instanz B
     participant NET as Netzwerk
-    participant S as SRV 2
+    participant S as SRV
     participant DB as Datenbank
     
     Note over NET: Hohe Latenz
@@ -14,7 +14,7 @@ sequenceDiagram
     L1->>NET: Weiterleitung A
 
     B->>L2: Konsumiert Alarmmeldung B
-    L1->>NET: Weiterleitung B
+    L2->>NET: Weiterleitung B
 
     NET->>S: Weiterleitung B
     S->>DB: Persistiert Alarmmeldung B

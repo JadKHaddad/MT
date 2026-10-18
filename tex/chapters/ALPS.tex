@@ -169,27 +169,7 @@ Die Auswahl der Parameter begründet sich wie folgt:
     \item $N_{\text{queue}}$: Da nur eine Alarmanlage simuliert wird, wird nur eine Queue benötigt. Weitere Queues würden von keiner Alarmmeldung genutzt werden.
 \end{itemize}
 
-Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-eod}. Dadurch werden die Fehlerbedingungen, unter denen \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, unverändert reproduziert. Für die Durchführung der Experimente werden zusätzliche Parameter definiert, die in Tabelle~\ref{tab:exp-alps-more-metrics} dargestellt werden.
-
-\begin{table}[H]
-    \centering
-    \caption{Weitere Parameter zur Durchführung der Experimente in \acrshort{alps}.}
-    \label{tab:exp-alps-more-metrics}
-    \begin{tabular}{|l|l|}
-        \hline
-        \textbf{Parameter}    & \textbf{Beschreibung}                       \\
-        \hline
-        $N_{\text{sent}}$     & Insgesamt gesendete Alarmmeldungen          \\
-        $N_{\text{received}}$ & Insgesamt empfangene Alarmmeldungen         \\
-        $N_{\text{loss}}$     & Verlorene Alarmmeldungen                    \\
-        $N_{\text{ooo}}$      & Außer Reihenfolge empfangene Alarmmeldungen \\
-        $N_{\text{unique}}$   & Eindeutige empfangene Alarmmeldungen        \\
-        $N_{\text{dup}}$      & Mehrfach empfangene Alarmmeldungen          \\
-        \hline
-    \end{tabular}
-\end{table}
-
-Wie zuvor beschrieben, wird jedes Experiment 59-mal durchgeführt. In diesem Experiment gilt ein Durchlauf erst dann als bestanden, wenn keine Alarmmeldung verloren geht und keine Alarmmeldung mehrfach verarbeitet wird, also $N_{\text{loss}} = 0$ und $N_{\text{dup}} = 0$. Zusätzlich muss im Durchlauf die Fehlerbedingung $F$ eingetreten sein, unter der \gls{lps} gescheitert ist: Die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} wird getrennt, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet. Tritt dieser Fall nicht ein, sagt der Durchlauf nichts über die Einhaltung der \textit{Exactly-Once-Delivery} aus und somit wird er aus der Auswertung ausgeschlossen. Dazu wird die Implementierung von \gls{alptwo} so modifiziert, dass die Timestamps, an denen die Alarmmeldungen an \gls{srv}~2 weitergeleitet werden, und die, an denen die Antworten von \gls{srv}~2 empfangen werden, in einer Datei gespeichert werden (\texttt{consumer-results.json}). Am Ende eines Durchlaufs werden Ergebnisse aus \texttt{consumer-results.json} und \texttt{tcp-proxy-results.json} verglichen, um zu prüfen, ob die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} getrennt wurde, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet.
+Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:alp-verletzung-eod}. Dadurch werden die Fehlerbedingungen, unter denen \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, unverändert reproduziert. Wie zuvor beschrieben, wird jedes Experiment 59-mal durchgeführt. In diesem Experiment gilt ein Durchlauf erst dann als bestanden, wenn keine Alarmmeldung verloren geht und keine Alarmmeldung mehrfach verarbeitet wird, also $N_{\text{loss}} = 0$ und $N_{\text{dup}} = 0$. Zusätzlich muss im Durchlauf die Fehlerbedingung $F$ eingetreten sein, unter der \gls{lps} gescheitert ist: Die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} wird getrennt, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet. Tritt dieser Fall nicht ein, sagt der Durchlauf nichts über die Einhaltung der \textit{Exactly-Once-Delivery} aus und somit wird er aus der Auswertung ausgeschlossen. Dazu wird die Implementierung von \gls{alptwo} so modifiziert, dass die Timestamps, an denen die Alarmmeldungen an \gls{srv}~2 weitergeleitet werden, und die, an denen die Antworten von \gls{srv}~2 empfangen werden, in einer Datei gespeichert werden (\texttt{consumer-results.json}). Am Ende eines Durchlaufs werden Ergebnisse aus \texttt{consumer-results.json} und \texttt{tcp-proxy-results.json} verglichen, um zu prüfen, ob die \gls{tcp}-Verbindung zwischen dem Broker und \gls{alptwo} getrennt wurde, nachdem \gls{alptwo} die Alarmmeldung an \gls{srv}~2 weitergeleitet hat und auf dessen Antwort wartet.
 
 \paragraph{Ergebnisse} Nach 59 Durchläufen des Experiments ist die Fehlerbedingung $F$ 59-mal aufgetreten und somit fassen sich die Ergebnisse des Experiments in Tabelle~\ref{tab:exp-alps-eod-results} zusammen:
 
