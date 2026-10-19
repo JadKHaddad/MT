@@ -365,7 +365,7 @@ Ein Durchlauf gilt als bestanden, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 
 
 Da $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$ in allen 59 Durchläufen gelten, wurden alle 177.000 Alarmmeldungen genau einmal und in der richtigen Reihenfolge verarbeitet. Im Gegensatz zu \textit{Phase~1} und \textit{Phase~2} wurden hier mehrere \gls{alpone}- und \gls{alptwo}-Instanzen gleichzeitig betrieben, und die Alarmmeldungen von 50 Alarmanlagen wurden über den \texttt{x-consistent-hash} Exchange auf drei Queues verteilt. Die Kombination aus \texttt{x-single-active-\allowbreak consumer} und \texttt{prefetch\_count = 1} sorgt dabei dafür, dass jede Queue zu jeder Zeit nur von einer einzigen \gls{alptwo}-Instanz verarbeitet wird und diese \gls{alptwo}-Instanz immer nur eine Alarmmeldung gleichzeitig verarbeitet. Dadurch werden Alarmmeldungen verschiedener Alarmanlagen parallel von verschiedenen \gls{alptwo}-Instanzen verarbeitet, während Alarmmeldungen einer einzelnen Alarmanlage weiterhin sequentiell von derselben \gls{alptwo}-Instanz verarbeitet werden. Die Ergebnisse zeigen, dass die Delivery-Garantien auch bei paralleler Verarbeitung und realitätsnaher Last erhalten bleiben. Da in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien auftrat, kann mit einer Konfidenz von $C = 95\,\%$ behauptet werden, dass \gls{alps} die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} im Normalbetrieb unter realitätsnaher Last mit einer Wahrscheinlichkeit von mindestens $R = 95\,\%$ einhält.
 
-Der Median der vorhergesagten Verarbeitungszeit über alle Durchläufe beträgt, aufgerundet auf die nächste ganze Zahl, $T_{\text{m}} = 8\,\text{ms}$. Dieser Wert dient in \textit{Phase~4} als Referenzwert für die Kalibrierung der \textit{\gls{tcp}-Proxies}.
+Der Median der vorhergesagten Verarbeitungszeit über alle Durchläufe beträgt, aufgerundet auf die nächste ganze Zahl, $T_{\text{m}} = 7\,\text{ms}$. Dieser Wert dient in \textit{Phase~4} als Referenzwert für die Kalibrierung der \textit{\gls{tcp}-Proxies}.
 
 \subsubsection{Phase~4: Realitätsnahe Fehlerbedingungen}
 \label{sub-sub:exp-alps-phase-4}
@@ -389,12 +389,12 @@ Tabelle~\ref{tab:exp-alps-realistic-config} fasst die Parameter zusammen, die si
         \hline
         \textbf{Parameter}                   & \textbf{Beschreibung}                                                     & \textbf{Wert} \\
         \hline
-        $T_{\text{m}}$                       & Median der Verarbeitungszeit (aus \textit{Phase~3})                       & 8\,ms         \\
+        $T_{\text{m}}$                       & Median der Verarbeitungszeit (aus \textit{Phase~3})                       & 7\,ms         \\
         $E_{\text{tcp}}$                     & Fehlerrate in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$ & 20{,}0\,\%    \\
-        $T_{\text{min,tcp}}^{\text{srv}}$    & Minimale Verbindungsdauer im $P_{\text{srv}}$                             & 6\,ms         \\
-        $T_{\text{max,tcp}}^{\text{srv}}$    & Maximale Verbindungsdauer im $P_{\text{srv}}$                             & 24\,ms        \\
-        $T_{\text{min,tcp}}^{\text{server}}$ & Minimale Verbindungsdauer im $P_{\text{server}}$                          & 6\,ms         \\
-        $T_{\text{max,tcp}}^{\text{server}}$ & Maximale Verbindungsdauer im $P_{\text{server}}$                          & 24\,ms        \\
+        $T_{\text{min,tcp}}^{\text{srv}}$    & Minimale Verbindungsdauer im $P_{\text{srv}}$                             & 5{,}25\,ms    \\
+        $T_{\text{max,tcp}}^{\text{srv}}$    & Maximale Verbindungsdauer im $P_{\text{srv}}$                             & 21\,ms        \\
+        $T_{\text{min,tcp}}^{\text{server}}$ & Minimale Verbindungsdauer im $P_{\text{server}}$                          & 5{,}25\,ms    \\
+        $T_{\text{max,tcp}}^{\text{server}}$ & Maximale Verbindungsdauer im $P_{\text{server}}$                          & 21\,ms        \\
         $T_{\text{min,tcp}}^{\text{amqp}}$   & Minimale Verbindungsdauer im $P_{\text{amqp}}$                            & 227\,s        \\
         $T_{\text{max,tcp}}^{\text{amqp}}$   & Maximale Verbindungsdauer im $P_{\text{amqp}}$                            & 909\,s        \\
         \hline
@@ -410,9 +410,9 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
     \item $T_{\text{min,tcp}}^{\text{srv}}$ und $T_{\text{max,tcp}}^{\text{srv}}$: Verbindungsdauern werden zwischen den Grenzen log-gleichverteilt gezogen, sodass ihr Median
           \begin{equation}
-              M_{\text{tcp}}^{\text{srv}} = \sqrt{T_{\text{min,tcp}}^{\text{srv}} \cdot T_{\text{max,tcp}}^{\text{srv}}} = 12\,\text{ms}
+              M_{\text{tcp}}^{\text{srv}} = \sqrt{T_{\text{min,tcp}}^{\text{srv}} \cdot T_{\text{max,tcp}}^{\text{srv}}} = 10{,}5\,\text{ms}
           \end{equation}
-          beträgt. Bei einer Referenzverarbeitungszeit von $T_{\text{m}} = 8\,\text{ms}$ ergibt sich daraus eine Wahrscheinlichkeit von etwa $20\,\%$, dass die Verbindung zwischen \gls{alptwo} und \gls{srv}~2 abbricht, während eine Alarmmeldung verarbeitet wird.
+          beträgt. Bei einer Referenzverarbeitungszeit von $T_{\text{m}} = 7\,\text{ms}$ ergibt sich daraus eine Wahrscheinlichkeit von etwa $20\,\%$, dass die Verbindung zwischen \gls{alptwo} und \gls{srv}~2 abbricht, während eine Alarmmeldung verarbeitet wird.
 
     \item $T_{\text{min,tcp}}^{\text{server}}$ und $T_{\text{max,tcp}}^{\text{server}}$: Analog zu $T_{\text{min,tcp}}^{\text{srv}}$ und $T_{\text{max,tcp}}^{\text{srv}}$ ergibt sich eine Wahrscheinlichkeit von etwa $20\,\%$, dass die Verbindung zwischen \gls{srv}~2 und dem \textit{Server-Simulator} abbricht, während eine Alarmmeldung verarbeitet wird.
 
