@@ -94,7 +94,7 @@ Die Implementierung von \gls{alpone} setzt voraus, dass die Alarmmeldungen minde
 \subsection{Advanced Legacy Proxy II}
 \label{sub-sec:alptwo}
 
-Die Implementierung von \gls{alptwo} besteht aus $N$ \gls{amqp}-Consumern, die beim Starten jeweils mit einer der $N$ Queues verbunden werden. Jeder Consumer konsumiert Nachrichten bzw.~Alarmmeldungen mit der \texttt{prefetch\_count = 1} Eigenschaft aus der Queue. Dadurch wird garantiert, dass zu jeder Zeit nur eine Alarmmeldung pro Consumer verarbeitet wird. Außerdem sind die Queues mit der \texttt{x-single-active-consumer} Eigenschaft verbunden. Dadurch erlaubt der Broker, dass nur ein einzelner Consumer pro Queue aktiv ist. Falls ein Consumer ausfällt oder dessen Verbindung zum Broker verloren geht, wird der Broker automatisch einen anderen Consumer aktivieren. Die Kombination aus \texttt{x-single-active-consumer}, \texttt{x-consistent-hash} und \texttt{prefetch\_count = 1} garantiert, dass Alarmmeldungen einer einzelnen Alarmanlage immer von einer einzigen \gls{alptwo} Instanz bzw.~einem einzigen Consumer innerhalb von \gls{alptwo} verarbeitet werden, und somit werden die Anforderungen \textbf{A~2} und \textbf{A~3} erfüllt. Wenn ein Consumer eine Alarmmeldung aus der Queue konsumiert, leitet er sie an den nachgelagerten Service weiter. Nach erfolgreicher Verarbeitung der Alarmmeldung durch den nachgelagerten Service, wird die Alarmmeldung vom Consumer als erfolgreich verarbeitet betrachtet und aus der Queue entfernt. Falls die Verarbeitung der Alarmmeldung durch den nachgelagerten Service fehlschlägt, wird die Alarmmeldung als fehlgeschlagen betrachtet und negativ mit \texttt{requeue = true} an die Queue bestätigt. Dadurch wird die Alarmmeldung erneut in dieselbe Queue in deren originalen Position zurückgestellt. Danach trennt sich der Consumer vom Broker und startet sich wieder neu. Der Broker erkennt, dass der Consumer nicht mehr aktiv ist und aktiviert automatisch einen anderen Consumer für die Queue. Der neue Consumer konsumiert die zuvor fehlgeschlagene Alarmmeldung erneut aus der Queue und leitet sie an den nachgelagerten Service weiter. Dieser Prozess wiederholt sich, bis die Alarmmeldung erfolgreich verarbeitet wurde. Dadurch wird die Anforderung \textbf{A~4} erfüllt und somit die \textit{In-Order-Delivery} pro Alarmanlage garantiert. Abbildung~\ref{fig:alps-normal-sequence} visualisiert einen beispielhaften Verarbeitungsablauf von Alarmmeldung von zwei verschiedenen Alarmanlagen \textit{A} und \textit{B} innerhalb von \gls{alptwo} im Zusammenhang mit \gls{srv}~2 als ein Sequenzdiagramm. Die Abbildung verdeutlicht, dass Alarmmeldungen verschiedener Alarmanlagen von verschiedenen \gls{alptwo}-Instanzen parallel verarbeitet werden können.
+Die Implementierung von \gls{alptwo} besteht aus $N$ \gls{amqp}-Consumern, die beim Starten jeweils mit einer der $N$ Queues verbunden werden. Jeder Consumer konsumiert Nachrichten bzw.~Alarmmeldungen mit der \texttt{prefetch\_count = 1} Eigenschaft aus der Queue. Dadurch wird garantiert, dass zu jeder Zeit nur eine Alarmmeldung pro Consumer verarbeitet wird. Außerdem sind die Queues mit der \texttt{x-single-active-consumer} Eigenschaft verbunden. Dadurch erlaubt der Broker, dass nur ein einzelner Consumer pro Queue aktiv ist. Falls ein Consumer ausfällt oder dessen Verbindung zum Broker verloren geht, wird der Broker automatisch einen anderen Consumer aktivieren. Die Kombination aus \texttt{x-single-active-consumer}, \texttt{x-consistent-hash} und \texttt{prefetch\_count = 1} garantiert, dass Alarmmeldungen einer einzelnen Alarmanlage immer von einer einzigen \gls{alptwo} Instanz bzw.~einem einzigen Consumer innerhalb von \gls{alptwo} verarbeitet werden, und somit werden die Anforderungen \textbf{A~2} und \textbf{A~3} erfüllt. Wenn ein Consumer eine Alarmmeldung aus der Queue konsumiert, leitet er sie an den nachgelagerten Service weiter. Nach erfolgreicher Verarbeitung der Alarmmeldung durch den nachgelagerten Service, wird die Alarmmeldung vom Consumer als erfolgreich verarbeitet betrachtet, positiv bestätigt und aus der Queue entfernt. Falls die Verarbeitung der Alarmmeldung durch den nachgelagerten Service fehlschlägt, wird die Alarmmeldung als fehlgeschlagen betrachtet und negativ mit \texttt{requeue = true} an die Queue bestätigt. Dadurch wird die Alarmmeldung erneut in dieselbe Queue in deren originalen Position zurückgestellt. Danach schließt der Consumer seinen \gls{amqp}-Channel, wodurch er sich beim Broker als Consumer der Queue abmeldet. Die zugrunde liegende \gls{tcp}-Verbindung zum Broker bleibt dabei bestehen. Anschließend öffnet der Consumer einen neuen Channel auf derselben Verbindung und registriert sich erneut an der Queue. Aufgrund der \texttt{x-single-active-consumer} Eigenschaft aktiviert der Broker automatisch einen anderen, bereits wartenden Consumer für die Queue, während sich der neu registrierte Consumer hinten in die Warteliste einreiht. Wartet kein anderer Consumer auf die Queue, etwa weil nur eine einzige \gls{alptwo}-Instanz betrieben wird, wird der neu registrierte Consumer selbst wieder aktiviert. Der aktivierte Consumer konsumiert die zuvor fehlgeschlagene Alarmmeldung erneut aus der Queue und leitet sie an den nachgelagerten Service weiter. Dieser Prozess wiederholt sich, bis die Alarmmeldung erfolgreich verarbeitet wurde. Bricht hingegen die Verbindung zwischen \gls{alptwo} und dem Broker ab, baut \gls{alptwo} eine neue Verbindung auf und registriert seine Consumer erneut an den Queues. Dadurch wird die Anforderung \textbf{A~4} erfüllt und somit die \textit{In-Order-Delivery} pro Alarmanlage garantiert. Abbildung~\ref{fig:alps-normal-sequence} visualisiert einen beispielhaften Verarbeitungsablauf von Alarmmeldung von zwei verschiedenen Alarmanlagen \textit{A} und \textit{B} innerhalb von \gls{alptwo} im Zusammenhang mit \gls{srv}~2 als ein Sequenzdiagramm. Die Abbildung verdeutlicht, dass Alarmmeldungen verschiedener Alarmanlagen von verschiedenen \gls{alptwo}-Instanzen parallel verarbeitet werden können.
 
 \begin{figure}[H]
     \centering
@@ -260,7 +260,7 @@ Im Gegensatz zu \textit{Phase~1} und \textit{Phase~2} wird in \textit{Phase~3} u
 \subsubsection{Phase~3: Realitätsnahe Bedingungen im Normalbetrieb}
 \label{sub-sub:exp-alps-phase-3}
 
-In dieser Phase wird \gls{alps} unter realitätsnahen Bedingungen im Normalbetrieb evaluiert, also ohne provozierte Netzwerkfehler. Im Gegensatz zu \textit{Phase~1} und \textit{Phase~2}, in denen jeweils eine gezielte Fehlerkonstellation mit minimaler Konfiguration reproduziert wurde, werden hier mehrere \gls{alpone}- und \gls{alptwo}-Instanzen, mehrere Queues und viele Alarmanlagen gleichzeitig betrieben. Die Phase verfolgt zwei Ziele: Erstens wird geprüft, ob \gls{alps} die Delivery-Garantien auch unter realitätsnaher Last und paralleler Verarbeitung einhält. Zweitens dient sie als Referenz für \textit{Phase~4}: Die hier gemessene Verarbeitungszeit wird verwendet, um die Netzwerkfehler in \textit{Phase~4} zu kalibrieren. Die Verarbeitungszeiten des Legacy-Systems werden mithilfe eines trainierten Vorhersagemodells nachgebildet. Das Modell wurde nach dem \gls{rast}-Ansatz erstellt~\citep{rast22, rast25}.
+In dieser Phase wird \gls{alps} unter realitätsnahen Bedingungen im Normalbetrieb evaluiert, also ohne provozierte Netzwerkfehler. Im Gegensatz zu \textit{Phase~1} und \textit{Phase~2}, in denen jeweils eine gezielte Fehlerkonstellation mit minimaler Konfiguration reproduziert wurde, werden hier mehrere \gls{alpone}- und \gls{alptwo}-Instanzen, mehrere Queues und viele Alarmanlagen gleichzeitig betrieben. Die Phase verfolgt zwei Ziele: Erstens wird geprüft, ob \gls{alps} die Delivery-Garantien auch unter realitätsnaher Last und paralleler Verarbeitung einhält. Zweitens dient sie als Referenz für \textit{Phase~4}: Die hier gemessene Antwortzeit aus Sicht der \gls{alptwo}-Instanzen wird verwendet, um die Netzwerkfehler in \textit{Phase~4} zu kalibrieren. Die Verarbeitungszeiten des Legacy-Systems werden mithilfe eines trainierten Vorhersagemodells nachgebildet. Das Modell wurde nach dem \gls{rast}-Ansatz erstellt~\citep{rast22, rast25}.
 
 \paragraph{Training des Modells}
 
@@ -365,7 +365,7 @@ Ein Durchlauf gilt als bestanden, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 
 
 Da $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$ in allen 59 Durchläufen gelten, wurden alle 177.000 Alarmmeldungen genau einmal und in der richtigen Reihenfolge verarbeitet. Im Gegensatz zu \textit{Phase~1} und \textit{Phase~2} wurden hier mehrere \gls{alpone}- und \gls{alptwo}-Instanzen gleichzeitig betrieben, und die Alarmmeldungen von 50 Alarmanlagen wurden über den \texttt{x-consistent-hash} Exchange auf drei Queues verteilt. Die Kombination aus \texttt{x-single-active-\allowbreak consumer} und \texttt{prefetch\_count = 1} sorgt dabei dafür, dass jede Queue zu jeder Zeit nur von einer einzigen \gls{alptwo}-Instanz verarbeitet wird und diese \gls{alptwo}-Instanz immer nur eine Alarmmeldung gleichzeitig verarbeitet. Dadurch werden Alarmmeldungen verschiedener Alarmanlagen parallel von verschiedenen \gls{alptwo}-Instanzen verarbeitet, während Alarmmeldungen einer einzelnen Alarmanlage weiterhin sequentiell von derselben \gls{alptwo}-Instanz verarbeitet werden. Die Ergebnisse zeigen, dass die Delivery-Garantien auch bei paralleler Verarbeitung und realitätsnaher Last erhalten bleiben. Da in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien auftrat, kann mit einer Konfidenz von $C = 95\,\%$ behauptet werden, dass \gls{alps} die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} im Normalbetrieb unter realitätsnaher Last mit einer Wahrscheinlichkeit von mindestens $R = 95\,\%$ einhält.
 
-Der Median der vorhergesagten Verarbeitungszeit über alle Durchläufe beträgt, aufgerundet auf die nächste ganze Zahl, $T_{\text{m}} = 7\,\text{ms}$. Dieser Wert dient in \textit{Phase~4} als Referenzwert für die Kalibrierung der \textit{\gls{tcp}-Proxies}.
+Zusätzlich wird für jede Alarmmeldung die Antwortzeit aus Sicht der \gls{alptwo}-Instanzen erfasst, also die Zeit zwischen der Weiterleitung einer Alarmmeldung an \gls{srv}~2 und dem Empfang der zugehörigen Antwort. Im Gegensatz zur vorhergesagten Verarbeitungszeit des Modells enthält sie zusätzlich die Latenzen des \textit{\gls{srv}~2 PROXY}, von \gls{alpdedup} sowie der \textit{\gls{tcp}-Proxies}. Das 80.~Perzentil dieser Antwortzeit über alle Durchläufe beträgt, aufgerundet auf die nächste ganze Zahl, $T_{\text{P80}} = 84\,\text{ms}$. Somit erhielten 80\,\% aller Alarmmeldungen innerhalb von höchstens 84\,ms eine Antwort, während die übrigen 20\,\% länger benötigten. Dieser Wert dient in \textit{Phase~4} als Referenzwert für die Kalibrierung der \textit{\gls{tcp}-Proxies}.
 
 \subsubsection{Phase~4: Realitätsnahe Fehlerbedingungen}
 \label{sub-sub:exp-alps-phase-4}
@@ -387,16 +387,13 @@ Tabelle~\ref{tab:exp-alps-realistic-config} fasst die Parameter zusammen, die si
     \label{tab:exp-alps-realistic-config}
     \begin{tabular}{|l|l|l|}
         \hline
-        \textbf{Parameter}                   & \textbf{Beschreibung}                                                     & \textbf{Wert} \\
+        \textbf{Parameter}               & \textbf{Beschreibung}                                                     & \textbf{Wert} \\
         \hline
-        $T_{\text{m}}$                       & Median der Verarbeitungszeit (aus \textit{Phase~3})                       & 7\,ms         \\
-        $E_{\text{tcp}}$                     & Fehlerrate in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$ & 20{,}0\,\%    \\
-        $T_{\text{min,tcp}}^{\text{srv}}$    & Minimale Verbindungsdauer im $P_{\text{srv}}$                             & 5{,}25\,ms    \\
-        $T_{\text{max,tcp}}^{\text{srv}}$    & Maximale Verbindungsdauer im $P_{\text{srv}}$                             & 21\,ms        \\
-        $T_{\text{min,tcp}}^{\text{server}}$ & Minimale Verbindungsdauer im $P_{\text{server}}$                          & 5{,}25\,ms    \\
-        $T_{\text{max,tcp}}^{\text{server}}$ & Maximale Verbindungsdauer im $P_{\text{server}}$                          & 21\,ms        \\
-        $T_{\text{min,tcp}}^{\text{amqp}}$   & Minimale Verbindungsdauer im $P_{\text{amqp}}$                            & 227\,s        \\
-        $T_{\text{max,tcp}}^{\text{amqp}}$   & Maximale Verbindungsdauer im $P_{\text{amqp}}$                            & 909\,s        \\
+        $T_{\text{P80}}$                 & 80.~Perzentil der Antwortzeit aus Sicht von \gls{alptwo}                  & 84\,ms        \\
+        $E_{\text{tcp}}$                 & Fehlerrate in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$ & 20{,}0\,\%    \\
+        $T_{\text{tcp}}^{\text{srv}}$    & Verbindungsdauer im $P_{\text{srv}}$                                      & 84\,ms        \\
+        $T_{\text{tcp}}^{\text{server}}$ & Verbindungsdauer im $P_{\text{server}}$                                   & 84\,ms        \\
+        $T_{\text{tcp}}^{\text{amqp}}$   & Verbindungsdauer im $P_{\text{amqp}}$                                     & 105\,ms       \\
         \hline
     \end{tabular}
 \end{table}
@@ -404,23 +401,17 @@ Tabelle~\ref{tab:exp-alps-realistic-config} fasst die Parameter zusammen, die si
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-    \item $T_{\text{m}}$: In \textit{Phase~3} bestimmter Median der vorhergesagten Verarbeitungszeit. Er dient als Referenzwert für die Kalibrierung der \textit{\gls{tcp}-Proxies}.
+    \item $T_{\text{P80}}$: In \textit{Phase~3} bestimmtes 80.~Perzentil der Antwortzeit aus Sicht der \gls{alptwo}-Instanzen (siehe Abschnitt~\ref{sub-sub:exp-alps-phase-3}). Es dient als Referenzwert für die Kalibrierung der \textit{\gls{tcp}-Proxies}.
 
-    \item $E_{\text{tcp}}$: Entspricht dem Wert der Messungen von Cloudflare~\citep{valenta2024}. Er wird einheitlich für alle \gls{tcp}-Proxies verwendet.
+    \item $E_{\text{tcp}}$: Entspricht dem Wert der Messungen von \textit{Cloudflare}~\citep{valenta2024}. Er wird einheitlich für alle \textit{\gls{tcp}-Proxies} verwendet.
 
-    \item $T_{\text{min,tcp}}^{\text{srv}}$ und $T_{\text{max,tcp}}^{\text{srv}}$: Verbindungsdauern werden zwischen den Grenzen log-gleichverteilt gezogen, sodass ihr Median
+    \item $T_{\text{tcp}}^{\text{srv}}$ und $T_{\text{tcp}}^{\text{server}}$: Die Verbindungsdauern in $P_{\text{srv}}$ und $P_{\text{server}}$ entsprechen $T_{\text{P80}}$. Dadurch werden die \gls{tcp}-Verbindungen bevorzugt bei Alarmmeldungen mit langer Antwortzeit getrennt, während die Alarmmeldung verarbeitet wird.
+
+    \item $T_{\text{tcp}}^{\text{amqp}}$: Die Verbindungsdauer im $P_{\text{amqp}}$ wird so gewählt, dass $T_{\text{P80}}$ 80\,\% davon entspricht:
           \begin{equation}
-              M_{\text{tcp}}^{\text{srv}} = \sqrt{T_{\text{min,tcp}}^{\text{srv}} \cdot T_{\text{max,tcp}}^{\text{srv}}} = 10{,}5\,\text{ms}
+              T_{\text{tcp}}^{\text{amqp}} = \frac{T_{\text{P80}}}{0{,}8} = \frac{5}{4} \cdot T_{\text{P80}} = 105\,\text{ms}
           \end{equation}
-          beträgt. Bei einer Referenzverarbeitungszeit von $T_{\text{m}} = 7\,\text{ms}$ ergibt sich daraus eine Wahrscheinlichkeit von etwa $20\,\%$, dass die Verbindung zwischen \gls{alptwo} und \gls{srv}~2 abbricht, während eine Alarmmeldung verarbeitet wird.
-
-    \item $T_{\text{min,tcp}}^{\text{server}}$ und $T_{\text{max,tcp}}^{\text{server}}$: Analog zu $T_{\text{min,tcp}}^{\text{srv}}$ und $T_{\text{max,tcp}}^{\text{srv}}$ ergibt sich eine Wahrscheinlichkeit von etwa $20\,\%$, dass die Verbindung zwischen \gls{srv}~2 und dem \textit{Server-Simulator} abbricht, während eine Alarmmeldung verarbeitet wird.
-
-    \item $T_{\text{min,tcp}}^{\text{amqp}}$ und $T_{\text{max,tcp}}^{\text{amqp}}$: Analog dazu ergibt sich ein Median von
-          \begin{equation}
-              M_{\text{tcp}}^{\text{amqp}} = \sqrt{T_{\text{min,tcp}}^{\text{amqp}} \cdot T_{\text{max,tcp}}^{\text{amqp}}} \approx 454\,\text{s}
-          \end{equation}
-          Damit beträgt die Wahrscheinlichkeit, dass eine einzelne Verbindung zwischen \gls{alptwo} und dem Broker innerhalb eines Durchlaufs ($N_{\text{alarm}} \cdot I_{\text{alarm}} = 300\,\text{s}$) abbricht, ebenfalls etwa $20\,\%$.
+          Dadurch wird die \gls{amqp}-Verbindung zwischen \gls{alptwo} und dem Broker bei etwa 20\,\% der Alarmmeldungen getrennt, während \gls{alptwo} auf eine Antwort von \gls{srv}~2 wartet.
 \end{itemize}
 
 Analog zu \textit{Phase~3} gilt ein Durchlauf als bestanden, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$.
@@ -471,6 +462,63 @@ Da $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$ in allen
 
 Da in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien auftrat, kann mit einer Konfidenz von $C = 95\,\%$ behauptet werden, dass \gls{alps} die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} unter realitätsnahen Fehlerbedingungen mit einer Wahrscheinlichkeit von mindestens $R = 95\,\%$ einhält. Diese Aussage gilt unter den oben genannten Limitierungen, insbesondere ohne Ausfälle von \gls{alpone}, des Brokers und von \gls{alpdedup}.
 
+\paragraph{Auswertung der Netzwerkfehler}
+
+Damit die Ergebnisse aussagekräftig sind, muss geprüft werden, ob die \textit{\gls{tcp}-Proxies} tatsächlich Netzwerkfehler erzeugt haben. Dazu wird ausgewertet, wie viele Verbindungen jeder Proxy über alle 59 Durchläufe akzeptiert, abgelehnt und getrennt hat. Tabelle~\ref{tab:exp-alps-realistic-connections} fasst die Werte zusammen.
+
+% TODO: update numbers and the rates
+\begin{table}[H]
+    \centering
+    \caption{Verbindungen pro \textit{\gls{tcp}-Proxy} über alle Durchläufe des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps}.}
+    \label{tab:exp-alps-realistic-connections}
+    \begin{tabular}{|l|l|l|l|l|}
+        \hline
+        \textbf{Proxy}      & \textbf{Akzeptiert} & \textbf{Abgelehnt}               & \textbf{Getrennt}               \\
+        \hline
+        $P_{\text{amqp}}$   & 274.019             & 68.459             (20{,}0\,\%)  & 273.900           (100{,}0\,\%) \\
+        $P_{\text{srv}}$    & 285.128             & 71.254              (20{,}0\,\%) & 285.122           (100{,}0\,\%) \\\
+        $P_{\text{server}}$ & 285.128             & 71.254             (20{,}0\,\%)  & 285.122           (100{,}0\,\%) \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Die Spalten bedeuten:
+
+\begin{itemize}
+    \item \textbf{Akzeptiert}: Verbindungen, die der Proxy angenommen und weitergeleitet hat.
+    \item \textbf{Abgelehnt}: Verbindungsversuche, die der Proxy direkt abgelehnt hat.
+    \item \textbf{Getrennt}: Akzeptierte Verbindungen, die der Proxy nach Ablauf der Verbindungsdauer $T_{\text{tcp}}$ getrennt hat.
+\end{itemize}
+
+Die Ablehnungsrate liegt bei allen drei Proxies bei 20{,}0\,\% und entspricht damit der konfigurierten Fehlerrate $E_{\text{tcp}}$. Auch die Trennungsrate liegt bei allen drei Proxies bei nahezu 100{,}0\,\%. Das bedeutet, dass fast keine akzeptierte Verbindung von \gls{alptwo} oder \gls{srv}~2 selbst beendet wird, sondern nahezu jede Verbindung so lange besteht, bis der Proxy sie nach Ablauf von $T_{\text{tcp}}$ trennt. Dies lässt sich wie folgt erklären:
+
+\begin{itemize}
+    \item \textbf{$P_{\text{amqp}}$}: Die \gls{amqp}-Verbindungen zwischen \gls{alptwo} und dem Broker sind langlebig und bleiben über viele Alarmmeldungen hinweg bestehen. Bei fehlgeschlagenen Requests schließt \gls{alptwo} lediglich den betroffenen Channel, nicht jedoch die \gls{tcp}-Verbindung (siehe Abschnitt~\ref{sub-sec:alptwo}). Die Verbindungen enden daher fast immer erst, wenn der Proxy sie trennt. Danach baut \gls{alptwo} eine neue Verbindung auf. Deshalb werden nahezu alle Verbindungen durch den Proxy getrennt.
+
+    \item \textbf{$P_{\text{srv}}$} und \textbf{$P_{\text{server}}$}: Sowohl \gls{alptwo} als auch \gls{srv}~2 verwenden persistente \gls{tcp}-Verbindungen (\textit{Keep-Alive}) zum Versenden von \gls{http}-Requests und verwenden sie für mehrere Requests wieder. Auch hier werden nahezu alle Verbindungen durch den Proxy getrennt.
+\end{itemize}
+
+Entscheidend für die \textit{Exactly-Once-Delivery} ist jedoch nicht, wie oft eine Verbindung getrennt wird, sondern wann: Die kritische Fehlerkonstellation $F$ aus \textit{Phase~1} liegt nur vor, wenn die Verbindung zwischen \gls{alptwo} und dem Broker getrennt wird, während \gls{alptwo} auf eine Antwort von \gls{srv}~2 wartet. Um das zu prüfen, werden die Zeitpunkte der Trennungen im $P_{\text{amqp}}$ mit den Wartezeiträumen der \gls{alptwo}-Instanzen verglichen. Ein Wartezeitraum beginnt mit der Weiterleitung einer Alarmmeldung an \gls{srv}~2 und endet mit dem Empfang der Antwort. Tabelle~\ref{tab:exp-alps-realistic-f} zeigt das Ergebnis.
+
+% TODO: update numbers and the rates
+\begin{table}[H]
+    \centering
+    \caption{Auftreten der kritischen Fehlerkonstellation $F$ über alle Durchläufe des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps}.}
+    \label{tab:exp-alps-realistic-f}
+    \begin{tabular}{|l|r|}
+        \hline
+        \textbf{Kennzahl}                                            & \textbf{Wert} \\
+        \hline
+        Übertragungsversuche von \gls{alptwo} (inkl.~Wiederholungen) & 653.785       \\
+        Trennungen im $P_{\text{amqp}}$ während des Wartens ($F$)    & 133.669       \\
+        Anteil von $F$ an allen Übertragungsversuchen                & 20{,}4\,\%    \\
+        Durchläufe mit mindestens einem Auftreten von $F$            & 59/59         \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Die Fehlerkonstellation $F$ trat bei 20{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Damit wurde genau die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt. Trotzdem trat keine Duplikation auf (siehe Tabelle~\ref{tab:exp-alps-realistic-results}).
+
 \subsubsection{Ausführung der Experimente}
 \label{sub-sub:exp-alps-execution}
 
@@ -481,4 +529,4 @@ Alle Experimente in diesem Abschnitt wurden mithilfe von \textit{Docker Compose}
     \item \textbf{Host~2}: Eine virtuelle Maschine bei \textit{Contabo}~\citep{contabo} mit 4 geteilten virtuellen CPUs (2{,}0\,GHz), 8\,GB \gls{ram} und \textit{Ubuntu} 24.04.3.
 \end{itemize}
 
-Die in \textit{Phase~3} und \textit{Phase~4} angegebenen absoluten Werte, wie $T_{\text{m}}$ und die davon abgeleiteten Werte, stammen von \textbf{Host~1}. Auf \textbf{Host~2} ergaben sich andere Werte, die hier nicht gesondert dargestellt werden. Die Ergebnisse hinsichtlich der Delivery-Garantien sind auf beiden Hosts identisch.
+Die in \textit{Phase~3} und \textit{Phase~4} angegebenen absoluten Werte, wie $T_{\text{P80}}$ und die davon abgeleiteten Verbindungsdauern, stammen von \textbf{Host~1}. Auf \textbf{Host~2} ergaben sich andere Werte, die hier nicht gesondert dargestellt werden. Die Ergebnisse hinsichtlich der Delivery-Garantien sind auf beiden Hosts identisch.
