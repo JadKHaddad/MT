@@ -286,7 +286,7 @@ Um das Modell ins Experiment zu integrieren, wird der \textit{Server-Simulator} 
 
 \paragraph{Kommunikation}
 
-Die Kommunikation zwischen den Komponenten erfolgt über drei \textit{\gls{tcp}-Proxies}. Der $P_{\text{amqp}}$ ist zwischen \gls{alptwo} und dem Broker positioniert, der $P_{\text{srv}}$ zwischen \gls{alptwo} und dem \textit{\gls{srv}~2 PROXY} und der $P_{\text{server}}$ zwischen dem \textit{\gls{srv}~2 PROXY} und dem \textit{Server-Simulator}. Analog zu den Experimenten zu \gls{lps} ist bei $P_{\text{amqp}}$ und $P_{\text{srv}}$ die \gls{alptwo}-Instanz der verbindende Client, bei $P_{\text{server}}$ der \textit{\gls{srv}~2 PROXY}. In dieser Phase leiten alle drei Proxies den Datenverkehr lediglich weiter, ohne Verbindungen zu trennen. Sie werden dennoch eingesetzt, damit der Aufbau mit dem von \textit{Phase~4} identisch ist und sich beide Phasen ausschließlich in den provozierten Netzwerkfehlern unterscheiden.
+Die Komponenten kommunizieren über drei \textit{\gls{tcp}-Proxies}. Der $P_{\text{amqp}}$ ist zwischen \gls{alptwo} und dem Broker positioniert, der $P_{\text{srv}}$ zwischen \gls{alptwo} und dem \textit{\gls{srv}~2 PROXY} und der $P_{\text{server}}$ zwischen dem \textit{\gls{srv}~2 PROXY} und dem \textit{Server-Simulator}. Analog zu den Experimenten zu \gls{lps} übernimmt bei $P_{\text{amqp}}$ und $P_{\text{srv}}$ die \gls{alptwo}-Instanz die Rolle von \textit{A} und bei $P_{\text{server}}$ der \textit{\gls{srv}~2 PROXY}. In dieser Phase leiten alle drei Proxies den Datenverkehr lediglich weiter, ohne Verbindungen zu trennen. Sie werden dennoch eingesetzt, damit der Aufbau mit dem von \textit{Phase~4} identisch ist und sich beide Phasen ausschließlich in den provozierten Netzwerkfehlern unterscheiden.
 
 \paragraph{Parameter}
 
@@ -339,9 +339,7 @@ Die Auswahl der Parameter begründet sich wie folgt:
     \label{fig:alps-exp-setup}
 \end{figure}
 
-Abbildung~\ref{fig:alps-exp-setup} veranschaulicht die Architektur der realitätsnahen Experimente in \textit{Phase~3} und \textit{Phase~4} sowie die Interaktionen der einzelnen Komponenten. Der \textit{Alarmanlagen-Simulator} generiert periodisch Alarmmeldungen und sendet sie an \gls{alpone} über den \textit{\gls{srv}~1 PROXY}. \gls{alpone} nimmt die Alarmmeldungen entgegen und publiziert sie anhand der \texttt{device\_id} an den Broker. Die \textit{\gls{alptwo}}-Instanzen verbinden sich über den $P_{\text{amqp}}$ mit dem Broker und konsumieren die Alarmmeldungen. Nach dem Konsumieren einer Alarmmeldung leitet \gls{alptwo} sie über den $P_{\text{srv}}$ an den \textit{\gls{srv}~2 PROXY} weiter, der sie wiederum über den $P_{\text{server}}$ weiterleitet. Anschließend wird die Alarmmeldung an \gls{alpdedup} übergeben, welche unmittelbar vor dem \textit{Server-Simulator} positioniert ist und bereits verarbeitete Alarmmeldungen anhand des Tupels \texttt{(device\_id, triggertime)} erkennt und verwirft, sodass nur eindeutige Alarmmeldungen an den \textit{Server-Simulator} weitergeleitet werden. Der \textit{Server-Simulator} über\-nimmt dabei, wie schon im Experiment zu \gls{lps}, die Rolle des ursprünglichen Services \gls{srv}~3 von \gls{marc}, verarbeitet die Alarmmeldungen anhand der durch das Vorhersagemodell bestimmten Verarbeitungszeit und speichert sie abschließend ab.
-
-Ein Durchlauf gilt als bestanden, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$.
+Abbildung~\ref{fig:alps-exp-setup} veranschaulicht die Architektur der realitätsnahen Experimente in \textit{Phase~3} und \textit{Phase~4} sowie die Interaktionen der einzelnen Komponenten. Der \textit{Alarmanlagen-Simulator} generiert periodisch Alarmmeldungen und sendet sie an \gls{alpone} über den \textit{\gls{srv}~1 PROXY}. \gls{alpone} nimmt die Alarmmeldungen entgegen und publiziert sie anhand der \texttt{device\_id} an den Broker. Die \textit{\gls{alptwo}}-Instanzen verbinden sich über den $P_{\text{amqp}}$ mit dem Broker und konsumieren die Alarmmeldungen. Nach dem Konsumieren einer Alarmmeldung leitet \gls{alptwo} sie über den $P_{\text{srv}}$ an den \textit{\gls{srv}~2 PROXY} weiter, der sie wiederum über den $P_{\text{server}}$ weiterleitet. Anschließend wird die Alarmmeldung an \gls{alpdedup} übergeben, welche unmittelbar vor dem \textit{Server-Simulator} positioniert ist und bereits verarbeitete Alarmmeldungen anhand des Tupels \texttt{(device\_id, triggertime)} erkennt und verwirft, sodass nur eindeutige Alarmmeldungen an den \textit{Server-Simulator} weitergeleitet werden. Der \textit{Server-Simulator} über\-nimmt dabei, wie schon im Experiment zu \gls{lps}, die Rolle des ursprünglichen Services \gls{srv}~3 von \gls{marc}, verarbeitet die Alarmmeldungen anhand der durch das Vorhersagemodell bestimmten Verarbeitungszeit und speichert sie abschließend ab. Ein Durchlauf gilt als bestanden, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$.
 
 \paragraph{Ergebnisse} Die Ergebnisse der 59 Durchläufe des Experiments werden in Tabelle~\ref{tab:exp-alps-normal-results} zusammengefasst.
 
@@ -466,18 +464,17 @@ Da in keinem der 59 Durchläufe eine Verletzung der Delivery-Garantien auftrat, 
 
 Damit die Ergebnisse aussagekräftig sind, muss geprüft werden, ob die \textit{\gls{tcp}-Proxies} tatsächlich Netzwerkfehler erzeugt haben. Dazu wird ausgewertet, wie viele Verbindungen jeder Proxy über alle 59 Durchläufe akzeptiert, abgelehnt und getrennt hat. Tabelle~\ref{tab:exp-alps-realistic-connections} fasst die Werte zusammen.
 
-% TODO: update numbers and the rates
 \begin{table}[H]
     \centering
     \caption{Verbindungen pro \textit{\gls{tcp}-Proxy} über alle Durchläufe des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps}.}
     \label{tab:exp-alps-realistic-connections}
-    \begin{tabular}{|l|l|l|l|l|}
+    \begin{tabular}{|l|r|r|r|}
         \hline
-        \textbf{Proxy}      & \textbf{Akzeptiert} & \textbf{Abgelehnt}               & \textbf{Getrennt}               \\
+        \textbf{Proxy}      & \textbf{Akzeptiert} & \textbf{Abgelehnt}  & \textbf{Getrennt}     \\
         \hline
-        $P_{\text{amqp}}$   & 274.019             & 68.459             (20{,}0\,\%)  & 273.900           (100{,}0\,\%) \\
-        $P_{\text{srv}}$    & 285.128             & 71.254              (20{,}0\,\%) & 285.122           (100{,}0\,\%) \\\
-        $P_{\text{server}}$ & 285.128             & 71.254             (20{,}0\,\%)  & 285.122           (100{,}0\,\%) \\
+        $P_{\text{amqp}}$   & 246.793             & 61.742 (20{,}0\,\%) & 246.698 (100{,}0\,\%) \\
+        $P_{\text{srv}}$    & 314.933             & 79.159 (20{,}1\,\%) & 314.925 (100{,}0\,\%) \\
+        $P_{\text{server}}$ & 287.364             & 71.939 (20{,}0\,\%) & 287.353 (100{,}0\,\%) \\
         \hline
     \end{tabular}
 \end{table}
@@ -509,15 +506,15 @@ Entscheidend für die \textit{Exactly-Once-Delivery} ist jedoch nicht, wie oft e
         \hline
         \textbf{Kennzahl}                                            & \textbf{Wert} \\
         \hline
-        Übertragungsversuche von \gls{alptwo} (inkl.~Wiederholungen) & 653.785       \\
-        Trennungen im $P_{\text{amqp}}$ während des Wartens ($F$)    & 133.669       \\
-        Anteil von $F$ an allen Übertragungsversuchen                & 20{,}4\,\%    \\
+        Übertragungsversuche von \gls{alptwo} (inkl.~Wiederholungen) & 638.762       \\
+        Trennungen im $P_{\text{amqp}}$ während des Wartens ($F$)    & 142.950       \\
+        Anteil von $F$ an allen Übertragungsversuchen                & 22{,}4\,\%    \\
         Durchläufe mit mindestens einem Auftreten von $F$            & 59/59         \\
         \hline
     \end{tabular}
 \end{table}
 
-Die Fehlerkonstellation $F$ trat bei 20{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Damit wurde genau die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt. Trotzdem trat keine Duplikation auf (siehe Tabelle~\ref{tab:exp-alps-realistic-results}).
+Die Fehlerkonstellation $F$ trat bei 22{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Damit wurde genau die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt. Trotzdem trat keine Duplikation auf (siehe Tabelle~\ref{tab:exp-alps-realistic-results}).
 
 \subsubsection{Ausführung der Experimente}
 \label{sub-sub:exp-alps-execution}
