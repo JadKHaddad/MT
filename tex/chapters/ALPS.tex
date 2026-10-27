@@ -487,7 +487,7 @@ Entscheidend für die \textit{Exactly-Once-Delivery} ist jedoch nicht, wie oft e
     \end{tabular}
 \end{table}
 
-Die Fehlerbedingung $F$ trat bei 22{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Damit wurde genau die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt. Dass dabei tatsächlich Duplikate entstanden sind, zeigen die Logs von \gls{alpdedup}: Über alle 59 Durchläufe hat \gls{alpdedup} insgesamt 307.390 erneut zugestellte Alarmmeldungen als Duplikat erkannt und nicht an den \textit{Server-Simulator} weitergeleitet. Trotzdem trat beim \textit{Server-Simulator} keine Duplikation auf (siehe Tabelle~\ref{tab:exp-alps-realistic-results}).
+Die Fehlerbedingung $F$ trat bei 22{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Damit wurde genau die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt.
 
 \subsubsection{Limitationen der Experimente}
 \label{sub-sub:exp-alps-limitationen}
