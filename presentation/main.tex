@@ -1,0 +1,398 @@
+% Copyright 2024 by Eva Pöll, Universität Münster
+% Example Presentation to illustrate the Uni Münster Latex Style
+%
+% This file may be distributed and/or modified
+%
+% 1. under the LaTeX Project Public License and/or
+% 2. under the GNU Public License.
+%
+% See the file doc/licenses/LICENSE for more details.
+% ###################################################
+
+
+\documentclass[11pt,handout, aspectratio=1610]{beamer}
+%Options:
+%	11pt - Default fontsize
+%	aspectratio=169 - 16:9, other ratios are also possible with all preset uni designs: 43, 169, 1610
+% 	handout - so that slide animations are suppressed, to hand out the presentation. Remove to generate animation slides
+
+
+\usetheme[language=en, style=cyan]{UniMS}
+%Options:
+%	Langugae Options:
+%	  de - deutsch -> wissen.leben, quotes with ,,x'' (default)
+%	  en - english -> living.knowledge, quotes with ``x''
+%	Preset Designs accordig to university design:
+%	  cyan (default) -> "Design C.1 // Flächen // Titel"
+%	  blue			 -> "Design B // Linie + Fläche // Titel"
+%	  grey			 -> "Design D.2 // Fläche + Schloss im Sommer // Titel"
+%	  blue-schloss	 -> "Design F.2 // Fläche + Hintergrundbild Schloss im Sommer // Titel"
+% 	  grey-cyan		 -> "Design G.1 // Linien + Farbhintergrund // Titel"
+% 	  green 		 -> "Design G.2 // Linien + Farbhintergrund // Titel"
+%	  custom		 -> set up own specific colours and styles
+%     Attention: the styles grey and blue-schloss create a larger pdf-file, due to the included photos in the title slide
+
+
+\setbeameroption{show notes} %Show slides with notes
+%Options (see beamer user guide):
+%	hide notes / show notes / show notes on second screen=right / show only notes / show only slides with notes
+
+%------------------------------------------------
+
+%Data
+%Information about the author (for title slide and possible contact slide)
+\author{Your Name}
+\authoremail{Emailaddress@uni-muenster.de}
+\authorinfo{optionally additional information, like\\M.Sc. Computer Science\\University of Münster}
+\authorlink{https://philpeople.org/}
+\authorlinktext{Find me on PhilPeople!}
+%\authorpic{figures/qrcode.png} %optional path to a photo or qrcode, this path is set per default
+
+%Information about the Presentation
+\title[Short Title]{Example Presentation}
+\date{20th Feb 2024}
+\institute{Conference Name for Title Slide}
+
+%------------------------------------------------
+
+\begin{document}
+	
+	%Beginning
+	\begin{frame}
+		\titlepage	%Retrieves the shown information from data section above
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Outline}
+		\tableofcontents %Retrieves the structure from using \part{...} \section{...} and \subsection{...}. You might need to compile twice for it to settle.
+	\end{frame}
+	
+	%Content 
+	\section{Standard Features}
+	
+	%This inserts a section divider
+	\makesectionpage
+	
+	%And has the same effect as the built in version:
+	%\begin{frame}
+	%	\sectionpage
+	%\end{frame}
+	
+	\subsection{Styles}
+	
+	%Same for subsections
+	\makesubsectionpage
+	
+	%And has the same effect as the built in version:
+	%\begin{frame}
+	%	\subsectionpage
+	%\end{frame}
+	
+	\begin{frame}
+		\frametitles
+		
+		\begin{itemize}
+			\item The Uni Münster beamer theme comes with \textbf{6 built-in styles}:
+			\begin{itemize}
+				\item \texttt{cyan} 		  \textrightarrow~ "Design C.1 // Flächen // Titel", default
+				\item \texttt{blue}			  \textrightarrow~ "Design B // Linie + Fläche // Titel"
+				\item \texttt{grey}			  \textrightarrow~ "Design D.2 // Fläche + Schloss im Sommer // Titel"
+				\item \texttt{blue-schloss}	  \textrightarrow~ "Design F.2 // Fläche + Hintergrundbild Schloss im Sommer // Titel"
+				\item \texttt{grey-cyan}	  \textrightarrow~ "Design G.1 // Linien + Farbhintergrund // Titel" and
+				\item \texttt{green} 		  \textrightarrow~ "Design G.2 // Linien + Farbhintergrund // Titel"
+			\end{itemize}
+			\item A style is chosen at the line to load the beamer theme: \texttt{$\backslash$usetheme[style=blue-schloss]\{UniMS\}}.
+			\item For a very specific look a \texttt{custom}-theme can be created: The custom theme needs to be defined in the beamerthemeUniMS.sty-file, using the highlighted hooks. The colours are defined in beamercolorthemeUniMS.sty, the font styling in beamerfontthemeUniMS.sty.
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\frametitles
+		
+		\begin{itemize}
+			\item The \textbf{slide dimensions} can be adjusted. They are set as a beamer class option: \texttt{$\backslash$documentclass[aspectratio=1610]\{beamer\}}
+			\item All styles of the Uni Münster theme are optimised for the three common slide dimensions:
+			\begin{itemize}
+				\item \texttt{43}   \textrightarrow~ 4:3 (default), 12.80cm x 9.60cm
+				\item \texttt{169}  \textrightarrow~ 16:9, 16cm x 9cm
+				\item \texttt{1610} \textrightarrow~ 16:10, 16cm x 10cm
+			\end{itemize}
+			\item Other ratios are also possible, but might break the layout of the slides. If another ratio is used, it should be setup with a custom style.
+			
+			\bigskip
+			
+			\item The \textbf{claim} and the style of quotation marks is controlled by the language option of the theme. It can be changed with \texttt{$\backslash$usetheme[language=en]\{UniMS\}}.
+			\item The options are \texttt{language=en} or \texttt{language=de}.
+		\end{itemize}
+	\end{frame}
+	
+	\subsection{Colours}
+	
+		\begin{frame}
+			\frametitles
+			
+			\begin{itemize}
+				\item The \textbf{colour scheme} depends on the chosen style for the presentation.
+				\item All colours are defined in the \texttt{beamercolorthemeUniMS.sty} file and can be altered there.
+				\item In general there are 5 colours defined:
+				\begin{itemize}
+					\item \texttt{col1}: The primary colour, used among other things for frame titles and the footer, e.g. cyan
+					\item \texttt{col2}: The secondary colour, used for the subtitle of the frame etc., e.g. peridot.
+					\item \texttt{col3}: An additional colour, used for further information (like on the title slide), e.g. graphite.
+					\item \texttt{accent}: The highlighting colour, used for the text highlighting, e.g. cassis.
+					\item \texttt{textcolor}: The general text colour of the presentation, a dark grey.
+				\end{itemize}
+				\item For small changes within a chosen style either the colour of the style can be changed more general at the colour definition. Or, for more fine-grained changes in specific areas (like frame titles), the chosen colour can be changed at the setbeamercolor-statements in the second part of the file. 
+			\end{itemize}
+		\end{frame}
+	
+	
+	\subsection{Titles and Notes}
+		
+	\begin{frame}
+		%insert titles from section (and subsection)
+		%the subsection is shown bigger (-> frametitle), the section as framesubtitle
+		%works too, if no subsection is given
+		\frametitles
+		
+		By structuring the presentation in (sub-)sections an agenda can be automatically generated and embedded in the pdf. And it allows to divide the presentation using separator pages (\texttt{$\backslash$makepartpage, $\backslash$makesectionpage, $\backslash$makesubsectionpage}).
+		\medskip
+		
+		The (sub-)section title can then also be used as frame titles either by \texttt{$\backslash$frametitle\{$\backslash$insertsection\}}, or by the shorthand command \texttt{$\backslash$frametitles}.
+		\medskip
+		
+		This slide also has notes. To include the notes in the pdf use the beamer option: \texttt{$\backslash$setbeameroption\{show notes\}}.
+	\end{frame}
+	
+	%insert a slide with notes
+	\note[itemize]{
+		\item Notes can be suppressed in the output changing the beamer option in the preamble to \texttt{$\backslash$setbeameroption\{hide notes\}}.
+		\medskip
+		\item Use notes to remember what you want to say
+		\item or write down additional information
+	}
+			
+	\subsection{Lists}
+	
+		\begin{frame}
+			\frametitle{Animated Lists}
+			\framesubtitle{\insertsection}
+			
+			If the pdf-output shows animated slides or not, depends on classoption \texttt{handout}. To suppress animation (e.g. to print or handout slides) set \texttt{$\backslash$documentclass[handout]\{beamer\}}.\\
+			To create animated slides in the pdf-output, delete the \texttt{handout}-option.
+			
+			\medskip
+						
+			\begin{enumerate}[<+->]
+				\item This is an enumerated list
+				\item It has the normal animation, where each item appears per click	
+				\pause[1]
+				\item With pause[1]  the item is shown right from the beginning
+			\end{enumerate}
+		
+			\medskip
+			
+			\begin{itemize}[<alert@+>]
+				\alert<@+>{} %makes everything black on first appearence. remove for highlighting 1st point already
+				\item With alert the list is animated too --
+				\item But all items are visible from the beginning.
+				\begin{itemize}
+					\item With each click, they are just highlighted.
+					\item The second level of the itemize environment uses the secondary colour, while the first level uses the primary colour.
+				\end{itemize}
+				\item You can change all colours in beamercolothemeUniMSep.tex.
+			\end{itemize}			
+		\end{frame}
+				
+	\subsection{Blocks}
+		\begin{frame}
+			\frametitles
+			
+			\begin{block}{Definition 27a}
+				Blocks are a nice way to highlight presentation parts like definitions.
+				\begin{enumerate}
+					\item The Block environment can be combined with other environments,
+					\item like numbered lists or bullet points.
+				\end{enumerate}
+			\end{block}
+		
+			\begin{exampleblock}{This is an example block}
+				This is a different kind of block, explaining an interesting topic.
+			\end{exampleblock}
+		
+			\begin{alertblock}{Alert Block}
+				This block highlights something very important.
+			\end{alertblock}
+		\end{frame}
+
+	\section{Additional Features}
+	
+	\makesectionpage
+	
+	\subsection{References}
+	
+		\begin{frame}
+			\frametitles
+			
+			\vskip0pt plus 1filll
+			Additionally to the built-in beamer features, there is more to this theme:
+			
+			Maybe you would like to reference what someone said on a slide, or present an infographic and would like to reference the authors. You can do that with "\texttt{\textbackslash source\{\}}". Which positions the reference in light grey at the bottom left of the slide.
+			
+			It is important to place this command outside of fancy environments like columns, to really push it to the bottom of the frame (and not only the bottom of the environment). This command does not automatically create a reference list (but could be combined with \texttt{\textbackslash cite\{\}}). The command also leads to aligning the content of the slide at the top. To counterbalance this use \texttt{$\backslash$vskip0pt plus 1filll} before the content.
+			
+			\source{The Internet, 2024}
+		\end{frame}
+	
+	\subsection{Coloured slides}
+	
+		\begin{frame}[bgcol1]
+				\frametitles
+				
+				This is a coloured slide, if you want to have some fun.
+		\end{frame}
+		
+		\begin{frame}[bgcol2]
+				\frametitles
+				
+				Same works with the secondary colour.
+		\end{frame}
+		
+	\subsection{Layouts}
+
+		\begin{frame}
+			\frametitle{Two Column Layout}
+			\framesubtitle{\insertsection}
+			
+			\layoutTwoColumn{
+				\begin{itemize}
+					\item On the left
+					\item there are just
+					\item a lot of bullet points.
+				\end{itemize}
+			}{
+				\begin{block}{Block}
+					While, at the same time, on the right, there can be an informative block or a picture.
+				\end{block}
+			}
+			
+			\bigskip
+			Sidenote: This command uses the columns-environment.
+		\end{frame}
+	
+		\begin{frame}
+			\frametitle{Layout with Motivating Icon on the Right}
+			\framesubtitle{\insertsection}
+			
+			\layoutTextIconRight{
+				\begin{itemize}
+					\item There is a very long text here with many good points. Next to it is a nice icon, which is very motivating. The text will cover several lines, if it gets too long.
+					\item Good icons can be found here:
+					\begin{itemize}
+						\item \hrefstyled{https://thenounproject.com/}{The Noun Project}
+						\item \hrefstyled{https://ikonate.com/}{Ikonate}
+						\item Colour definitions (hex-values) can be found in beamercolorthemeUniMS.sty
+					\end{itemize}
+				\end{itemize}
+			}{figures/goal.pdf}
+		\end{frame}
+	
+	\section{Closing a presentation}
+	
+		\makesectionpage
+	
+		%Use coloured slides without title to close the presentation
+		\makeclosingpage{Thank you for your attention!}
+		\makeclosingpage[bgcol2]{Questions?}
+		
+		%Make a contact slide
+		%Pull data from data above (author, authoremail, authorinfo)
+		\makecontactpage
+		
+		%also works with colour
+		\makecontactpage[bgcol1]
+		\makecontactpage[bgcol2]		
+				
+	\section{Neatly animated example frames}
+		\makesectionpage
+		
+		\subsection*{Conspiracy Theory: Amikäfer} %the star removes it from the toc
+		%nicely animated
+		\begin{frame}
+			\frametitles
+			
+			\layoutTextIconRight{	
+				\vspace{-10pt}
+				\begin{itemize}[<alert@+>]
+					\alert<@+>{}
+					\item 1950: sprunghafter Anstieg von Kartoffelkäfern in DDR
+					\item zu früh im Jahr, zu viele, oft vermehrt nach Fluggeräuschen
+					\item Kartoffelkäfer von allen Seite als mögliche Waffe erforscht
+					\item DDR-Regierung: wurden von US-Soldaten abgeworfen, um DDR zu destabilisieren
+					\item Aber: keine Unterlagen auf Seiten der Alliierten
+					\item Kaum Möglichkeiten der Bekämpfung (Kartoffelkäferabwehrdienst, Pflanzenschutzmittel) + geeignetes Wetter für Käferwachstum
+				\end{itemize}
+				\smallskip
+				
+				\pause[8]
+				\textbf{Ist das eine Verschwörungstheorie?}
+			}{figures/rocket}
+		
+			\pause[1]
+			\source{Flemming 2020}
+		\end{frame}
+	
+		\subsection*{Metamorphic Relations}
+		%complex image animation
+		\begin{frame}
+			\frametitles
+			
+			\begin{columns}[c, onlytextwidth]
+				\begin{column}{.6\textwidth}%
+					\begin{itemize}
+						\item\alert<2|handout:0>{MR = formulation of expected behaviour}
+						\item\alert<3|handout:0>{Describe connection between \textcolor{cyan}{source testcase}\\
+							and \textcolor{peridot}{follow-up testcase}}
+						\item 3-tuple:
+						\alert<@+>{}\alert<@+>{}\alert<@+>{}
+						\begin{itemize}[<alert@+>]
+							\item[T] -- relation between inputs (transformation)
+							\item[O] -- relation between outputs
+							\item[f\,] -- program function
+						\end{itemize}
+					\end{itemize}
+				\end{column}
+				\begin{column}{.35\textwidth}%
+					\pause[1]
+					%animate graphic by using the 7 pdf pages
+					\foreach \x in {1,...,7} {
+						\includegraphics<\x|handout:0>[width=\columnwidth, page=\x]{figures/mr.pdf}
+					}
+					%show only last slide in handoutmode
+					\includegraphics<0|handout:1>[width=\columnwidth, page=7]{figures/mr.pdf}
+				\end{column}
+			\end{columns}
+			\pause[1]
+			\source{[CCY98, Seg+16, Che+18]}
+		\end{frame}
+	
+		\subsection*{Most Relevant References: Metamorphic Testing}
+		%example how to setup references
+		\begin{frame}
+			\frametitles
+			
+			{\fontsize{7pt}{8pt} 
+				\begin{itemize}
+					\addtolength{\itemindent}{1cm}
+					\item[{[Bar+15]}] Earl T. Barr et al. \textit{"The Oracle Problem in Software Testing: A Survey"}. In: IEEE Transactions on Software Engineering 41.5 (2015), pp. 507–525. \doi{10.1109/TSE.2014.2372785}.
+					\item[{[CCY98]}] T. Y. Chen, S. C. Cheung, and S. M. Yiu. \textit{"Metamorphic Testing: A New Approach for Generating Next Test Cases"}. Technical Report HKUST-CS98-01. The Hong Kong University of Science and Technology, 1998.
+					\item[{[Che+18]}] Tsong Yueh Chen et al. "Metamorphic Testing: A Review of Challenges and Opportunities". In: ACM Computing Surveys 51.1 (2018), 4:1–4:27. \doi{10.1145/3143561}.
+					\item[{[Liu+14]}] Huai Liu et al. \textit{"How Effectively Does Metamorphic Testing Alleviate the Oracle Problem?"} In: IEEE Transactions on Software Engineering 40.1 (2014), pp. 4–22. \doi{10.1109/TSE.2013.46}.
+					\item[{[Seg+16]}] Sergio Segura et al. \textit{"A Survey on Metamorphic Testing"}. In: IEEE Transactions on Software Engineering 42.9 (2016), pp. 805–824. \doi{10.1109/TSE.2016.2532875}.
+					\item[{[Seg+20]}] Sergio Segura et al. \textit{"Metamorphic Testing: Testing the Untestable"}. In: IEEE Software 37.3 (2020), pp. 46–53. \doi{10.1109/MS.2018.2875968}.
+					\item[{[Wey98]}] Elaine J. Weyuker. \textit{"On Testing Non-Testable Programs"}. In: The Computer Journal 25.4 (1982), pp. 465–470. \doi{10.1093/comjnl/25.4.465}.
+					\item[{[Zho+20]}] Zhi Quan Zhou et al. \textit{"Metamorphic Relations for Enhancing System Understanding and Use"}. In: IEEE Transactions on Software Engineering 46.10 (2020), pp. 1120–1154. \doi{10.1109/TSE.2018.2876433}.
+			\end{itemize}}
+		\end{frame}
+	
+\end{document}

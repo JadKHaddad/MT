@@ -7,7 +7,7 @@
 ## Install latex packages
 
 ```bash
-sudo apt install texlive-science texlive-latex-extra texlive-extra-utils texlive-lang-german latexmk texlive-publishers texlive-science
+sudo apt install texlive-science texlive-latex-extra texlive-fonts-extra texlive-extra-utils texlive-lang-german latexmk texlive-publishers texlive-science
 ```
 
 ## Install mermaid-cli
