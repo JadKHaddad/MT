@@ -1,5 +1,4 @@
 \documentclass[11pt,handout,aspectratio=1610]{beamer}
-%	handout - Animationen werden unterdrückt
 
 \usetheme[language=de, style=blue]{UniMS}
 
@@ -8,14 +7,15 @@
 
 \usepackage{booktabs}
 \usepackage{tabularx}
-% Spaltentypen für Tabellen über die volle Breite: C = zentriert, R = rechtsbündig, L = linksbündig
+
 \newcolumntype{C}{>{\centering\arraybackslash}X}
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
 \usepackage{amssymb}
 \usepackage{tikz}
 \usetikzlibrary{positioning}
-\usepackage{appendixnumberbeamer} % Backup-Folien zählen nicht zur Gesamtzahl
+\usepackage{appendixnumberbeamer}
 
 \makeatletter
 \setbeamertemplate{headline}{
@@ -38,6 +38,7 @@
 	}
 	\fi
 }
+
 \setbeamertemplate{footline}{
 	\ifnum\c@page=1
 	\else
@@ -61,7 +62,6 @@
 	\fi
 }
 
-
 \setbeamertemplate{section page}{
 	\thispagestyle{navigation@sectionpage}
 	\begin{textblock*}{\slidew}(0cm,0cm)
@@ -79,40 +79,29 @@
 
 \newcommand{\sprechtext}[1]{\note{\footnotesize #1}}
 
-% Abbildung aus der Arbeit einbinden. Fehlt die Datei, erscheint ein Platzhalter mit dem Dateinamen.
-% #1 = Breite, #2 = maximale Höhe, #3 = Dateipfad
-\newcommand{\abbildung}[3]{%
-	\IfFileExists{#3}{%
+\newcommand{\abbildung}[3]{
+	\IfFileExists{#3}{
 		\includegraphics[width=#1,height=#2,keepaspectratio]{#3}%
-	}{%
+	}{
 		\fbox{\parbox[c][\dimexpr#2-2\fboxsep-2\fboxrule\relax][c]{\dimexpr#1-2\fboxsep-2\fboxrule\relax}{\centering\scriptsize Abbildung fehlt:\\\texttt{#3}}}%
-	}%
+	}
 }
 
 \newcommand{\ok}{\textcolor{green!45!black}{$\checkmark$}}
 \newcommand{\nok}{\textcolor{red!70!black}{$\times$}}
 
-%------------------------------------------------
-% Daten
-
 \author{Jad Haddad}
-\authoremail{jadkhaddad@uni-muenster.de} % TODO: eigene E-Mail-Adresse eintragen
+\authoremail{jadkhaddad@uni-muenster.de}
 \authorinfo{Masterarbeit\\M.Sc. Informatik\\Universität Münster}
 \authorlink{https://github.com/JadKHaddad/ALPS}
 \authorlinktext{Quellcode auf GitHub}
-\authorpic{figures/qrcode.png} % QR-Code aus Abb. A.1 (Link zum Repository)
+\authorpic{../qrcode/qrcode.pdf}
 
 \title[ALPS]{{\large Entwurf und Evaluation eines asynchronen Proxy-Systems zur Mitigierung von Design Smells in verteilten Legacy-Systemen}}
-\date{\today} % TODO: Datum der Verteidigung eintragen
+\date{\today}
 \institute{Parallele und verteiltete Systeme}
 
-%------------------------------------------------
-
 \begin{document}
-
-%================================================
-% Eröffnung
-%================================================
 
 \begin{frame}
 	\titlepage
@@ -138,9 +127,8 @@
 	\textit{Roter Faden: Problem $\rightarrow$ bestehender Ansatz (LPS) $\rightarrow$ dessen Schwächen $\rightarrow$ neues System (ALPS) $\rightarrow$ Nachweis.}
 }
 
-%================================================
 \section{Einleitung und Zielsetzung}
-%================================================
+
 \makesectionpage
 
 \begin{frame}
@@ -213,9 +201,9 @@
 	Drittens evaluiere ich ALPS experimentell: einmal unter genau den Bedingungen, unter denen LPS gescheitert ist, und einmal unter realitätsnahen Bedingungen mit Netzwerkfehlern.
 }
 
-%================================================
+
 \section{Grundlagen}
-%================================================
+
 \makesectionpage
 
 
@@ -265,9 +253,9 @@
 	Das sind zwar RabbitMQ-Erweiterungen, die Konzepte gibt es aber auch in anderen Brokern. So wird ein Vendor-Lock-in vermieden.
 }
 
-%================================================
+
 \section{Fallstudie: MARC}
-%================================================
+
 \makesectionpage
 
 \begin{frame}
@@ -285,7 +273,7 @@
 		      \end{itemize}
 	\end{itemize}
 
-	\source{Reale Systemgröße: über 30 Komponenten, hier reduzierte Sicht}
+
 \end{frame}
 
 \sprechtext{
@@ -300,8 +288,8 @@
 	\frametitle{MARC: Replizierte Architektur}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-3-3.pdf}
-	\source{Abb. 3.3 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/marc.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -343,9 +331,9 @@
 	Für dieses System sind Exactly-Once- und In-Order-Delivery also keine Komfortfunktionen, sondern Sicherheitsanforderungen.
 }
 
-%================================================
+
 \section{Analyse des Legacy Proxy Systems}
-%================================================
+
 \makesectionpage
 
 \begin{frame}
@@ -376,8 +364,8 @@
 	\frametitle{LPS: Integration in MARC}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-3-6.pdf}
-	\source{Abb. 3.6 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/lps.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -435,7 +423,7 @@
 		Alle 59 erfolgreich $\rightarrow$ mit 95\,\% Konfidenz ist ein Durchlauf mit $\geq$ 95\,\% Wahrscheinlichkeit erfolgreich
 	\end{block}
 
-	\source{Reproduzierbar über Seed und Docker Compose}
+
 \end{frame}
 
 \sprechtext{
@@ -452,8 +440,8 @@
 	\frametitle{Aufbau der Experimente}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-3-9.pdf}
-	\source{Abb. 3.9 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/exp_lps.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -521,8 +509,8 @@
 	\frametitle{Ablauf: Verletzung der Exactly-Once-Delivery in LPS}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-3-10.pdf}
-	\source{Abb. 3.10 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/lps_exactly_once_delivery_violation_sequence.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -552,7 +540,7 @@
 		\bottomrule
 	\end{tabularx}
 
-	\source{HiveMQ-CE-Bug \#558 verhindert parallele Shared-Subscription-Consumer $\rightarrow$ Mosquitto}
+
 \end{frame}
 
 \sprechtext{
@@ -593,8 +581,8 @@
 	\frametitle{Ablauf: Verletzung der In-Order-Delivery in LPS}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-3-11.pdf}
-	\source{Abb. 3.11 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/lps_in_order_delivery_violation_sequence.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -625,9 +613,8 @@
 	Zusammengefasst hat LPS drei Limitationen: Beide Garantien können verletzt werden, und der Retry-Mechanismus bindet das System an einen bestimmten Broker. Die Grundidee, also das asynchrone und transparente Proxy-Broker-Proxy-Design, ist jedoch richtig. ALPS übernimmt diese Idee und behebt den Rest.
 }
 
-%================================================
 \section{Advanced Legacy Proxy System}
-%================================================
+
 \makesectionpage
 
 \begin{frame}
@@ -677,8 +664,8 @@
 	\frametitle{ALPS: Integration in MARC}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-4-2.pdf}
-	\source{Abb. 4.2 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/a_lps.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -734,7 +721,6 @@
 		\node[box, minimum width=22mm] (alp1) at (2.6,0) {\textbf{ALP 1}\\HTTP $\rightarrow$ AMQP};
 		\node[box, minimum width=26mm] (ex) at (6.5,0) {Exchange\\\texttt{x-consistent-hash}};
 
-		% Queues: Kopf (nächste Meldung) rechts
 		\foreach \y/\name in {1.0/q1, 0/q2, -1.0/qn} {
 				\draw[col1, rounded corners=1pt] (8.7,\y-0.3) rectangle (11.4,\y+0.3);
 			}
@@ -912,8 +898,6 @@
 	\begin{alertblock}{Deployment}
 		Fehler zwischen ALP D und SRV 3 können zu Duplikaten führen $\rightarrow$ ALP D als \textbf{Sidecar} direkt neben SRV 3 betreiben
 	\end{alertblock}
-
-	\source{Proof of Concept: Exactly-Once ist in verteilten Systemen mit Ausfällen grundsätzlich nicht garantierbar}
 \end{frame}
 
 \sprechtext{
@@ -932,8 +916,8 @@
 	\frametitle{Ablauf: Mehrfachzustellung ohne ALP D}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-4-5.pdf}
-	\source{Abb. 4.5 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/a_lps_exactly_once_delivery_dup.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -942,9 +926,8 @@
 	Hier der Ablauf ohne Deduplizierung: Die Verbindung von Instanz I zum Broker bricht ab, während SRV 2 die Meldung verarbeitet. Der Broker übergibt sie an Instanz II, und sie wird ein zweites Mal weitergeleitet. Genau diese Wiederholung fängt ALP D ab.
 }
 
-%================================================
 \section{Experimentelle Evaluation}
-%================================================
+
 \makesectionpage
 
 \begin{frame}
@@ -1044,8 +1027,7 @@
 	\frametitle{Aufbau der realitätsnahen Experimente}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-4-6.pdf}
-	\source{Abb. 4.6 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/exp_alps.pdf}
 \end{frame}
 
 \sprechtext{
@@ -1104,7 +1086,7 @@
 		\bottomrule
 	\end{tabularx}
 
-	\source{Fehlerrate nach Messungen von Cloudflare zu TCP-Resets und Timeouts, als pessimistische Obergrenze}
+
 \end{frame}
 
 \sprechtext{
@@ -1181,9 +1163,9 @@
 	Mit 95 Prozent Konfidenz hält ein Durchlauf unter diesen Bedingungen also beide Garantien mit mindestens 95 Prozent Wahrscheinlichkeit ein. Auf einem zweiten Host, einer Cloud-VM, waren die Ergebnisse identisch.
 }
 
-%================================================
+
 \section{Fazit und Ausblick}
-%================================================
+
 \makesectionpage
 
 \begin{frame}
@@ -1204,7 +1186,7 @@
 		\bottomrule
 	\end{tabularx}
 
-	\source{Nicht simuliert: Broker-Cluster, Ausfälle von ALP 1/Broker/ALP D, Paketverlust}
+
 \end{frame}
 
 \sprechtext{
@@ -1257,12 +1239,9 @@
 	\end{itemize}
 }
 
-\makecontactpage[c] % [c] = Standardausrichtung; ohne Option meldet neueres beamer einen keyval-Fehler
+\makecontactpage[c]
 
-%================================================
-% Backup-Folien (nicht in der Agenda, nicht in der Gesamtzahl der Folien)
 \appendix
-%================================================
 \section{Backup}
 
 \begin{frame}
@@ -1326,14 +1305,18 @@
 	Der Seed wurde gezielt gesucht, weil die Experimente zu LPS keine Häufigkeit messen, sondern zeigen sollen, dass LPS unter bestimmten Bedingungen versagt. Für ALPS wurde derselbe Seed verwendet, um genau diese Bedingungen erneut herzustellen.
 }
 
-% Abbildungen aus der Arbeit für Rückfragen
+\begin{frame}
+	\frametitle{Backup: Verletzung der Exactly-Once-Delivery in MARC}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/marc_exactly_once_delivery_violation_sequence.pdf}
+\end{frame}
 
 \begin{frame}
 	\frametitle{Backup: Verletzung der In-Order-Delivery in MARC}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-3-5.pdf}
-	\source{Abb. 3.5 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/marc_in_order_delivery_violation_sequence.pdf}
 \end{frame}
 
 \sprechtext{
@@ -1344,8 +1327,8 @@
 	\frametitle{Backup: AMQP-Komponentenmodell}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.7\textheight}{figures/abb-2-3.pdf}
-	\source{Abb. 2.3 der Arbeit}
+	\abbildung{\linewidth}{0.7\textheight}{../img/drawio/amqp_topo.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -1356,8 +1339,8 @@
 	\frametitle{Backup: Parallele Verarbeitung in ALPS}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-4-3.pdf}
-	\source{Abb. 4.3 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/alps_normal_sequence.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -1368,8 +1351,8 @@
 	\frametitle{Backup: Fehlerpfad in ALP 2}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-4-4.pdf}
-	\source{Abb. 4.4 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/alps_retry_sequence.pdf}
+
 \end{frame}
 
 \sprechtext{
@@ -1380,8 +1363,8 @@
 	\frametitle{Backup: Verbleibende Lücke der Idempotenz in ALP D}
 	\framesubtitle{\insertsection}
 	\centering
-	\abbildung{\linewidth}{0.72\textheight}{figures/abb-4-1.pdf}
-	\source{Abb. 4.1 der Arbeit}
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/a_lps_dedup_exactly_once_delivery_violation_sequence.pdf}
+
 \end{frame}
 
 \sprechtext{
