@@ -1,8 +1,3 @@
-% ###################################################
-% Verteidigung der Masterarbeit – Jad Haddad
-% Basierend auf der Vorlage des Uni Münster Beamer-Themes (Eva Pöll, 2024)
-% ###################################################
-
 \documentclass[11pt,handout,aspectratio=1610]{beamer}
 %	handout - Animationen werden unterdrückt
 
@@ -22,12 +17,6 @@
 \usetikzlibrary{positioning}
 \usepackage{appendixnumberbeamer} % Backup-Folien zählen nicht zur Gesamtzahl
 
-%------------------------------------------------
-% Kopf- und Fußzeile aus beamerthemeUniMS.sty übernommen, mit zwei Änderungen:
-% 1. Seitenzahl als "aktuelle Folie / Gesamtzahl" (Backup-Folien zählen nicht mit)
-% 2. Die Titelfolie wird über die PDF-Seite erkannt statt über die Foliennummer.
-%    Sonst würden Kopf- und Fußzeile auch auf der ersten Backup-Folie fehlen,
-%    weil die Nummerierung im Backup-Teil wieder bei 1 beginnt.
 \makeatletter
 \setbeamertemplate{headline}{
 	\ifnum\c@page=1
@@ -72,10 +61,7 @@
 	\fi
 }
 
-%------------------------------------------------
-% Abschnittsseite: statt nur des aktuellen Abschnitts werden alle Abschnitte aufgelistet.
-% Der aktuelle Abschnitt ist größer und fett, die übrigen sind kleiner und blasser.
-% Hintergrund und Farben wie im Theme (beamerthemeUniMS.sty).
+
 \setbeamertemplate{section page}{
 	\thispagestyle{navigation@sectionpage}
 	\begin{textblock*}{\slidew}(0cm,0cm)
@@ -91,10 +77,6 @@
 }
 \makeatother
 
-%------------------------------------------------
-% Hilfsbefehle
-
-% Sprechtext als Notiz. Schriftgröße hier zentral anpassen, falls eine Notizseite überläuft.
 \newcommand{\sprechtext}[1]{\note{\footnotesize #1}}
 
 % Abbildung aus der Arbeit einbinden. Fehlt die Datei, erscheint ein Platzhalter mit dem Dateinamen.
