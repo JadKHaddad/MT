@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="cvGvFGDaaiNlz1BJfXfh">
-    <mxGraphModel dx="975" dy="536" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1346" dy="711" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -176,7 +176,7 @@
             <mxPoint x="965" y="709.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="4NaugXFDCfd7kfkR637J-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;" value="MQTT" vertex="1">
+        <mxCell id="4NaugXFDCfd7kfkR637J-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;" value="AMQP" vertex="1">
           <mxGeometry height="30" width="60" x="955" y="695" as="geometry" />
         </mxCell>
         <mxCell id="s9GM7TX1E71qG-LEdkIS-1" edge="1" parent="1" source="k2QZdSC_FI8t9IlOHx6p-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;dashed=1;dashPattern=1 4;endArrow=none;endFill=0;startArrow=block;startFill=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;" target="k2QZdSC_FI8t9IlOHx6p-49">

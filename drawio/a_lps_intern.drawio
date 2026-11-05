@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="OG3FxDTNSDp6Z8v5TIjM">
-    <mxGraphModel dx="4611" dy="1877" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="4814" dy="1877" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -184,7 +184,7 @@
             <mxPoint x="-2575" y="-430.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="v7o8h9A7PPokPzk-Vm2X-71" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;" value="MQTT" vertex="1">
+        <mxCell id="v7o8h9A7PPokPzk-Vm2X-71" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;" value="AMQP" vertex="1">
           <mxGeometry height="30" width="60" x="-2585" y="-445" as="geometry" />
         </mxCell>
       </root>
