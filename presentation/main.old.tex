@@ -1,0 +1,1374 @@
+\documentclass[11pt,handout,aspectratio=1610]{beamer}
+
+\usetheme[language=de, style=blue]{UniMS}
+
+% \setbeameroption{show notes} % Sprechtext als Notizseiten im PDF
+% Alternativen: hide notes / show notes on second screen=right / show only notes
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{appendixnumberbeamer}
+
+\makeatletter
+\setbeamertemplate{headline}{
+	\ifnum\c@page=1
+	\else
+	{
+		\ifbeamer@logogrey
+			\def\col{frame head}
+			\def\imgpath{assets/Logo_UniMuenster_2023_RGB.pdf}
+		\else
+			\def\col{bright}
+			\def\imgpath{assets/Logo_UniMuenster_2023_RGB_Negativ.pdf}
+		\fi
+		\begin{beamercolorbox}[wd=\slidew, leftskip=\margin, rightskip=\margin, ht=1.3cm]{\col}%
+			\includegraphics[width=22.5mm,keepaspectratio]{\imgpath}
+			\hfill
+			\makebox[8cm][r]{\usebeamerfont{frame head} \insertshorttitle}
+			\vskip\margins
+		\end{beamercolorbox}
+	}
+	\fi
+}
+
+\setbeamertemplate{footline}{
+	\ifnum\c@page=1
+	\else
+		{
+		\ifbeamer@logogrey
+			\def\col{footline}
+			\def\colline{col1!30}
+		\else
+			\def\col{bright}
+			\def\colline{white!30}
+		\fi
+		\begin{beamercolorbox}[wd=\slidew, leftskip=\margin, rightskip=\margin]{\col}
+			\textcolor{\colline}{\hrule}
+			\vspace{\margins}
+			\makebox[8cm][l]{\usebeamerfont{footline} \insertauthor}
+			\hfill
+			\makebox[2cm][r]{\usebeamerfont{page number in head/foot} \insertframenumber\,/\,\inserttotalframenumber}%
+			\vspace{\margin}
+		\end{beamercolorbox}
+		}
+	\fi
+}
+
+\setbeamertemplate{section page}{
+	\thispagestyle{navigation@sectionpage}
+	\begin{textblock*}{\slidew}(0cm,0cm)
+		\color{col1}\vrule width\slidew height\slideh
+	\end{textblock*}
+	\begin{beamercolorbox}[wd=\slidewmargin, rightskip=\margin]{bright}%
+		\setbeamertemplate{section in toc}{%
+			{\color{white}\Large\bfseries\inserttocsection}\par}%
+		\setbeamertemplate{section in toc shaded}{%
+			{\color{white!65}\small\inserttocsection}\par}%
+		\tableofcontents[currentsection, sections={1-7}, hideallsubsections]
+	\end{beamercolorbox}
+}
+\makeatother
+
+\newcommand{\sprechtext}[1]{\note{\footnotesize #1}}
+
+\newcommand{\abbildung}[3]{
+	\IfFileExists{#3}{
+		\includegraphics[width=#1,height=#2,keepaspectratio]{#3}%
+	}{
+		\fbox{\parbox[c][\dimexpr#2-2\fboxsep-2\fboxrule\relax][c]{\dimexpr#1-2\fboxsep-2\fboxrule\relax}{\centering\scriptsize Abbildung fehlt:\\\texttt{#3}}}%
+	}
+}
+
+\newcommand{\ok}{\textcolor{green!45!black}{$\checkmark$}}
+\newcommand{\nok}{\textcolor{red!70!black}{$\times$}}
+
+\author{Jad Haddad}
+\authoremail{jadkhaddad@uni-muenster.de}
+\authorinfo{Masterarbeit\\M.Sc. Informatik\\Universität Münster}
+\authorlink{https://github.com/JadKHaddad/ALPS}
+\authorlinktext{Quellcode auf GitHub}
+\authorpic{../qrcode/qrcode.pdf}
+
+\title[ALPS]{{\large Entwurf und Evaluation eines asynchronen Proxy-Systems zur Mitigierung von Design Smells in verteilten Legacy-Systemen}}
+\date{\today}
+\institute{Parallele und verteiltete Systeme}
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:30}
+
+	Guten Morgen und vielen Dank, dass Sie heute hier sind. Ich stelle Ihnen meine Masterarbeit zum Entwurf und zur Evaluation eines asynchronen Proxy-Systems vor, das Design Smells in verteilten Legacy-Systemen mitigiert, und zwar ohne eine einzige Zeile des Legacy-Codes zu ändern.
+}
+
+\begin{frame}
+	\frametitle{Agenda}
+	\tableofcontents[sections={1-7}]
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:30}
+
+	Ich beginne mit der Motivation und der Zielsetzung und erkläre dann die nötigen Grundlagen. Danach stelle ich die Fallstudie vor, ein reales Alarmempfangssystem. Der erste Hauptteil ist eine kritische Analyse eines bestehenden Ansatzes, des Legacy Proxy Systems. Der zweite Hauptteil ist das von mir entwickelte System ALPS und dessen experimentelle Evaluation. Zum Schluss folgen Fazit und Ausblick.
+
+	\medskip
+	\textit{Roter Faden: Problem $\rightarrow$ bestehender Ansatz (LPS) $\rightarrow$ dessen Schwächen $\rightarrow$ neues System (ALPS) $\rightarrow$ Nachweis.}
+}
+
+\section{Einleitung und Zielsetzung}
+
+\makesectionpage
+
+\begin{frame}
+	\frametitle{Motivation: Design Smells in Legacy-Systemen}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item Geschäftskritische Legacy-Systeme laufen \textbf{weit über ihren geplanten Lebenszyklus hinaus}
+		\item Weiterentwicklung fokussiert neue Funktionen, Wartbarkeit bleibt auf der Strecke $\rightarrow$ \textbf{Design Smells}
+		\item In verteilten Systemen: \textbf{Architektur-Smells} in Kommunikation und Betrieb, z.\,B.
+		      \begin{itemize}
+			      \item synchrone Request-Response-Ketten
+			      \item heterogene Redundanzmodi
+			      \item Strikte Delivery-Garantien (\textbf{Exactly-Once, In-Order})
+		      \end{itemize}
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:15}
+
+	Viele geschäftskritische Systeme laufen noch lange nach ihrem geplanten Lebensende. Die Weiterentwicklung konzentriert sich meist auf neue Funktionen, die Wartbarkeit bleibt dabei auf der Strecke. So entstehen Design Smells.
+
+	Ein Design Smell ist kein Programmfehler. Das System funktioniert korrekt, aber es ist schwer zu verstehen, zu testen und weiterzuentwickeln.
+
+	In verteilten Systemen stecken die wichtigsten Smells nicht in einer einzelnen Funktion, sondern in der Architektur: darin, wie Services miteinander kommunizieren und wie sie redundant betrieben werden. Typische Beispiele sind synchrone Request-Response-Ketten, in denen sich Latenzen aufsummieren, gemischte Redundanzmodi, die den Durchsatz begrenzen, und Systeme, die darauf angewiesen sind, dass jede Nachricht genau einmal und in der richtigen Reihenfolge ankommt. Die letzten beiden sind der Fokus meiner Arbeit.
+}
+
+\begin{frame}
+	\frametitle{Mitigierung durch Architektur-Reengineering}
+	\framesubtitle{\insertsection}
+	\begin{itemize}
+		\item Code kaum dokumentiert, Entwickler nicht mehr verfügbar $\rightarrow$ \alert{jede Code-Änderung ist riskant}
+		\item Stattdessen \textbf{Architektur-Reengineering}: die \emph{Interaktion} der Komponenten ändern, nicht die Komponenten
+		\item Legacy Proxy System (LPS): Proxy-Broker-Proxy-Schicht überführt synchrone in \textbf{asynchrone} Kommunikation, \textbf{ohne den Legacy-Code anzufassen}
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:00}
+
+	Der naheliegende Weg wäre, den Code zu refaktorieren. Bei diesen Systemen ist das aber kaum möglich: Der Code ist umfangreich und kaum dokumentiert, die ursprünglichen Entwickler sind nicht mehr da, und niemand versteht das interne Verhalten noch im Detail. Jede Änderung kann unvorhersehbare Seiteneffekte auslösen.
+
+	Die Alternative ist ein Architektur-Reengineering. Man lässt die Services unverändert und ändert nur, wie sie miteinander kommunizieren. Genau das macht das Legacy Proxy System, kurz LPS, aus vorheriger Arbeit an unserem Lehrstuhl. Es setzt zwei Proxies und einen Message Broker zwischen zwei Services. Der erste Proxy nimmt die Nachricht entgegen, legt sie im Broker ab und bestätigt sofort. Der zweite Proxy liefert sie asynchron weiter. Für die Services sieht das aus wie bisher, der Legacy-Code bleibt unverändert.
+
+	LPS adressiert damit auch die Delivery-Garantien. Die offene Frage ist, ob diese Garantien auch dann halten, wenn Fehler auftreten. Das führt direkt zu meiner Zielsetzung.
+}
+
+\begin{frame}
+	\frametitle{Zielsetzung}
+	\framesubtitle{\insertsection}
+
+	\medskip
+	\begin{enumerate}
+		\item \textbf{Analyse von LPS:} gezielte Experimente, ob die Delivery-Garantien unter Fehlerbedingungen halten
+		\item \textbf{Entwicklung von ALPS:} Vorteile von LPS beibehalten, Limitationen beheben
+		\item \textbf{Evaluation von ALPS:} unter Fehlerbedingungen \emph{und} unter realitätsnahen Bedingungen
+	\end{enumerate}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:00}
+
+	Mein Ziel ist ein Architektur-Reengineering, das die Design Smells mitigiert, ohne den Legacy-Code zu ändern, und dabei Exactly-Once- und In-Order-Delivery tatsächlich einhält. Dafür verfolge ich drei Teilziele.
+
+	Erstens prüfe ich kritisch, ob LPS seine Delivery-Garantien auch unter Fehlerbedingungen einhält. Dafür entwickle ich Experimente, die gezielt Fehler provozieren.
+
+	Zweitens entwickle ich auf Basis der gefundenen Schwächen ein neues System, das Advanced Legacy Proxy System, kurz ALPS. Es behält die Vorteile von LPS bei, bleibt transparent zum Legacy-System, verhindert Nachrichtenverluste und hält beide Garantien ein.
+
+	Drittens evaluiere ich ALPS experimentell: einmal unter genau den Bedingungen, unter denen LPS gescheitert ist, und einmal unter realitätsnahen Bedingungen mit Netzwerkfehlern.
+}
+
+
+\section{Grundlagen}
+
+\makesectionpage
+
+
+\begin{frame}
+	\frametitle{Asynchrone Messaging-Protokolle: MQTT vs.\ AMQP}
+	\framesubtitle{\insertsection}
+
+	\small
+	\begin{tabularx}{\linewidth}{@{}LL@{}}
+		\toprule
+		\textbf{MQTT 5.0} (verwendet von LPS)                                              & \textbf{AMQP 0-9-1} (verwendet von ALPS)                                            \\
+		\midrule
+		Leichtgewichtiges, Topic-basiertes Publish/Subscribe                               & Producer $\rightarrow$ \textbf{Exchange} $\rightarrow$ Queue $\rightarrow$ Consumer \\[3pt]
+		QoS 0 / 1 / 2 (At-Most / At-Least / Exactly-Once)                                  & Consumer-\textbf{ACK / NACK} (\texttt{requeue = true})                              \\[3pt]
+		QoS gilt \alert{nur pro Teilstrecke}                                               & \texttt{prefetch\_count = 1} $\rightarrow$ Stop-and-Wait                            \\[3pt]
+		Shared Subscriptions $\rightarrow$ \alert{keine Reihenfolgegarantie} in der Gruppe & Reihenfolge nur bei einem Kanal, einer Queue, einem Consumer                        \\
+		\bottomrule
+	\end{tabularx}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:30}
+
+	Zwei Protokolle sind hier relevant. LPS verwendet MQTT. Die QoS-Stufe 2 verspricht Exactly-Once-Delivery, aber nur zwischen zwei direkt verbundenen Teilnehmern, also etwa zwischen Broker und Subscriber. Über die Ende-zu-Ende-Verarbeitung sagt sie nichts aus. Mit Shared Subscriptions teilen sich mehrere Subscriber die Last, aber die Spezifikation legt nicht fest, wie die Nachrichten verteilt werden. Die Reihenfolge geht damit verloren.
+
+	ALPS verwendet AMQP 0-9-1. Das Modell aus Exchanges, Queues und expliziten Bestätigungen erlaubt eine deutlich feinere Kontrolle. Eine Nachricht wird erst entfernt, wenn der Consumer sie bestätigt hat, und mit einem Prefetch Count von eins liefert der Broker die nächste Nachricht erst aus, wenn die vorherige bestätigt wurde.
+}
+
+\begin{frame}
+	\frametitle{Zentrale Bausteine: Partitioned Logs}
+	\framesubtitle{\insertsection}
+
+	\textbf{Partitioned Logs:} gleicher Schlüssel $\rightarrow$ gleiche Partition $\rightarrow$ Reihenfolge pro Schlüssel bleibt erhalten
+	\begin{itemize}
+		\item \texttt{x-consistent-hash}: Hash des Routing Keys bestimmt die Queue
+		\item \texttt{x-single-active-consumer}: nur ein aktiver Consumer pro Queue, automatische Übernahme
+	\end{itemize}
+	\medskip
+	\textbf{Vendor-neutral:} LavinMQ (beide Funktionen), ActiveMQ Artemis (Message Grouping, Exclusive Queues)
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:50}
+
+	Um Reihenfolge und horizontale Skalierung gleichzeitig zu erreichen, nutze ich das Konzept der Partitioned Logs: Alle Nachrichten mit demselben Schlüssel landen in derselben Partition. RabbitMQ setzt das mit zwei Erweiterungen um. Der Consistent-Hash-Exchange ordnet einen Routing Key einer festen Queue zu, und Single Active Consumer stellt sicher, dass immer nur ein Consumer diese Queue liest.
+
+	Das sind zwar RabbitMQ-Erweiterungen, die Konzepte gibt es aber auch in anderen Brokern. So wird ein Vendor-Lock-in vermieden.
+}
+
+
+\section{Fallstudie: MARC}
+
+\makesectionpage
+
+\begin{frame}
+	\frametitle{MARC: Architektur}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item \textbf{M}onitoring and \textbf{A}larm \textbf{R}eceiving \textbf{C}entre (GS electronic)
+		\item Synchrone Kette: SRV 1 $\rightarrow$ SRV 2 $\rightarrow$ SRV 3 (HTTP + proprietäres TCP)
+		\item Bestätigung läuft die gesamte Kette zurück
+		\item Repliziert über \textbf{drei Rechenzentren}
+		      \begin{itemize}
+			      \item SRV 1, SRV 2: Aktiv-Aktiv
+			      \item SRV 3: \alert{Aktiv-Passiv}
+		      \end{itemize}
+	\end{itemize}
+
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:00}
+
+	Die Fallstudie ist MARC, ein verteiltes Alarmempfangssystem. Externe Alarmanlagen senden Alarmmeldungen, das System verarbeitet und persistiert sie und stellt sie den Mitarbeitern in einer Leitstelle bereit.
+
+	Kernkomponente ist die Alarm Receiving Software mit drei Services. Eine Alarmmeldung kommt bei SRV 1 an und läuft synchron über SRV 2 zu SRV 3, der sie in der Datenbank speichert. Erst dann wird die Bestätigung durch die ganze Kette an die Alarmanlage zurückgeschickt. Schlägt etwas fehl oder tritt ein Timeout auf, sendet die Alarmanlage die Meldung erneut.
+}
+
+\begin{frame}
+	\frametitle{MARC: Replizierte Architektur}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/marc.pdf}
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:30}
+
+	MARC ist über drei Rechenzentren repliziert. SRV 1 und SRV 2 laufen Aktiv-Aktiv, SRV 3 dagegen Aktiv-Passiv. Es verarbeitet also immer nur eine einzige SRV-3-Instanz die Alarmmeldungen.
+}
+
+\begin{frame}
+	\frametitle{Fünf Design Smells in MARC}
+	\framesubtitle{\insertsection}
+
+	\small
+	\begin{tabularx}{\linewidth}{@{}lLL@{}}
+		\toprule
+		\#         & \textbf{Smell}                                  & \textbf{Auswirkung}                                                 \\
+		\midrule
+		1          & Synchrone Request-Response-Ketten               & Latenzen summieren sich                                             \\
+		2          & Heterogene Redundanzmodi                        & Durchsatz begrenzt durch eine SRV-3-Instanz                         \\
+		3          & Manuelles Ausfall-Management                    & Minuten statt Sekunden (EN 50136)                                   \\
+		\textbf{4} & \textbf{Abhängigkeit von Exactly-Once-Delivery} & Keine Idempotenz $\rightarrow$ Duplikate werden doppelt verarbeitet \\
+		\textbf{5} & \textbf{Strikte Reihenfolgeabhängigkeit}        & Entwarnung vor Alarm $\rightarrow$ unnötiger Notfalleinsatz         \\
+		\bottomrule
+	\end{tabularx}
+
+	\bigskip
+	\centering\textbf{Fokus dieser Arbeit: Smells 4 und 5}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:30}
+
+	In vorheriger Arbeit wurden fünf Design Smells identifiziert. Die ersten drei betreffen Latenz, Durchsatz und manuelles Ausfall-Management. Meine Arbeit konzentriert sich auf die Smells vier und fünf.
+
+	Smell vier: Die Verarbeitung ist nicht idempotent. Sendet eine Alarmanlage eine Meldung erneut, wird sie doppelt gespeichert. Im schlimmsten Fall bearbeiten zwei Mitarbeiter denselben Alarm.
+
+	Smell fünf: Alarmmeldungen sind zustandsbehaftet, die Reihenfolge ist also entscheidend. Das kritische Beispiel ist eine Entwarnung, die vor dem eigentlichen Alarm ankommt. Wird der verspätete Alarm zuletzt verarbeitet, überschreibt er die Entwarnung, und es wird ein unnötiger Notfalleinsatz ausgelöst.
+
+	Für dieses System sind Exactly-Once- und In-Order-Delivery also keine Komfortfunktionen, sondern Sicherheitsanforderungen.
+}
+
+
+\section{Analyse des Legacy Proxy Systems}
+
+\makesectionpage
+
+\begin{frame}
+	\frametitle{Das Legacy Proxy System (LPS)}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item SRV 1 $\rightarrow$ \textbf{LP 1} $\rightarrow$ MQTT-Broker $\rightarrow$ \textbf{LP 2} $\rightarrow$ SRV 2
+		\item LP 1 bestätigt sofort nach dem Broker $\rightarrow$ synchrone Kette aufgebrochen
+		\item Mechanismen für die Garantien:
+		      \begin{itemize}
+			      \item MQTT \textbf{QoS 2}
+			      \item \texttt{max\_inflight\_messages = 1} pro LP 2
+			      \item \textbf{Retry-Topic} + HiveMQ-Plugin
+		      \end{itemize}
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:45}
+
+	LPS fügt zwischen SRV 1 und SRV 2 eine Proxy-Broker-Proxy-Kette ein. LP 1 nimmt die Alarmmeldung entgegen, publiziert sie an den Broker und bestätigt, sobald der Broker sie hat. SRV 1 muss also nicht mehr auf die gesamte Kette warten.
+
+	Für die Garantien kombiniert LPS drei Mechanismen: QoS 2, sequentielle Verarbeitung innerhalb jeder LP-2-Instanz und ein Retry-Topic mit einem Broker-Plugin, das die reguläre Auslieferung pausiert, während eine fehlgeschlagene Meldung erneut zugestellt wird.
+}
+
+\begin{frame}
+	\frametitle{LPS: Integration in MARC}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/lps.pdf}
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:30}
+
+	Hier sieht man LPS zwischen SRV 1 und SRV 2 in allen drei Rechenzentren. Nach außen bleiben die Legacy-Schnittstellen unverändert.
+
+	Die ursprüngliche Evaluation zeigte bessere Antwortzeiten und berichtete, dass beide Garantien eingehalten werden. Bei genauerer Betrachtung der Messmethodik habe ich jedoch Lücken gefunden.
+}
+
+\begin{frame}
+	\frametitle{Lücken in der ursprünglichen Evaluation}
+	\framesubtitle{\insertsection}
+
+	\small
+
+	\begin{alertblock}{Exactly-Once wurde per Zählung geprüft}
+		Anzahl gesendet = Anzahl empfangen?\\
+		Gegenbeispiel: Alarm \#1 geht verloren, Alarm \#2 kommt doppelt an $\rightarrow$ Zahlen stimmen, Garantie verletzt
+	\end{alertblock}
+
+	\begin{alertblock}{Instanzübergreifende Reihenfolge nicht getestet}
+		\texttt{max\_inflight = 1} ordnet nur \textbf{innerhalb einer} LP-2-Instanz;\\
+		Shared Subscriptions $\rightarrow$ zwei Instanzen verarbeiten \textbf{parallel}
+	\end{alertblock}
+
+	\begin{exampleblock}{Hypothese}
+		LPS verletzt beide Garantien unter bestimmten Fehlerbedingungen
+	\end{exampleblock}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:15}
+
+	Zwei Punkte sind mir aufgefallen. Erstens wurde Exactly-Once bestätigt, indem die Anzahl gesendeter und empfangener Alarmmeldungen verglichen wurde. Das reicht nicht. Geht eine Meldung verloren und kommt eine andere doppelt an, sind die Zahlen gleich, die Garantie ist aber trotzdem verletzt.
+
+	Zweitens wurde die Reihenfolge nur innerhalb einer LP-2-Instanz sichergestellt. Durch die Shared Subscriptions können zwei Instanzen parallel arbeiten, und bei variablen Latenzen kann eine spätere Meldung eine frühere überholen.
+
+	Ich habe deshalb Experimente entworfen, die genau diese Situationen provozieren.
+}
+
+\begin{frame}
+	\frametitle{Experimentelle Methodik}
+	\framesubtitle{\insertsection}
+
+	\small
+	\begin{itemize}
+		\item \textbf{Alarmanlagen-Simulator:} \texttt{device\_id} + monoton steigende \texttt{triggertime}; Wiederholungen behalten die \texttt{triggertime}
+		\item \textbf{TCP-Proxy:} abgelehnte Verbindungen, erzwungene Trennungen, Latenz pro Byte
+		\item \textbf{Server-Simulator:} bildet SRV 3 nach
+		\item \textbf{Validator:} Vollständigkeit, Exactly-Once, Reihenfolge pro Alarmanlage
+	\end{itemize}
+	\begin{block}{Success-Run-Theorem}
+		\[ n = \frac{\ln(1-C)}{\ln R} = \frac{\ln(0{,}05)}{\ln(0{,}95)} \approx 58{,}4 \;\Rightarrow\; \textbf{59 Durchläufe} \]
+		Alle 59 erfolgreich $\rightarrow$ mit 95\,\% Konfidenz ist ein Durchlauf mit $\geq$ 95\,\% Wahrscheinlichkeit erfolgreich
+	\end{block}
+
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:20}
+
+	Für die Experimente verwende ich vier Hilfsservices, die ich später auch für ALPS wiederverwende. Ein Simulator bildet die Alarmanlagen nach. Jede Alarmmeldung hat eine Device-ID und eine monoton steigende Triggertime, und eine wiederholte Meldung behält ihre Triggertime. Damit kann der Validator Duplikate und Reihenfolgefehler exakt erkennen und nicht nur zählen.
+
+	Da die Experimente stochastisch sind, sagt ein einzelner Durchlauf nichts aus. Ich verwende deshalb das Success-Run-Theorem. Bei 95 Prozent Zuverlässigkeit und 95 Prozent Konfidenz brauche ich 59 Durchläufe. Sind alle 59 erfolgreich, kann ich mit 95 Prozent Konfidenz sagen, dass ein Durchlauf mit mindestens 95 Prozent Wahrscheinlichkeit erfolgreich ist.
+
+	Bei LPS bedeutet \emph{erfolgreich}, dass die Verletzung auftritt. Ich will zeigen, dass sie reproduzierbar ist und kein Einzelfall.
+}
+
+\begin{frame}
+	\frametitle{Aufbau der Experimente}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/exp_lps.pdf}
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:40}
+
+	Hier sehen Sie den Aufbau. Das zentrale Werkzeug ist ein TCP-Proxy, den ich auf beide Pfade jeder LP-2-Instanz setze: zum Broker und zu SRV 2. Er kann Verbindungen ablehnen, sie nach einer zufälligen Dauer trennen und Daten pro Byte verzögern. So lassen sich Netzwerkfehler gezielt genau dort einbringen, wo sie die Delivery-Garantien gefährden. Alle übrigen Pfade werden als fehlerfrei angenommen.
+}
+
+\begin{frame}
+	\frametitle{Exactly-Once-Experiment: Parameter}
+	\framesubtitle{\insertsection}
+
+	\small
+	\textbf{Broker:} HiveMQ CE 2025.5\\[4pt]
+	\begin{tabularx}{\linewidth}{@{}Ll@{}}
+		\toprule
+		\textbf{Parameter}                                           & \textbf{Wert}  \\
+		\midrule
+		Instanzen LP 1 / LP 2                                        & 1 / 1          \\
+		Alarmanlagen / Meldungen pro Alarmanlage                     & 1 / 1          \\
+		Server-Idle-Zeit $T_{idle}$                                  & 20\,s          \\
+		Verbindungsdauer im $P_{mqtt}$ (zufällig)                    & 0--4\,s        \\
+		Downstream-Latenz im $P_{srv}$ (zufällig)                    & 0--27\,ms/Byte \\
+		\quad $\rightarrow$ max.\ Verzögerung der Antwort (189 Byte) & 5,103\,s       \\
+		Seed $S$                                                     & 6              \\
+		\bottomrule
+	\end{tabularx}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:25}
+
+	Beide Verletzungen ließen sich in allen 59 Durchläufen reproduzieren. Zuerst Exactly-Once.
+
+	Zu den Parametern: Ich verwende die minimale Konfiguration, eine Alarmanlage, eine Meldung und je eine Instanz von LP 1 und LP 2. Die Antwort von SRV 2 wird zufällig um bis zu gut fünf Sekunden verzögert, die Verbindung zum Broker wird zufällig nach höchstens vier Sekunden getrennt. Dadurch kann die Verbindung abbrechen, während LP 2 noch auf die Antwort wartet. Weil beide Werte zufällig sind und nicht fest, kommt die Antwort irgendwann doch innerhalb der Verbindungsdauer an, und die Simulation terminiert.
+}
+
+\begin{frame}
+	\frametitle{Exactly-Once-Experiment: Ergebnisse}
+	\framesubtitle{\insertsection}
+
+	\small
+	\textbf{Ergebnisse} (über alle 59 Durchläufe)\\[4pt]
+	\begin{tabularx}{\linewidth}{@{}CCCCCC@{}}
+		\toprule
+		$N_{sent}$ & $N_{received}$ & $N_{unique}$ & $N_{loss}$ & $N_{ooo}$ & $N_{dup}$                              \\
+		\midrule
+		59         & 177            & 59           & 0          & 0         & \textcolor{red!80!black}{\textbf{118}} \\
+		\bottomrule
+	\end{tabularx}
+
+	\bigskip
+	\begin{alertblock}{Ergebnis}
+		Exactly-Once-Delivery in \textbf{59/59 Durchläufen verletzt}
+	\end{alertblock}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:15}
+
+	Zum Ergebnis: Pro Durchlauf wurde eine Meldung gesendet, aber drei kamen beim Server an, also zwei Duplikate. Über alle 59 Durchläufe sind das 118 Duplikate. Verloren ging nichts, und die Reihenfolge war korrekt.
+}
+
+\begin{frame}
+	\frametitle{Ablauf: Verletzung der Exactly-Once-Delivery in LPS}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/lps_exactly_once_delivery_violation_sequence.pdf}
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:20}
+
+	SRV 2 hat die Meldung bereits verarbeitet, aber der Broker hat nie eine Bestätigung bekommen und stellt sie deshalb erneut zu. QoS 2 hilft hier nicht, weil es nur die Strecke zum Broker abdeckt, nicht die Verarbeitung hinter LP 2.
+}
+
+\begin{frame}
+	\frametitle{In-Order-Experiment: Parameter}
+	\framesubtitle{\insertsection}
+
+	\small
+	\textbf{Broker:} Mosquitto 2.1.2\\[4pt]
+	\begin{tabularx}{\linewidth}{@{}Ll@{}}
+		\toprule
+		\textbf{Parameter}                                            & \textbf{Wert}                   \\
+		\midrule
+		Instanzen LP 1 / LP 2                                         & 1 / \textbf{2}                  \\
+		Alarmanlagen / Meldungen pro Alarmanlage                      & 1 / 2                           \\
+		Sendeintervall $I_{alarm}$                                    & 1\,s                            \\
+		Server-Idle-Zeit $T_{idle}$                                   & 20\,s                           \\
+		Verbindungsdauer im $P_{mqtt}$                                & $\infty$ (keine Netzwerkfehler) \\
+		Upstream-Latenz im $P_{srv}$ (zufällig)                       & 0--10\,ms/Byte                  \\
+		\quad $\rightarrow$ max.\ Verzögerung des Requests (411 Byte) & 4,11\,s                         \\
+		Seed $S$                                                      & 6                               \\
+		\bottomrule
+	\end{tabularx}
+
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:25}
+
+	Dann In-Order. Zu den Parametern: diesmal zwei LP-2-Instanzen, eine Alarmanlage mit zwei Meldungen im Abstand von einer Sekunde. Netzwerkfehler gibt es hier keine, die Verbindungen bleiben bestehen. Stattdessen wird die Weiterleitung an SRV 2 zufällig um bis zu 4,11 Sekunden verzögert, also deutlich länger als das Sendeintervall. Wäre die Latenz fest, kämen beide Meldungen gleich verzögert und damit in der richtigen Reihenfolge an.
+
+	Ein praktischer Hinweis: HiveMQ CE hat einen offenen Bug, der parallele Consumer auf einer Shared Subscription verhindert. Für dieses Experiment bin ich deshalb auf Mosquitto ausgewichen. LPS nutzt hier nur standardisierte MQTT-v5-Features, und das Retry-Plugin kommt nicht zum Einsatz.
+}
+
+\begin{frame}
+	\frametitle{In-Order-Experiment: Ergebnisse}
+	\framesubtitle{\insertsection}
+
+	\small
+	\textbf{Ergebnisse} (über alle 59 Durchläufe)\\[4pt]
+	\begin{tabularx}{\linewidth}{@{}CCCCCC@{}}
+		\toprule
+		$N_{sent}$ & $N_{received}$ & $N_{unique}$ & $N_{loss}$ & $N_{ooo}$                             & $N_{dup}$ \\
+		\midrule
+		118        & 118            & 118          & 0          & \textcolor{red!80!black}{\textbf{59}} & 0         \\
+		\bottomrule
+	\end{tabularx}
+
+	\bigskip
+	\begin{alertblock}{Ergebnis}
+		In-Order-Delivery in \textbf{59/59 Durchläufen verletzt}
+	\end{alertblock}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:15}
+
+	Zum Ergebnis: Beide Meldungen kamen in jedem Durchlauf genau einmal an, aber eine davon außer Reihenfolge. Die zweite Meldung hat die erste also in allen 59 Durchläufen überholt.
+}
+
+\begin{frame}
+	\frametitle{Ablauf: Verletzung der In-Order-Delivery in LPS}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/lps_in_order_delivery_violation_sequence.pdf}
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:20}
+
+	Beide Instanzen konsumieren parallel. Meldung B wird schneller weitergeleitet und vor Meldung A persistiert. Jede Instanz für sich arbeitet sequentiell, zusammen aber nicht.
+}
+
+\begin{frame}
+	\frametitle{LPS: Zusammenfassung der Limitationen}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item[\nok] Verletzt \textbf{Exactly-Once-Delivery} bei Netzwerkfehlern zwischen LP 2 und Broker
+		\item[\nok] Verletzt \textbf{In-Order-Delivery} bei parallelen LP-2-Instanzen und hohen Latenzen
+		\item[\nok] \textbf{Vendor-Lock-in:} Retry-Plugin ist HiveMQ-spezifisch
+	\end{itemize}
+
+	\bigskip
+	\begin{exampleblock}{Aber}
+		Die asynchrone, transparente Proxy-Broker-Proxy-Architektur ist wertvoll und soll erhalten bleiben.
+	\end{exampleblock}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:45}
+
+	Zusammengefasst hat LPS drei Limitationen: Beide Garantien können verletzt werden, und der Retry-Mechanismus bindet das System an einen bestimmten Broker. Die Grundidee, also das asynchrone und transparente Proxy-Broker-Proxy-Design, ist jedoch richtig. ALPS übernimmt diese Idee und behebt den Rest.
+}
+
+\section{Advanced Legacy Proxy System}
+
+\makesectionpage
+
+\begin{frame}
+	\frametitle{Anforderungen an ALPS}
+	\framesubtitle{\insertsection}
+
+	\begin{tabularx}{\linewidth}{@{}Ll@{}}
+		\toprule
+		\textbf{Anforderung}                       & \textbf{Ursprung}    \\
+		\midrule
+		Asynchrone Entkopplung beibehalten         & Vorteil von LPS      \\
+		Transparenz zum Legacy-System beibehalten  & Vorteil von LPS      \\
+		Kein Nachrichtenverlust                    & Sicherheit           \\
+		Exactly-Once-Delivery                      & Limitation 1 von LPS \\
+		In-Order-Delivery \textbf{pro Alarmanlage} & Limitation 2 von LPS \\
+		Vendor-Neutralität                         & Limitation 3 von LPS \\
+		\bottomrule
+	\end{tabularx}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:00}
+
+	Die Anforderungen ergeben sich direkt aus dieser Analyse. Zwei erhalten, was LPS gut macht, eine verbietet Nachrichtenverluste, und drei adressieren die Limitationen. Wichtig: Die Reihenfolge wird pro Alarmanlage gefordert, nicht global. Genau das braucht die Domäne, und es erlaubt weiterhin Parallelität zwischen verschiedenen Alarmanlagen.
+}
+
+\begin{frame}
+	\frametitle{Architektur und Integration}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item \textbf{ALP 1:} HTTP-Schnittstelle, AMQP-Producer, Routing nach \texttt{device\_id}
+		\item \textbf{Broker (RabbitMQ):} puffert und verteilt
+		\item \textbf{ALP 2:} AMQP-Consumer, leitet an SRV 2 weiter
+		\item \textbf{ALP D:} Deduplizierungschicht vor SRV 3
+	\end{itemize}
+	\medskip
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:45}
+
+	ALPS behält die Grundform von LPS bei, ersetzt aber MQTT durch AMQP und ergänzt eine vierte Komponente. ALP 1 sitzt hinter SRV 1, ALP 2 vor SRV 2, und die neue Komponente ALP D sitzt unmittelbar vor SRV 3, dem letzten Service der Kette.
+}
+
+\begin{frame}
+	\frametitle{ALPS: Integration in MARC}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/a_lps.pdf}
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:45}
+
+	In der Abbildung sieht man die Positionierung in allen drei Rechenzentren. Da ALP D hinter dem Broker liegt, verlängert es die Wartezeit der vorgelagerten Systeme nicht.
+
+	Die Legacy-Schnittstellen bleiben unverändert. Die einzige Voraussetzung ist, dass jede Alarmmeldung eine Device-ID und eine Triggertime besitzt und dass eine wiederholte Meldung ihre ursprüngliche Triggertime behält. Das entspricht dem Verhalten von MARC.
+}
+
+\begin{frame}
+	\frametitle{Anforderungen an die In-Order-Delivery}
+	\framesubtitle{\insertsection}
+
+	\begin{tabularx}{\linewidth}{@{}lL@{}}
+		\toprule
+		    & \textbf{Anforderung}                                                                                                                   \\
+		\midrule
+		A~1 & ALP 2 verarbeitet Alarmmeldungen in der \textbf{Reihenfolge}, in der ALP 1 sie empfangen hat                                           \\[4pt]
+		A~2 & Alarmmeldungen einer Alarmanlage werden immer von \textbf{derselben} ALP-2-Instanz verarbeitet                                         \\[4pt]
+		A~3 & Alarmmeldungen einer Alarmanlage werden \textbf{strikt sequentiell} verarbeitet; verschiedene Alarmanlagen weiterhin \textbf{parallel} \\[4pt]
+		A~4 & Fehler in ALP 2 führen \textbf{weder zu Verlust noch zu Umordnung}: Wiederholung, bis die Verarbeitung erfolgreich ist                 \\
+		\bottomrule
+	\end{tabularx}
+
+	\bigskip
+	\centering
+	A~1 -- A~4 erfüllt $\Rightarrow$ \textbf{In-Order-Delivery pro Alarmanlage}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:45}
+
+	Bevor ich zeige, wie ALP 1 und ALP 2 funktionieren, zerlege ich die In-Order-Delivery in vier Anforderungen.
+
+	A~1: Was ALP 1 in einer bestimmten Reihenfolge empfängt, muss ALP 2 in derselben Reihenfolge verarbeiten. A~2: Die Meldungen einer Alarmanlage dürfen nicht beliebig auf Instanzen verteilt werden, genau das war das Problem der Shared Subscriptions in LPS. A~3: Pro Alarmanlage wird strikt nacheinander verarbeitet, verschiedene Alarmanlagen dürfen aber weiterhin parallel laufen. A~4: Fehler dürfen weder dazu führen, dass eine Meldung verloren geht, noch dazu, dass sie überholt wird.
+
+	Sind alle vier erfüllt, ist die Reihenfolge pro Alarmanlage garantiert. Auf den nächsten beiden Folien zeige ich, welche Komponente welche Anforderung erfüllt.
+}
+
+\begin{frame}
+	\frametitle{ALP 1: Routing pro Alarmanlage}
+	\framesubtitle{\insertsection}
+
+	\centering
+	\begin{tikzpicture}[
+			font=\scriptsize, >=stealth, thick,
+			box/.style={draw=col1, fill=col1!8, rounded corners=2pt, minimum height=8mm, align=center, inner sep=3pt},
+			msg/.style={draw=black!60, minimum width=6mm, minimum height=4.5mm, inner sep=0pt, font=\tiny\bfseries},
+			ma/.style={msg, fill=orange!35}, mb/.style={msg, fill=teal!30}, mc/.style={msg, fill=violet!25}, md/.style={msg, fill=black!10}
+		]
+		\node[box] (srv1) at (0,0) {SRV 1};
+		\node[box, minimum width=22mm] (alp1) at (2.6,0) {\textbf{ALP 1}\\HTTP $\rightarrow$ AMQP};
+		\node[box, minimum width=26mm] (ex) at (6.5,0) {Exchange\\\texttt{x-consistent-hash}};
+
+		\foreach \y/\name in {1.0/q1, 0/q2, -1.0/qn} {
+				\draw[col1, rounded corners=1pt] (8.7,\y-0.3) rectangle (11.4,\y+0.3);
+			}
+		\node[ma] at (9.75,1.0) {A2}; \node[mc] at (10.4,1.0) {C1}; \node[ma] at (11.05,1.0) {A1};
+		\node[mb] at (10.4,0) {B2}; \node[mb] at (11.05,0) {B1};
+		\node[md] at (11.05,-1.0) {D1};
+		\node at (10.0,-0.52) {$\vdots$};
+		\node[font=\scriptsize\bfseries, anchor=west] at (8.75,1.0) {Q 1};
+		\node[font=\scriptsize\bfseries, anchor=west] at (8.75,0) {Q 2};
+		\node[font=\scriptsize\bfseries, anchor=west] at (8.75,-1.0) {Q $N$};
+
+		\draw[->] (srv1) -- node[above] {HTTP} (alp1);
+		\draw[->] (alp1) -- node[above, font=\tiny] {publish} (ex);
+		\node[font=\tiny, below=1mm of ex] {Routing Key = \texttt{device\_id}};
+		\draw[->] (ex.east) -- (8.7,1.0);
+		\draw[->] (ex.east) -- (8.7,0);
+		\draw[->] (ex.east) -- (8.7,-1.0);
+		\draw[->, col1] (11.4,0) -- ++(0.6,0) node[right, black, align=left] {an\\ALP 2};
+	\end{tikzpicture}
+	\par\medskip
+	\raggedright
+	\begin{itemize}
+		\item Beim Start: $N$ Queues mit \texttt{x-single-active-consumer} anlegen und an den Exchange binden
+		\item \textbf{A~1:} Publizieren in Empfangsreihenfolge mit gleicher Priorität $\rightarrow$ Queues verhalten sich als \textbf{FIFO}
+		\item \textbf{A~2:} Routing Key = \texttt{device\_id} $\rightarrow$ eine Alarmanlage landet \textbf{immer in derselben Queue}
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:00}
+
+	ALP 1 ersetzt LP 1 und sitzt direkt hinter SRV 1. Nach außen ist es eine HTTP-Schnittstelle, nach innen ein AMQP-Producer. Beim Start legt ALP 1 eine feste Anzahl N von Queues an und bindet sie an einen Consistent-Hash-Exchange.
+
+	Jede eingehende Alarmmeldung wird mit der Device-ID als Routing Key publiziert. Der Exchange bildet den Hash dieses Schlüssels auf eine Queue ab. Im Bild landen alle Meldungen von Alarmanlage A in Queue 1, die von B in Queue 2. Eine Queue kann mehrere Alarmanlagen enthalten, wie hier A und C in Queue 1, aber eine Alarmanlage ist nie auf mehrere Queues verteilt.
+
+	Da ALP 1 in Empfangsreihenfolge und mit gleicher Priorität publiziert, verhalten sich die Queues als FIFO. Damit sind A~1 und A~2 erfüllt.
+}
+
+\begin{frame}
+	\frametitle{ALP 2: Sequentielle Verarbeitung im Normalbetrieb}
+	\framesubtitle{\insertsection}
+
+	\centering
+	\begin{tikzpicture}[
+			font=\scriptsize, >=stealth, thick,
+			box/.style={draw=col1, fill=col1!8, rounded corners=2pt, minimum height=8mm, align=center, inner sep=3pt},
+			msg/.style={draw=black!60, minimum width=6mm, minimum height=4.5mm, inner sep=0pt, font=\tiny\bfseries},
+			ma/.style={msg, fill=orange!35}
+		]
+		% Queue 1
+		\draw[col1, rounded corners=1pt] (0,-0.3) rectangle (2.1,0.3);
+		\node[font=\scriptsize\bfseries, above] at (1.05,0.3) {Queue 1};
+		\node[ma] at (0.6,0) {A3}; \node[ma] at (1.15,0) {A2}; \node[ma, very thick, draw=col1] at (1.75,0) {A1};
+
+		\node[box, minimum width=24mm] (i1) at (5.2,0.9) {\textbf{ALP 2 Instanz I}\\aktiv};
+		\node[box, minimum width=24mm, dashed, fill=white] (i2) at (5.2,-0.9) {\textbf{ALP 2 Instanz II}\\wartend};
+		\node[box, minimum width=14mm] (srv2) at (9.4,0.9) {SRV 2};
+
+		\draw[->] (2.1,0.1) -- node[pos=0.5, below right, font=\tiny, inner sep=1pt] {\textcircled{\tiny1} A1} (i1.west);
+		\draw[dashed, black!50] (2.1,-0.1) -- node[pos=0.5, above right, font=\tiny, inner sep=1pt] {keine Zustellung} (i2.west);
+		\draw[->] ([yshift=1.5mm]i1.east) -- node[above, font=\tiny] {\textcircled{\tiny2} Weiterleitung} ([yshift=1.5mm]srv2.west);
+		\draw[->, green!45!black] ([yshift=-1.5mm]srv2.west) -- node[below, font=\tiny] {\textcircled{\tiny3} Bestätigung} ([yshift=-1.5mm]i1.east);
+		\draw[->, green!45!black] (i1.north west) to[bend right=35] node[pos=0.4, above left, font=\tiny, black] {\textcircled{\tiny4} ACK $\rightarrow$ A1 entfernt, dann A2} (1.75,0.3);
+	\end{tikzpicture}
+
+	\medskip
+	\raggedright
+	\begin{itemize}
+		\item Jede ALP-2-Instanz registriert einen Consumer pro Queue
+		\item \texttt{x-single-active-consumer}: nur \textbf{ein} Consumer pro Queue ist aktiv, die anderen warten
+		\item \texttt{prefetch\_count = 1}: der aktive Consumer hält \textbf{genau eine} unbestätigte Meldung; A2 erst nach dem ACK von A1
+		\item[$\Rightarrow$] \textbf{A~3:} pro Alarmanlage strikt sequentiell, verschiedene Queues laufen parallel
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:50}
+
+	ALP 2 ersetzt LP 2. Jede ALP-2-Instanz registriert für jede der N Queues einen Consumer. Wegen Single Active Consumer ist pro Queue aber immer nur einer aktiv, hier Instanz I. Instanz II wartet und bekommt nichts zugestellt.
+
+	Instanz I bekommt A1, leitet sie an SRV 2 weiter und wartet auf die Bestätigung. Erst dann sendet sie ein ACK, A1 wird aus der Queue entfernt, und der Broker stellt A2 zu. Das erzwingt der Prefetch Count von eins. Die Meldungen einer Alarmanlage werden also strikt nacheinander verarbeitet, das ist A~3. Verschiedene Queues und damit verschiedene Alarmanlagen laufen trotzdem parallel.
+}
+
+\begin{frame}
+	\frametitle{ALP 2: Fehlerbehandlung}
+	\framesubtitle{\insertsection}
+
+	\centering
+	\begin{tikzpicture}[
+			font=\scriptsize, >=stealth, thick,
+			box/.style={draw=col1, fill=col1!8, rounded corners=2pt, minimum height=8mm, align=center, inner sep=3pt},
+			msg/.style={draw=black!60, minimum width=6mm, minimum height=4.5mm, inner sep=0pt, font=\tiny\bfseries},
+			ma/.style={msg, fill=orange!35}
+		]
+		% Queue 1
+		\draw[col1, rounded corners=1pt] (0,-0.3) rectangle (2.1,0.3);
+		\node[font=\scriptsize\bfseries, above] at (1.05,0.3) {Queue 1};
+		\node[ma] at (0.6,0) {A3}; \node[ma] at (1.15,0) {A2}; \node[ma, very thick, draw=red!70!black] at (1.75,0) {A1};
+
+		\node[box, minimum width=24mm] (i1) at (5.2,0.9) {\textbf{ALP 2 Instanz I}\\aktiv $\rightarrow$ wartend};
+		\node[box, minimum width=24mm, dashed, fill=white] (i2) at (5.2,-0.9) {\textbf{ALP 2 Instanz II}\\wartend $\rightarrow$ aktiv};
+		\node[box, minimum width=14mm] (srv2) at (9.4,0.9) {SRV 2};
+
+		\draw[->] (2.1,0.1) -- node[pos=0.5, below right, font=\tiny, inner sep=1pt] {A1} (i1.west);
+		\draw[->, dashed] (2.1,-0.1) -- node[pos=0.5, above right, font=\tiny, inner sep=1pt] {\textcircled{\tiny3} A1 erneut} (i2.west);
+		\draw[->] ([yshift=1.5mm]i1.east) -- node[above, font=\tiny] {\textcircled{\tiny1} Weiterleitung} ([yshift=1.5mm]srv2.west);
+		\draw[->, red!70!black] ([yshift=-1.5mm]srv2.west) -- node[below, font=\tiny] {Fehler} ([yshift=-1.5mm]i1.east);
+		\draw[->, red!70!black] (i1.north west) to[bend right=35] node[pos=0.4, above left, font=\tiny, black] {\textcircled{\tiny2} NACK, \texttt{requeue = true}} (1.75,0.3);
+		\draw[->, dashed] (i2.east) -| node[pos=0.75, right, font=\tiny] {\textcircled{\tiny4} Weiterleitung} (srv2.south);
+	\end{tikzpicture}
+
+	\medskip
+	\raggedright
+	\begin{enumerate}
+		\item Instanz I leitet A1 an SRV 2 weiter $\rightarrow$ Fehler
+		\item NACK mit \texttt{requeue = true}: A1 zurück an die \textbf{originale Position} (vor A2)
+		\item Instanz I registriert sich neu $\rightarrow$ Broker aktiviert \textbf{Instanz II}
+		\item Instanz II leitet zuerst \textbf{A1} weiter
+		\item[$\Rightarrow$] \textbf{A~4:} kein Verlust, keine Umordnung
+	\end{enumerate}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:00}
+
+	Jetzt der Fehlerfall. Instanz I leitet A1 an SRV 2 weiter, und SRV 2 antwortet mit einem Fehler. Instanz I sendet ein NACK mit Requeue, und A1 kommt zurück an ihre ursprüngliche Position am Kopf der Queue, also vor A2.
+
+	Dann schließt Instanz I ihren Channel, die TCP-Verbindung bleibt bestehen, und registriert sich neu. Damit steht sie hinten in der Warteliste, und der Broker aktiviert Instanz II. Instanz II bekommt als Erstes wieder A1 und leitet sie weiter.
+
+	Läuft nur eine Instanz, wird sie selbst wieder aktiviert. So geht keine Meldung verloren und keine wird überholt. Das ist A~4. Bricht die ganze Verbindung zum Broker ab, baut ALP 2 sie neu auf und registriert sich wieder.
+}
+
+\begin{frame}
+	\frametitle{Garantie der In-Order-Delivery}
+	\framesubtitle{\insertsection}
+
+	\small
+	\begin{tabularx}{\linewidth}{@{}lLL@{}}
+		\toprule
+		    & \textbf{Anforderung}                                & \textbf{Mechanismus}                                                                              \\
+		\midrule
+		A~1 & Verarbeitung in Empfangsreihenfolge von ALP 1       & Gleiche Priorität $\rightarrow$ Queues verhalten sich als FIFO                                    \\
+		A~2 & Eine Alarmanlage $\rightarrow$ immer dieselbe Queue & \texttt{x-consistent-hash} auf \texttt{device\_id}                                                \\
+		A~3 & Eine Alarmanlage $\rightarrow$ strikt sequentiell   & \texttt{x-single-active-consumer} + \texttt{prefetch\_count = 1}                                  \\
+		A~4 & Fehler führen weder zu Verlust noch zu Umordnung    & \texttt{NACK} mit \texttt{requeue = true} $\rightarrow$ zurück an die \textbf{originale Position} \\
+		\bottomrule
+	\end{tabularx}
+
+	\bigskip
+	\centering\textbf{Ergebnis:} In-Order-Delivery \textbf{pro Alarmanlage}, Parallelität zwischen Alarmanlagen bleibt erhalten
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:45}
+
+	Zusammengefasst: Die In-Order-Delivery pro Alarmanlage ergibt sich aus vier Anforderungen. ALP 1 sorgt mit gleicher Priorität für FIFO-Verhalten und mit dem Consistent-Hash-Exchange dafür, dass eine Alarmanlage immer in derselben Queue landet. ALP 2 sorgt mit Single Active Consumer und einem Prefetch Count von eins für strikt sequentielle Verarbeitung und mit NACK und Requeue dafür, dass Fehler weder zu Verlust noch zu Umordnung führen.
+
+	Damit wird das HiveMQ-Retry-Plugin durch Standardfunktionen des Brokers ersetzt.
+}
+
+\begin{frame}
+	\frametitle{Garantie der Exactly-Once-Delivery: ALP D}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item \textbf{HTTP-Schnittstelle} und \textbf{Verteilte Datenbank}
+		\item \textbf{Vorraussetzung}: \texttt{device\_id} + \texttt{triggertime}. Wiederholungen behalten die \texttt{triggertime}
+		\item \texttt{(device\_id, triggertime)} in der Datenbank nachschlagen
+		      \begin{itemize}
+			      \item Bekannt $\rightarrow$ positiv antworten, \textbf{nicht weiterleiten}
+			      \item Unbekannt $\rightarrow$ an SRV 3 weiterleiten. Bei Erfolg \textbf{speichern}, dann positiv antworten
+		      \end{itemize}
+
+	\end{itemize}
+	\begin{alertblock}{Deployment}
+		Fehler zwischen ALP D und SRV 3 können zu Duplikaten führen $\rightarrow$ ALP D als \textbf{Sidecar} direkt neben SRV 3 betreiben
+	\end{alertblock}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:10}
+
+	Die Reihenfolge allein liefert noch kein Exactly-Once. Wie im Ablauf auf der nächsten Folie: Verliert ALP 2 die Verbindung zum Broker, während es auf SRV 2 wartet, übergibt der Broker die Meldung an einen anderen Consumer, und sie wird erneut verarbeitet.
+
+	Deshalb ergänze ich die fehlende Idempotenz vor dem System, dem sie fehlt. ALP D prüft für jede Meldung die Kombination aus Device-ID und Triggertime in einer replizierten Mnesia-Tabelle. Ist sie bekannt, wird bestätigt, ohne weiterzuleiten. Ist sie neu, wird weitergeleitet und erst nach der Bestätigung von SRV 3 gespeichert.
+
+	Bei Netzwerkpartitionierungen ist das Zusammenführen unproblematisch, weil Datensätze nur hinzugefügt und nie verändert werden.
+
+	Eine Lücke bleibt: Bricht die Verbindung zwischen ALP D und SRV 3 ab, nachdem SRV 3 die Meldung bereits verarbeitet hat, speichert ALP D sie nicht. Deshalb läuft ALP D als Sidecar direkt neben SRV 3. Und um es klar zu sagen: Exactly-Once lässt sich in verteilten Systemen mit Ausfällen grundsätzlich nicht garantieren. ALP D ist daher ein Proof of Concept unter definierten Bedingungen.
+}
+
+\begin{frame}
+	\frametitle{Ablauf: Mehrfachzustellung ohne ALP D}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/a_lps_exactly_once_delivery_dup.pdf}
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:20}
+
+	Hier der Ablauf ohne Deduplizierung: Die Verbindung von Instanz I zum Broker bricht ab, während SRV 2 die Meldung verarbeitet. Der Broker übergibt sie an Instanz II, und sie wird ein zweites Mal weitergeleitet. Genau diese Wiederholung fängt ALP D ab.
+}
+
+\section{Experimentelle Evaluation}
+
+\makesectionpage
+
+\begin{frame}
+	\frametitle{Aufbau der Evaluation: Vier Phasen}
+	\framesubtitle{\insertsection}
+
+	\begin{tabularx}{\linewidth}{@{}cLc@{}}
+		\toprule
+		\textbf{Phase} & \textbf{Zweck}                                  & \textbf{Seed} \\
+		\midrule
+		1              & Exactly-Once-Fehlerfall von LPS reproduzieren   & 6 (wie LPS)   \\
+		2              & In-Order-Fehlerfall von LPS reproduzieren       & 6 (wie LPS)   \\
+		3              & Realitätsnahe Last, Normalbetrieb               & zufällig      \\
+		4              & Realitätsnahe Last \textbf{plus Netzwerkfehler} & zufällig      \\
+		\bottomrule
+	\end{tabularx}
+
+	\bigskip
+	\begin{itemize}
+		\item 59 Durchläufe pro Phase, Broker: RabbitMQ 4.3.6
+		\item \textbf{Erfolg = Garantien eingehalten und kein Nachrichtenverlust}
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:00}
+
+	Die Evaluation besteht aus vier Phasen. Phase eins und zwei wiederholen genau die Szenarien, in denen LPS gescheitert ist, mit denselben Parametern und demselben Seed. Phase drei und vier testen ALPS unter realitätsnaher Last, zuerst ohne Fehler, dann mit massiver Fehlerinjektion. Dort verwende ich in jedem Durchlauf einen neuen zufälligen Seed, um möglichst viele verschiedene Konstellationen abzudecken.
+
+	Diesmal gilt ein Durchlauf als erfolgreich, wenn keine Garantie verletzt wird und keine Alarmmeldung verloren geht.
+}
+
+\begin{frame}
+	\frametitle{Phase 1 und 2: Die Fehlerszenarien von LPS}
+	\framesubtitle{\insertsection}
+
+	\small
+	\begin{tabularx}{\linewidth}{@{}p{0.2\linewidth}LL@{}}
+		\toprule
+		                              & \textbf{LPS}                                            & \textbf{ALPS}                                                   \\
+		\midrule
+		Exactly-Once\newline(Phase 1) & \nok\ 2 Duplikate pro Durchlauf,\newline 59/59 verletzt & \ok\ 0 Duplikate, 0 Verluste,\newline 59/59 eingehalten         \\[3pt]
+		In-Order\newline(Phase 2)     & \nok\ 1 außer Reihenfolge,\newline 59/59 verletzt       & \ok\ 0 außer Reihenfolge, 0 Verluste,\newline 59/59 eingehalten \\
+		\bottomrule
+	\end{tabularx}
+
+	\bigskip
+	\small
+	\begin{itemize}
+		\item \textbf{Phase 1:} Fehlerbedingung \textbf{F} (Broker-Verbindung getrennt, \emph{während} ALP 2 wartet) protokolliert und in \textbf{59/59 Durchläufen eingetreten}
+		\item \textbf{Phase 2:} Fehlerbedingung durch Konfiguration festgelegt (2 Consumer, Verzögerung bis 4,11\,s $\gg$ 1\,s)
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:15}
+
+	Gleiche Bedingungen, umgekehrtes Ergebnis. In Phase eins kam kein einziges Duplikat beim Server an. Da der Seed nicht das gesamte zeitliche Verhalten festlegt, habe ich zusätzlich geprüft, ob der kritische Fehler tatsächlich in jedem Durchlauf aufgetreten ist. Dazu habe ich protokolliert, wann ALP 2 weitergeleitet und wann es Antworten erhalten hat, und das mit den Trennungszeitpunkten verglichen. Der Fehler trat in allen 59 Durchläufen auf. Der Broker hat also tatsächlich erneut zugestellt, und ALP D hat das Duplikat herausgefiltert.
+
+	In Phase zwei kam keine Meldung außer Reihenfolge an, weil der Consistent-Hash beide Meldungen in dieselbe Queue geleitet hat und ein einziger Consumer sie nacheinander verarbeitet hat.
+}
+
+\begin{frame}
+	\frametitle{Phase 3: Realitätsnahe Last -- Parameter}
+	\framesubtitle{\insertsection}
+
+	\small
+	\begin{tabularx}{\linewidth}{@{}Ll@{}}
+		\toprule
+		\textbf{Parameter}                               & \textbf{Wert}                                                     \\
+		\midrule
+		Instanzen ALP 1 / ALP 2 / AMQP-Queues            & 3 / 3 / 3                                                         \\
+		Alarmanlagen / Meldungen pro Alarmanlage         & 50 / 60                                                           \\
+		Sendeintervall $I_{alarm}$                       & 5\,s                                                              \\
+		Server-Idle-Zeit $T_{idle}$                      & 20\,s                                                             \\
+		\textbf{Hintergrundlast $R_{bg}$}                & \textbf{70 Requests/s}                                            \\
+		\textbf{Verarbeitungszeit des Server-Simulators} & \textbf{RAST-Modell} (\texttt{PR1N}, \texttt{PR2N}, \texttt{CMD}) \\
+		TCP-Fehlerrate $E_{tcp}$ in allen Proxies        & 0,0\,\%                                                           \\
+		Verbindungsdauer $T_{tcp}$ in allen Proxies      & $\infty$                                                          \\
+		Latenz $L_{up}$ / $L_{down}$ in allen Proxies    & 0 / 0\,ms/Byte                                                    \\
+		Seed $S$                                         & keiner (zufällig je Durchlauf)                                    \\
+		\bottomrule
+	\end{tabularx}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:40}
+
+	Phase drei geht von minimalen Szenarien zu einem realitätsnahen Aufbau über: jeweils drei Instanzen von ALP 1 und ALP 2, drei Queues und fünfzig Alarmanlagen mit je sechzig Meldungen im Abstand von fünf Sekunden. Ein Durchlauf dauert damit etwa fünf Minuten.
+
+	Damit SRV 3 sich wie das reale System verhält, verwendet der Server-Simulator ein Regressionsmodell, das auf den Request-Logs von MARC trainiert wurde, nach dem RAST-Ansatz. Es sagt die Verarbeitungszeit anhand der aktuellen Parallelität und des Request-Typs vorher. Zusätzlich erzeuge ich die 70 Requests pro Sekunde Hintergrundlast, die MARC in Spitzenzeiten hat.
+
+	Im Normalbetrieb erzeugen die Proxies keine Fehler und keine Latenz. Einen festen Seed gibt es nicht, damit sich die Durchläufe unterscheiden.
+}
+
+\begin{frame}
+	\frametitle{Aufbau der realitätsnahen Experimente}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/drawio/exp_alps.pdf}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:20}
+
+	Phase drei und vier nutzen denselben Aufbau: jeweils drei Instanzen von ALP 1 und ALP 2, drei Queues, ALP D vor dem Server-Simulator und drei TCP-Proxies, zwischen ALP 2 und Broker, zwischen ALP 2 und SRV 2 sowie zwischen SRV 2 und ALP D. In Phase drei leiten die Proxies nur weiter, in Phase vier erzeugen sie Fehler.
+}
+
+\begin{frame}
+	\frametitle{Phase 3: Realitätsnahe Last -- Ergebnisse}
+	\framesubtitle{\insertsection}
+
+	\small
+	\textbf{Ergebnisse} (über alle 59 Durchläufe)\\[4pt]
+	\begin{tabularx}{\linewidth}{@{}CCCCCC@{}}
+		\toprule
+		$N_{sent}$ & $N_{received}$ & $N_{unique}$ & $N_{loss}$ & $N_{ooo}$ & $N_{dup}$ \\
+		\midrule
+		177.000    & 177.000        & 177.000      & 0          & 0         & 0         \\
+		\bottomrule
+	\end{tabularx}
+
+	\bigskip
+	\begin{exampleblock}{Ergebnis}
+		Delivery-Garantien in \textbf{59/59 Durchläufen eingehalten}
+	\end{exampleblock}
+
+	\begin{block}{Referenzwert für Phase 4}
+		$T_{P80} = 84\,\text{ms}$: 80. Perzentil der Antwortzeit aus Sicht von ALP 2
+	\end{block}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:40}
+
+	Die Alarmrate liegt deutlich über der des realen MARC-Systems, das etwA~13.000 Alarmmeldungen pro Tag verarbeitet. Es handelt sich also um einen Stresstest. Alle 177.000 Meldungen wurden genau einmal und in der richtigen Reihenfolge zugestellt.
+
+	Diese Phase liefert außerdem einen Referenzwert: 80 Prozent der Requests wurden innerhalb von 84 Millisekunden beantwortet. Diesen Wert verwende ich, um die Fehler in Phase vier zu kalibrieren.
+}
+
+\begin{frame}
+	\frametitle{Phase 4: Netzwerkfehler -- Parameter}
+	\framesubtitle{\insertsection}
+
+	\small
+	Alle Parameter wie in Phase 3, mit folgenden Änderungen:\\[4pt]
+	\begin{tabularx}{\linewidth}{@{}Ll@{}}
+		\toprule
+		\textbf{Parameter}                                                 & \textbf{Wert}               \\
+		\midrule
+		Referenzwert $T_{P80}$ aus Phase 3                                 & 84\,ms                      \\
+		TCP-Fehlerrate $E_{tcp}$ in $P_{amqp}$, $P_{srv}$ und $P_{server}$ & 20,0\,\%                    \\
+		Verbindungsdauer $T^{srv}_{tcp}$ im $P_{srv}$                      & 84\,ms ($= T_{P80}$)        \\
+		Verbindungsdauer $T^{server}_{tcp}$ im $P_{server}$                & 84\,ms ($= T_{P80}$)        \\
+		Verbindungsdauer $T^{amqp}_{tcp}$ im $P_{amqp}$                    & 105\,ms ($= T_{P80}/0{,}8$) \\
+		\bottomrule
+	\end{tabularx}
+
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:40}
+
+	Phase vier ist der härteste Test. Gleiche realitätsnahe Last, aber jetzt lehnt jeder Proxy jede fünfte Verbindung ab. Die 20 Prozent stammen aus Messungen von Cloudflare zu TCP-Resets im öffentlichen Internet. Das ist bewusst deutlich pessimistischer als ein Rechenzentrumsnetz.
+
+	Die Verbindungsdauern sind am Referenzwert aus Phase drei ausgerichtet. Zwischen ALP 2 und SRV 2 sowie zwischen SRV 2 und ALP D wird jede Verbindung nach 84 Millisekunden getrennt, also ungefähr nach der typischen Antwortzeit. Die Broker-Verbindung wird nach 105 Millisekunden getrennt. So wird sie bei etwA~20 Prozent der Übertragungen getrennt, während ALP 2 noch auf eine Antwort wartet.
+}
+
+\begin{frame}
+	\frametitle{Phase 4: Nachweis der Netzwerkfehler}
+	\framesubtitle{\insertsection}
+
+	\footnotesize
+	\textbf{Verbindungen pro TCP-Proxy} (über alle 59 Durchläufe)\\[4pt]
+	\begin{tabularx}{\linewidth}{@{}LRRR@{}}
+		\toprule
+		\textbf{Proxy} & \textbf{Akzeptiert} & \textbf{Abgelehnt} & \textbf{Getrennt} \\
+		\midrule
+		$P_{amqp}$     & 246.793             & 61.742 (20,0\,\%)  & $\approx$ 100\,\% \\
+		$P_{srv}$      & 314.933             & 79.159 (20,1\,\%)  & $\approx$ 100\,\% \\
+		$P_{server}$   & 287.364             & 71.939 (20,0\,\%)  & $\approx$ 100\,\% \\
+		\bottomrule
+	\end{tabularx}
+
+	\medskip
+	\textbf{Fehlerbedingung F} (Broker-Verbindung getrennt, während ALP 2 wartet)\\[4pt]
+	\begin{tabularx}{\linewidth}{@{}Lr@{}}
+		\toprule
+		\textbf{Kennzahl}                                      & \textbf{Wert} \\
+		\midrule
+		Übertragungsversuche von ALP 2 (inkl.\ Wiederholungen) & 638.762       \\
+		Trennungen im $P_{amqp}$ während des Wartens (F)       & 142.950       \\
+		Anteil von F an allen Übertragungsversuchen            & 22,4\,\%      \\
+		Durchläufe mit mindestens einem Auftreten von F        & 59/59         \\
+		\bottomrule
+	\end{tabularx}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:50}
+
+	Ein fehlerfreies Ergebnis ist nur aussagekräftig, wenn die Fehler tatsächlich passiert sind, deshalb habe ich das geprüft. Die Ablehnungsrate entspricht bei allen drei Proxies den konfigurierten 20 Prozent, und fast jede Verbindung wurde vom Proxy getrennt, weil die Verbindungen langlebig sind und wiederverwendet werden.
+
+	Noch wichtiger ist die untere Tabelle: Genau die Situation, an der LPS gescheitert ist, also der Verlust der Broker-Verbindung während des Wartens auf eine Antwort, trat über 140.000 Mal auf. Das sind 22,4 Prozent aller Übertragungsversuche, und es passierte in jedem einzelnen Durchlauf.
+}
+
+\begin{frame}
+	\frametitle{Phase 4: Netzwerkfehler -- Ergebnisse}
+	\framesubtitle{\insertsection}
+
+	\small
+	\textbf{Ergebnisse} (über alle 59 Durchläufe)\\[4pt]
+	\begin{tabularx}{\linewidth}{@{}CCCCCC@{}}
+		\toprule
+		$N_{sent}$ & $N_{received}$ & $N_{unique}$ & $N_{loss}$ & $N_{ooo}$ & $N_{dup}$ \\
+		\midrule
+		177.000    & 177.000        & 177.000      & 0          & 0         & 0         \\
+		\bottomrule
+	\end{tabularx}
+
+	\bigskip
+	\begin{exampleblock}{Ergebnis}
+		Delivery-Garantien trotz Netzwerkfehlern in \textbf{59/59 Durchläufen eingehalten}
+	\end{exampleblock}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:50}
+
+	Trotzdem ging keine Meldung verloren, keine wurde doppelt verarbeitet, keine kam außer Reihenfolge an. Die Ergebnisse sind identisch mit Phase drei. Fehler auf der HTTP-Seite werden durch NACK und Requeue abgefangen, Fehler auf der Broker-Seite durch die Übernahme eines anderen Consumers, und ALP D filtert jedes dabei entstehende Duplikat.
+
+	Mit 95 Prozent Konfidenz hält ein Durchlauf unter diesen Bedingungen also beide Garantien mit mindestens 95 Prozent Wahrscheinlichkeit ein. Auf einem zweiten Host, einer Cloud-VM, waren die Ergebnisse identisch.
+}
+
+
+\section{Fazit und Ausblick}
+
+\makesectionpage
+
+\begin{frame}
+	\frametitle{Erfüllung der Anforderungen}
+	\framesubtitle{\insertsection}
+
+	\footnotesize
+	\begin{tabularx}{\linewidth}{@{}p{0.27\linewidth}L@{}}
+		\toprule
+		\textbf{Anforderung}     & \textbf{Mechanismus}                                                                                            \\
+		\midrule
+		Asynchrone Entkopplung   & Architektonisch erfüllt                                                                                         \\
+		Transparenz              & Legacy-Schnittstellen bleiben unverändert                                                                       \\
+		Kein Nachrichtenverlust  & \texttt{requeue = true}. Vorrausetzung: Broker speichert dauerhaft                                              \\
+		Exactly-Once             & Deduplizierung durch ALP D. Vorrausetzung: \texttt{device\_id}, \texttt{triggertime} und kein Ausfall von ALP D \\
+		In-Order pro Alarmanlage & \texttt{x-consistent-hash}, \texttt{x-single-active-consumer} und \texttt{prefetch\_count = 1}                  \\
+		Vendor-Neutralität       & Konzeptionell durch Protokoll-Erweiterngen. Nur mit RabbitMQ evaluiert                                          \\
+		\bottomrule
+	\end{tabularx}
+
+
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 1:00}
+
+	Zum Fazit: LPS hat gezeigt, dass asynchrone Entkopplung funktioniert, meine Experimente haben aber belegt, dass dabei beide Delivery-Garantien verletzt werden können. ALPS behält die Architektur bei und schließt diese Lücken mit Standardmechanismen des Brokers und einer Deduplizierungsschicht.
+
+	Alle sechs Anforderungen sind erfüllt, aber ich möchte bei den Bedingungen präzise sein. Reihenfolge und Verlustfreiheit gelten ab dem Broker, denn Fehler vor ALP 1 können die Reihenfolge weiterhin verändern. Exactly-Once gilt, solange die Verbindung zwischen ALP D und SRV 3 stabil ist. Und die Vendor-Neutralität ist konzeptionell, da ich nur RabbitMQ getestet habe.
+}
+
+\begin{frame}
+	\frametitle{Ausblick}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item \textbf{Reale verteilte Umgebung:} drei Rechenzentren, Broker-Cluster, Ausfälle von Broker, ALP 1 und ALP D
+		\item Overhead durch ALP D
+		\item Durchsatz begrenzt durch Anzahl der Queues $N$
+		\item \alert{Head-of-Line-Blocking} durch fehlschlagende Meldungen
+		\item Dynamische Skalierung von $N$ ohne Umordnung
+		\item Betriebsaufwand
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	\textbf{Zeit: 0:30}
+
+	Einige Fragen bleiben offen. Der nächste Schritt ist ein Test in einer realen Umgebung über mehrere Standorte, mit Broker-Cluster und Komponentenausfällen. Der Mnesia-Cluster sollte unter echten Partitionierungen geprüft werden, und die Deduplizierungstabelle braucht eine Bereinigungsstrategie.
+	Die Performance habe ich nicht gemessen. Zwei Punkte stechen hervor: Eine Meldung, die immer wieder fehlschlägt, blockiert ihre gesamte Queue, und eine Änderung der Queue-Anzahl zur Laufzeit würde die Zuordnung der Alarmanlagen zu den Queues durcheinanderbringen. Beides zu lösen, ohne die Reihenfolge zu verletzen, wäre eine lohnende Folgearbeit.
+
+}
+
+\makeclosingpage{Vielen Dank für Ihre Aufmerksamkeit!}
+
+\sprechtext{
+	Vielen Dank für Ihre Aufmerksamkeit. Ich freue mich auf Ihre Fragen.
+}
+
+\makeclosingpage[bgcol2]{Fragen?}
+
+\sprechtext{
+	\textbf{Vorbereitung auf mögliche Fragen}
+	\begin{itemize}
+		\item \textbf{ALP D stürzt nach dem Weiterleiten, aber vor dem Speichern ab?} Dann ist ein Duplikat möglich. Liegt explizit außerhalb der Garantie; Abhilfe bräuchte einen transaktionalen oder zweiphasigen Ansatz mit T SRV.
+		\item \textbf{Bremst \texttt{prefetch\_count = 1} den Durchsatz?} Der Durchsatz skaliert mit der Anzahl der Queues $N$, nicht mit Consumern pro Queue. Preis für die Reihenfolge pro Alarmanlage; als Folgearbeit aufgeführt.
+		\item \textbf{Poison Message?} Blockiert aktuell ihre Queue (Head-of-Line-Blocking). Ansätze: Dead-Letter-Queue pro Alarmanlage oder begrenzte Wiederholungen mit Benachrichtigung der Leitstelle.
+		\item \textbf{Sind 20\,\% realistisch für MARC?} Nein, bewusst pessimistisch. Die Garantien müssen für jede Fehlerrate gelten; die Rate bestimmt nur, wie oft kritische Situationen auftreten.
+		\item \textbf{Warum werden fast 100\,\% der Verbindungen vom Proxy getrennt?} AMQP-Verbindungen sind langlebig, HTTP nutzt Keep-Alive; die Clients schließen kaum selbst.
+		\item \textbf{Umordnung vor dem Broker?} Ja, möglich. Deshalb gilt die In-Order-Aussage nur für Broker $\rightarrow$ ALP 2 $\rightarrow$ T SRV.
+	\end{itemize}
+}
+
+\makecontactpage[c]
+
+\appendix
+\section{Backup}
+
+\begin{frame}
+	\frametitle{Backup: Warum AMQP statt MQTT?}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item MQTT-QoS gilt nur pro Teilstrecke
+		\item Shared Subscriptions legen weder Verteilung noch Reihenfolge fest
+		\item Kein standardisiertes Zurückstellen an die ursprüngliche Position
+		\item AMQP: ACK/NACK mit Requeue, Prefetch-Steuerung, schlüsselbasierte Partitionierung und Single Active Consumer, \textbf{ohne eigenes Plugin}
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	MQTT-QoS ist nur pro Teilstrecke definiert und sagt nichts über die Verarbeitung hinter dem Consumer aus. AMQP bietet alle benötigten Mechanismen über Standardfunktionen und Broker-Erweiterungen, die es auch bei anderen Brokern gibt.
+}
+
+\begin{frame}
+	\frametitle{Backup: Warum eine eigene Deduplizierungsschicht?}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item SRV 3 ist Legacy-Code und darf nicht verändert werden
+		\item ALP D ergänzt die Idempotenz \textbf{transparent}
+		\item Datensätze werden nur hinzugefügt $\rightarrow$ Zusammenführen nach Split Brain ist trivial
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	Die naheliegende Lösung wäre, SRV 3 idempotent zu machen. Genau das ist aber ausgeschlossen, weil der Legacy-Code nicht angefasst werden darf. ALP D löst das Problem davor, ohne Änderung am Legacy-System.
+}
+
+\begin{frame}
+	\frametitle{Backup: Wie belastbar ist die statistische Aussage?}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item 59/59 Erfolge $\rightarrow$ mit 95\,\% Konfidenz Erfolgswahrscheinlichkeit $\geq$ 95\,\% \emph{unter den getesteten Bedingungen}
+		\item Kein Korrektheitsbeweis, sondern eine empirische Schranke
+		\item Die Entwurfsargumente (In-Order, ALP D) erklären, \emph{warum} sie hält
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	Das Success-Run-Theorem liefert eine untere Schranke für die Zuverlässigkeit unter den getesteten Bedingungen. Es ersetzt keinen formalen Beweis; die Begründung, warum die Garantien halten, kommt aus dem Entwurf.
+}
+
+\begin{frame}
+	\frametitle{Backup: Warum ein bestimmter Seed?}
+	\framesubtitle{\insertsection}
+
+	\begin{itemize}
+		\item Ziel bei LPS: zeigen, dass sich eine Verletzung \textbf{reproduzierbar provozieren} lässt, nicht ihre allgemeine Häufigkeit messen
+		\item Der Seed legt die Fehlerbedingungen fest
+		\item ALPS: Phase 1--2 mit demselben Seed (direkter Vergleich), Phase 3--4 mit zufälligen Seeds (breite Abdeckung)
+	\end{itemize}
+\end{frame}
+
+\sprechtext{
+	Der Seed wurde gezielt gesucht, weil die Experimente zu LPS keine Häufigkeit messen, sondern zeigen sollen, dass LPS unter bestimmten Bedingungen versagt. Für ALPS wurde derselbe Seed verwendet, um genau diese Bedingungen erneut herzustellen.
+}
+
+\begin{frame}
+	\frametitle{Backup: Verletzung der Exactly-Once-Delivery in MARC}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/marc_exactly_once_delivery_violation_sequence.pdf}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Backup: Verletzung der In-Order-Delivery in MARC}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/marc_in_order_delivery_violation_sequence.pdf}
+\end{frame}
+
+\sprechtext{
+	Die Entwarnung wird vor dem verspäteten Alarm persistiert. Der Alarm überschreibt danach den Status der Entwarnung, und es wird ein unnötiger Notfalleinsatz ausgelöst.
+}
+
+\begin{frame}
+	\frametitle{Backup: AMQP-Komponentenmodell}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.7\textheight}{../img/drawio/amqp_topo.pdf}
+
+\end{frame}
+
+\sprechtext{
+	Ein Producer sendet nie direkt an eine Queue, sondern immer an einen Exchange. Der Exchange leitet anhand der Bindings an die Queues weiter. Eine Nachricht bleibt in der Queue, bis der Consumer sie mit einem ACK bestätigt.
+}
+
+\begin{frame}
+	\frametitle{Backup: Parallele Verarbeitung in ALPS}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/alps_normal_sequence.pdf}
+
+\end{frame}
+
+\sprechtext{
+	Alarmmeldungen verschiedener Alarmanlagen landen in verschiedenen Queues und werden von verschiedenen Consumern parallel verarbeitet. Innerhalb einer Queue bleibt die Verarbeitung strikt sequentiell.
+}
+
+\begin{frame}
+	\frametitle{Backup: Fehlerpfad in ALP 2}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/alps_retry_sequence.pdf}
+
+\end{frame}
+
+\sprechtext{
+	SRV 2 antwortet negativ. ALP 2 bestätigt die Meldung negativ mit Requeue, schließt seinen Channel und registriert sich neu. Der Broker aktiviert die zweite ALP-2-Instanz, die dieselbe Meldung erneut weiterleitet.
+}
+
+\begin{frame}
+	\frametitle{Backup: Verbleibende Lücke der Idempotenz in ALP D}
+	\framesubtitle{\insertsection}
+	\centering
+	\abbildung{\linewidth}{0.72\textheight}{../img/mermaid/a_lps_dedup_exactly_once_delivery_violation_sequence.pdf}
+
+\end{frame}
+
+\sprechtext{
+	Bricht die Verbindung zwischen ALP D und T SRV ab, nachdem T SRV die Meldung verarbeitet hat, speichert ALP D sie nicht. Die Wiederholung wird dann als neu betrachtet und erneut weitergeleitet. Deshalb wird ALP D als Sidecar direkt neben T SRV betrieben.
+}
+
+\end{document}
