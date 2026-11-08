@@ -99,7 +99,7 @@
 
 \title[ALPS]{{\large Entwurf und Evaluation eines asynchronen Proxy-Systems zur Mitigierung von Design Smells in verteilten Legacy-Systemen}}
 \date{\today}
-\institute{Parallele und verteiltete Systeme}
+\institute{Parallele und verteilte Systeme}
 
 \begin{document}
 
@@ -122,9 +122,10 @@
 
     \begin{itemize}
         \item Geschäftskritische Legacy-Systeme laufen weit über ihren geplanten Lebenszyklus hinaus
-        \item Focus auf neue Funktionen, Wartbarkeit wird vernachlässigt
+        \item Fokus auf neue Funktionen, Wartbarkeit wird vernachlässigt
         \item \textbf{Design Smells}: Keine Programmierfehler, sondern strukturelle Probleme
-        \item Negativer Einfluss auf das Verstehen, Testen, Erweitern und Warten
+        \item Negativer Einfluss auf das Verstehen, Testen, Korrigieren und Erweitern
+        \item Beispiele für Design Smells
               \begin{itemize}
                   \item Synchrone Request-Response-Ketten
                   \item Heterogene Redundanzmodi
@@ -175,8 +176,7 @@
         \item \textbf{M}onitoring and \textbf{A}larm \textbf{R}eceiving \textbf{C}entre (GS electronic)
               \begin{itemize}
                   \item Alarmmeldungen von externen Alarmanlagen empfangen
-                  \item Alarmmeldungen in einer Datenbank persistieren
-                  \item Alarmmeldungen zur Verarbeitung bereitstellen
+                  \item Alarmmeldungen zur Bearbeitung bereitstellen
               \end{itemize}
         \item \textbf{A}larm \textbf{R}eceiving \textbf{S}oftware: Repliziert über \textbf{drei Rechenzentren}
     \end{itemize}
@@ -202,7 +202,7 @@
         \item \textbf{Synchrone} Request-Response-Ketten: Latenzen summieren sich
         \item \textbf{Heterogene} Redundanzmodi: Durchsatz begrenzt durch eine SRV~3 Instanz
         \item \textbf{Manuelles} Ausfall-Management: Minuten statt Sekunden (\textbf{EN 50136})
-        \item \textbf{Exactly-Once-Delivery}: Keine Idempotenz. Duplikate werden doppelt verarbeitet
+        \item \textbf{Exactly-Once-Delivery}: Keine Idempotenz. Duplikate werden doppelt bearbeitet
         \item \textbf{In-Order-Delivery}: Alarmmeldungen sind Zustandbehaftet. Entwarnung vor Alarm löst unnötigen Notfalleinsatz
     \end{enumerate}
 
@@ -233,7 +233,7 @@
 
     \begin{itemize}
         \item \textbf{Proof-of-Concept} Implementierung
-        \item \textbf{MQTT} basiert
+        \item \textbf{MQTT} basiert. Leichtgewichtiges \textbf{Publish-Subscribe} Protokoll
         \item \textbf{LP~1}: Empfängt Alarmmeldungen von SRV~1 und publiziert sie an den Broker
         \item \textbf{MQTT-Broker (HiveMQ)}: Puffert die Alarmmeldungen und stellt sie für LP~2 bereit
         \item \textbf{LP~2}: Konsumiert die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
@@ -280,7 +280,7 @@
     \end{itemize}
 
     \begin{block}{Hypothese}
-        LPS verletzt beide Garantien unter bestimmten Fehlerbedingungen
+        LPS verletzt beide Garantien unter Netzwerkfehler und hohe Latenzen
     \end{block}
 \end{frame}
 
@@ -410,7 +410,7 @@
         \item[A~3] Kein Nachrichtenverlust
         \item[A~4] \textbf{Exactly-Once-Delivery} \hfill (Limitation \textbf{1} von LPS)
         \item[A~5] \textbf{In-Order-Delivery} pro Alarmanlage \hfill (Limitation \textbf{2} von LPS)
-        \item[A~6] Vendor-Neutralität \hfill (Limitation \textbf{3} von LPS)
+        \item[A~6] Vendor-Neutralität (kein Vendor-Lock-in) \hfill (Limitation \textbf{3} von LPS)
     \end{itemize}
 \end{frame}
 
