@@ -233,7 +233,7 @@
 
     \begin{itemize}
         \item \textbf{Proof-of-Concept} Implementierung
-        \item \textbf{MQTT} basiert. Leichtgewichtiges \textbf{Publish-Subscribe} Protokoll
+        \item \textbf{MQTT} basiert. \textbf{Publish-Subscribe} Protokoll
         \item \textbf{LP~1}: Empfängt Alarmmeldungen von SRV~1 und publiziert sie an den Broker
         \item \textbf{MQTT-Broker (HiveMQ)}: Puffert die Alarmmeldungen und stellt sie für LP~2 bereit
         \item \textbf{LP~2}: Konsumiert die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
@@ -271,7 +271,7 @@
     \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item Fokus auf Response-Times
+        \item Fokus auf Antwortzeiten
         \item \textbf{Ideale Bedingungen}
               \begin{itemize}
                   \item Keine Netzwerkfehler
@@ -438,7 +438,7 @@
     \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item \textbf{Deduplizierungschicht}
+        \item \textbf{ALP~D: Deduplizierungschicht}
               \begin{itemize}
                   \item Verteilte Datenbank
                   \item Garantiert \textbf{Exactly-Once-Delivery}
