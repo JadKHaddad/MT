@@ -121,11 +121,11 @@
     \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item Geschäftskritische Legacy-Systeme laufen weit über ihren geplanten Lebenszyklus hinaus
-        \item Fokus auf neue Funktionen, Wartbarkeit wird vernachlässigt
-        \item \textbf{Design Smells}: Keine Programmierfehler, sondern strukturelle Probleme
-        \item Negativer Einfluss auf das Verstehen, Testen, Korrigieren und Erweitern
-        \item Beispiele für Design Smells
+        \item Geschäftskritische Legacy-Systeme laufen weit über ihren geplanten Lebenszyklus hinaus~\hyperlink{Ben95}{[Ben95]}
+        \item Fokus auf neue Funktionen, Wartbarkeit wird vernachlässigt~\hyperlink{Ben95}{[Ben95]}
+        \item \textbf{Design Smells}: Keine Programmierfehler, sondern strukturelle Probleme~\hyperlink{SSS16}{[SSS16]}
+        \item Negativer Einfluss auf das Verstehen, Testen, Korrigieren und Erweitern~\hyperlink{Alk19}{[Alk19]}
+        \item Beispiele für Design Smells~\hyperlink{LG25}{[LG25]}
               \begin{itemize}
                   \item Synchrone Request-Response-Ketten
                   \item Heterogene Redundanzmodi
@@ -145,7 +145,7 @@
                   \item \alert{Jede Code-Änderung ist riskant}
               \end{itemize}
         \item \textbf{Architektur-Reengineering}: die \emph{Interaktion} der Komponenten ändern, nicht die Komponenten
-        \item \textbf{Legacy Proxy System (LPS)}
+        \item \textbf{Legacy Proxy System (LPS)}~\hyperlink{LG25}{[LG25]}
               \begin{itemize}
                   \item Ansatz zum Mitigieren von Design Smells
                   \item Keine Änderungen am \textbf{Legacy-Code}
@@ -173,7 +173,7 @@
 \begin{frame}
     \frametitle{\insertsection}
     \begin{itemize}
-        \item \textbf{M}onitoring and \textbf{A}larm \textbf{R}eceiving \textbf{C}entre (GS electronic)
+        \item \textbf{M}onitoring and \textbf{A}larm \textbf{R}eceiving \textbf{C}entre (GS electronic Gebr. Schönweitz GmbH~\hyperlink{GS25}{[GS25]})
               \begin{itemize}
                   \item Alarmmeldungen von externen Alarmanlagen empfangen
                   \item Alarmmeldungen zur Bearbeitung bereitstellen
@@ -201,7 +201,7 @@
     \begin{enumerate}
         \item \textbf{Synchrone} Request-Response-Ketten: Latenzen summieren sich
         \item \textbf{Heterogene} Redundanzmodi: Durchsatz begrenzt durch eine SRV~3 Instanz
-        \item \textbf{Manuelles} Ausfall-Management: Minuten statt Sekunden (\textbf{EN 50136})
+        \item \textbf{Manuelles} Ausfall-Management: Minuten statt Sekunden (\textbf{EN 50136}~\hyperlink{DIN12}{[DIN12]})
         \item \textbf{Exactly-Once-Delivery}: Keine Idempotenz. Duplikate werden doppelt bearbeitet
         \item \textbf{In-Order-Delivery}: Alarmmeldungen sind Zustandbehaftet. Entwarnung vor Alarm löst unnötigen Notfalleinsatz
     \end{enumerate}
@@ -233,9 +233,9 @@
 
     \begin{itemize}
         \item \textbf{Proof-of-Concept} Implementierung
-        \item \textbf{MQTT} basiert. \textbf{Publish-Subscribe} Protokoll
+        \item \textbf{MQTT} basiert~\hyperlink{OAS19}{[OAS19]}. \textbf{Publish-Subscribe} Protokoll
         \item \textbf{LP~1}: Empfängt Alarmmeldungen von SRV~1 und publiziert sie an den Broker
-        \item \textbf{MQTT-Broker (HiveMQ)}: Puffert die Alarmmeldungen und stellt sie für LP~2 bereit
+        \item \textbf{MQTT-Broker} (HiveMQ)~\hyperlink{Hiv25}{[Hiv25]}: Puffert die Alarmmeldungen und stellt sie für LP~2 bereit
         \item \textbf{LP~2}: Konsumiert die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
     \end{itemize}
 \end{frame}
@@ -308,7 +308,7 @@
     \frametitle{Reproduzierbarkeit der Experimente}
     \framesubtitle{\insertsection}
 
-    \begin{block}{Success-Run-Theorem}
+    \begin{block}{Success-Run-Theorem~[\hyperlink{Jos23}{Jos23}, \hyperlink{Kec92}{Kec92}]}
         \[ n = \frac{\ln(1-C)}{\ln R} = \frac{\ln(1-0{,}95)}{\ln(0{,}95)} \approx 58{,}4 \;\Rightarrow\; \textbf{59 Durchläufe} \]
 
         Alle \textbf{59} erfolgreich $\rightarrow$ mit \textbf{95\,\%} Konfidenz ist ein einzelner Durchlauf mit $\geq$ \textbf{95\,\%} Wahrscheinlichkeit erfolgreich
@@ -419,9 +419,9 @@
     \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item \textbf{AMQP} basiert
+        \item \textbf{AMQP} basiert~\hyperlink{AMQ08}{[AMQ08]}
         \item \textbf{ALP~1}: Empfängt Alarmmeldungen von SRV~1 und publiziert sie an den Broker
-        \item \textbf{AMQP-Broker (RabbitMQ)}: Puffert die Alarmmeldungen und stellt sie für ALP~2 bereit
+        \item \textbf{AMQP-Broker} (RabbitMQ)~\hyperlink{Bro26}{[Bro26]}: Puffert die Alarmmeldungen und stellt sie für ALP~2 bereit
         \item \textbf{ALP~2}: Konsumiert die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
         \item \textbf{ALP~D}: Deduplizierungschicht vor SRV~3
     \end{itemize}
@@ -564,7 +564,7 @@
         \item \textbf{60} Alarmmeldungen
         \item \textbf{3} ALP~1 Instanzen
         \item \textbf{3} ALP~2 Instanzen
-        \item \textbf{Verarbeitungszeit} nach \textbf{RAST}
+        \item \textbf{Verarbeitungszeit} nach \textbf{RAST}~\hyperlink{TG25}{[TG25]}
         \item \textbf{Keine} Netzwerkfehler
     \end{itemize}
 \end{frame}
@@ -598,7 +598,7 @@
         \item \textbf{3} ALP~1 Instanzen
         \item \textbf{3} ALP~2 Instanzen
         \item \textbf{Verarbeitungszeit} nach \textbf{RAST}
-        \item \textbf{20,0\,\%} Netzwerkfehler
+        \item \textbf{20,0\,\%} Netzwerkfehler~\hyperlink{Val24}{[Val24]}
     \end{itemize}
 \end{frame}
 
@@ -670,6 +670,80 @@
 %         \item \textbf{Umordnung vor dem Broker?} Ja, möglich. Deshalb gilt die In-Order-Aussage nur für Broker $\rightarrow$ ALP 2 $\rightarrow$ T SRV.
 %     \end{itemize}
 % }
+
+\section*{Referenzen}
+
+\newenvironment{reflist}{%
+    \begin{list}{}{%
+            \setlength{\labelwidth}{1.4cm}%
+            \setlength{\labelsep}{0.3cm}%
+            \setlength{\leftmargin}{\dimexpr\labelwidth+\labelsep\relax}%
+            \setlength{\itemsep}{0.3em}%
+            \renewcommand{\makelabel}[1]{##1\hfill}}%
+        }{\end{list}}
+
+\begin{frame}
+    \frametitle{Referenzen}
+    \fontsize{7pt}{8pt}\selectfont
+    \begin{reflist}
+        % Design smells
+        \hypertarget{Alk19}{}
+        \item[{[Alk19]}] Khalid Alkharabsheh, Yania Crespo, Esperanza Manso und José A. Taboada. \textit{Software Design Smell Detection: a systematic mapping study}. In: \textit{Software Quality Journal} 27.3 (2019). \url{https://doi.org/10.1007/s11219-018-9424-8}.
+
+        % AMQP 0-9-1 (used by RabbitMQ)
+        \hypertarget{AMQ08}{}
+        \item[{[AMQ08]}] AMQP Working Group. \textit{AMQP 0-9-1 Specification}. 2008. \url{https://www.rabbitmq.com/resources/specs/amqp0-9-1.pdf}.
+
+        % Legacy systems
+        \hypertarget{Ben95}{}
+        \item[{[Ben95]}] Keith Bennett. \textit{Legacy systems: coping with success}. In: \textit{IEEE Software} 12.1 (1995). \url{https://doi.org/10.1109/52.363157}.
+
+        % RabbitMQ
+        \hypertarget{Bro26}{}
+        \item[{[Bro26]}] Broadcom. \textit{RabbitMQ: Open Source Message Broker}. 2026. \url{https://www.rabbitmq.com/}. Abgerufen am 26.09.2026.
+
+        % Alarm transmission standard
+        \hypertarget{DIN12}{}
+        \item[{[DIN12]}] DIN EN 50136-1:2012-08. \textit{Alarmanlagen -- Alarmübertragungsanlagen und -einrichtungen -- Teil 1: Allgemeine Anforderungen an Alarmübertragungsanlagen}. 2012.
+
+        % GS electronic
+        \hypertarget{GS25}{}
+        \item[{[GS25]}] GS electronic company group. Unternehmenswebsite. 2025. \url{https://www.gselectronic.de}. Abgerufen am 07.10.2025.
+
+        % HiveMQ
+        \hypertarget{Hiv25}{}
+        \item[{[Hiv25]}] HiveMQ GmbH. \textit{HiveMQ Community Edition}. GitHub-Repository, 2025. \url{https://github.com/hivemq/hivemq-community-edition}.
+
+        % Success-Run-Theorem (derivation)
+        \hypertarget{Jos23}{}
+        \item[{[Jos23]}] Sanjay M. Joshi. \textit{Computation of Reliability Statistics for Success-Failure Experiments}. arXiv, 2023. \url{https://arxiv.org/abs/2303.03167}.
+
+        % Success-Run-Theorem (standard reference)
+        \hypertarget{Kec92}{}
+        \item[{[Kec92]}] Dimitri Kececioglu. \textit{Reliability \& Life Testing Handbook}. New York: Prentice Hall, 1992.
+
+        % LPS
+        \hypertarget{LG25}{}
+        \item[{[LG25]}] Juri Liebig und Sergei Gorlatch. \textit{A Case Study on Architectural Refactoring of Real-Time Legacy Distributed Systems}. In: \textit{ICACS'25}, 2025. To appear.
+
+        % MQTT 5.0
+        \hypertarget{OAS19}{}
+        \item[{[OAS19]}] OASIS Standard. \textit{MQTT Version 5.0}. März 2019. \url{https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html}.
+
+        % Architecture smells
+        \hypertarget{SSS16}{}
+        \item[{[SSS16]}] Ganesh Samarthyam, Girish Suryanarayana und Tushar Sharma. \textit{Refactoring for software architecture smells}. In: \textit{Proceedings of the 1st International Workshop on Software Refactoring (IWoR 2016)}. ACM, 2016. \url{https://doi.org/10.1145/2975945.2975946}.
+
+        % RAST (toolset)
+        \hypertarget{TG25}{}
+        \item[{[TG25]}] Juri Tomak und Sergei Gorlatch. \textit{A Toolset for Predicting Performance of Legacy Real-Time Software Based on the RAST Approach}. In: \textit{ACM Transactions on Modeling and Computer Simulation} 35.3 (2025). \url{https://doi.org/10.1145/3673897}.
+
+        % Cloudflare: TCP resets and timeouts
+        \hypertarget{Val24}{}
+        \item[{[Val24]}] Luke Valenta. \textit{Bringing insights into TCP resets and timeouts to Cloudflare Radar}. Cloudflare Blog, 2024. \url{https://blog.cloudflare.com/tcp-resets-timeouts/}.
+
+    \end{reflist}
+\end{frame}
 
 \makecontactpage[c]
 
