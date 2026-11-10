@@ -280,7 +280,7 @@
     \end{itemize}
 
     \begin{block}{Hypothese}
-        LPS verletzt beide Garantien unter Netzwerkfehler und hohe Latenzen
+        LPS verletzt beide Garantien unter Netzwerkfehlern und hohen Latenzen
     \end{block}
 \end{frame}
 
@@ -316,21 +316,15 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Phase~1: Exactly-Once-Delivery - Setup}
+    \frametitle{Phase~1: Exactly-Once-Delivery}
     \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item \textbf{1} Alarmanlage
-        \item \textbf{1} Alarmmeldung
-        \item \textbf{1} LP~1 Instanz
-        \item \textbf{1} LP~2 Instanz
+        \item \textbf{1} Alarmanlage, \textbf{1} Alarmmeldung, \textbf{1} LP~1 Instanz, \textbf{1} LP~2 Instanz
         \item \textbf{Netzwerkfehler} gezielt zwischen \textbf{LP~2} und dem \textbf{MQTT-Broker}, während LP~2 auf Antwort von SRV~2 wartet
     \end{itemize}
-\end{frame}
 
-\begin{frame}
-    \frametitle{Phase~1: Exactly-Once-Delivery - Ergebnis}
-    \framesubtitle{\insertsection}
+    \bigskip
 
     \begin{tabularx}{\linewidth}{@{}LLLL@{}}
         \toprule
@@ -347,22 +341,17 @@
     \end{alertblock}
 \end{frame}
 
+
 \begin{frame}
-    \frametitle{Phase~2: In-Order-Delivery - Setup}
+    \frametitle{Phase~2: In-Order-Delivery}
     \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item \textbf{1} Alarmanlage
-        \item \textbf{2} Alarmmeldungen
-        \item \textbf{1} LP~1 Instanz
-        \item \textbf{2} LP~2 Instanzen
+        \item \textbf{1} Alarmanlage, \textbf{2} Alarmmeldungen, \textbf{1} LP~1 Instanz, \textbf{2} LP~2 Instanzen
         \item \textbf{Hohe Netzwerklatenzen} während beide \textbf{LP~2} Instanzen Alarmmeldungen \textbf{parallel} verarbeiten
     \end{itemize}
-\end{frame}
 
-\begin{frame}
-    \frametitle{Phase~2: In-Order-Delivery - Ergebnis}
-    \framesubtitle{\insertsection}
+    \bigskip
 
     \begin{tabularx}{\linewidth}{@{}LLL@{}}
         \toprule
@@ -524,9 +513,9 @@
 
     \bigskip
 
-    \begin{block}{Ergebnis}
+    \begin{alertblock}{Ergebnis}
         Exactly-Once-Delivery in \textbf{59/59 Durchläufen eingehalten}
-    \end{block}
+    \end{alertblock}
 \end{frame}
 
 \begin{frame}
@@ -550,28 +539,22 @@
 
     \bigskip
 
-    \begin{block}{Ergebnis}
+    \begin{alertblock}{Ergebnis}
         In-Order-Delivery in \textbf{59/59 Durchläufen eingehalten}
-    \end{block}
+    \end{alertblock}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Phase~3: Realitätsnahe Last im Normalbetrieb - Setup}
+    \frametitle{Phase~3: Realitätsnahe Last im Normalbetrieb}
     \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item \textbf{50} Alarmanlagen
-        \item \textbf{60} Alarmmeldungen
-        \item \textbf{3} ALP~1 Instanzen
-        \item \textbf{3} ALP~2 Instanzen
+        \item \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
         \item \textbf{Verarbeitungszeit} nach \textbf{RAST}~\hyperlink{TG25}{[TG25]}
         \item \textbf{Keine} Netzwerkfehler
     \end{itemize}
-\end{frame}
 
-\begin{frame}
-    \frametitle{Phase~3: Realitätsnahe Last im Normalbetrieb - Ergebnis}
-    \framesubtitle{\insertsection}
+    \bigskip
 
     \begin{tabularx}{\linewidth}{@{}LLLLL@{}}
         \toprule
@@ -583,28 +566,22 @@
 
     \bigskip
 
-    \begin{block}{Ergebnis}
+    \begin{alertblock}{Ergebnis}
         Delivery-Garantien in \textbf{59/59 Durchläufen eingehalten}
-    \end{block}
+    \end{alertblock}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Phase~4: Realitätsnahe Last mit Newtzwerkfehlern - Setup}
+    \frametitle{Phase~4: Realitätsnahe Last mit Newtzwerkfehlern}
     \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item \textbf{50} Alarmanlagen
-        \item \textbf{60} Alarmmeldungen
-        \item \textbf{3} ALP~1 Instanzen
-        \item \textbf{3} ALP~2 Instanzen
+        \item \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
         \item \textbf{Verarbeitungszeit} nach \textbf{RAST}
         \item \textbf{20,0\,\%} Netzwerkfehler~\hyperlink{Val24}{[Val24]}
     \end{itemize}
-\end{frame}
 
-\begin{frame}
-    \frametitle{Phase~4: Realitätsnahe Last mit Newtzwerkfehlern - Ergebnis}
-    \framesubtitle{\insertsection}
+    \bigskip
 
     \begin{tabularx}{\linewidth}{@{}LLLLL@{}}
         \toprule
@@ -616,9 +593,9 @@
 
     \bigskip
 
-    \begin{block}{Ergebnis}
+    \begin{alertblock}{Ergebnis}
         Delivery-Garantien in \textbf{59/59 Durchläufen eingehalten}
-    \end{block}
+    \end{alertblock}
 \end{frame}
 
 \section{Fazit und Ausblick}
