@@ -40,6 +40,31 @@
 	\fi
 }
 
+% Focus/Context-Agenda im Footer
+\newcommand{\footagendaitem}[2]{%
+	\ifnum\c@section=#1\relax
+		\textbf{#2}%
+	\else
+		#2%
+	\fi
+}
+\newcommand{\footagenda}{%
+	\footagendaitem{1}{Einleitung}\footagendasep
+	\footagendaitem{2}{Fallstudie}\footagendasep
+	\footagendaitem{3}{LPS}\footagendasep
+	\footagendaitem{4}{ALPS}\footagendasep
+	\footagendaitem{5}{Evaluation}\footagendasep
+	\footagendaitem{6}{Fazit}
+}
+\newcommand{\footagendasep}{\enspace\textperiodcentered\enspace}
+
+% Flag: Agenda im Footer auf Section-Pages ausblenden
+\newif\ifonsectionpage
+% Globaler Schalter: Agenda im Footer ab einer bestimmten Stelle abschalten
+\newif\iffootagendaon
+\footagendaontrue
+
+
 \setbeamertemplate{footline}{
 	\ifnum\c@page=1
 	\else
@@ -54,7 +79,10 @@
 		\begin{beamercolorbox}[wd=\slidew, leftskip=\margin, rightskip=\margin]{\col}
 			\textcolor{\colline}{\hrule}
 			\vspace{\margins}
-			\makebox[8cm][l]{\usebeamerfont{footline} \insertauthor}
+            {\usebeamerfont{footline}\insertauthor}
+            \hfill
+            \ifonsectionpage\else\iffootagendaon{\usebeamerfont{footline}\footagenda}\fi\fi
+            \global\onsectionpagefalse% Flag nach dem Seitenumbruch zurücksetzen
 			\hfill
 			\makebox[2cm][r]{\usebeamerfont{page number in head/foot} \insertframenumber\,/\,\inserttotalframenumber}%
 			\vspace{\margin}
@@ -65,6 +93,7 @@
 
 \setbeamertemplate{section page}{
 	\thispagestyle{navigation@sectionpage}
+	\global\onsectionpagetrue
 	\begin{textblock*}{\slidew}(0cm,0cm)
 		\color{col1}\vrule width\slidew height\slideh
 	\end{textblock*}
@@ -456,12 +485,13 @@
     \end{itemize}
 \end{frame}
 
-\section{ALPS: Experimentelle Evaluation}
+\section{Experimentelle Evaluation}
 
 \makesectionpage
 
 \begin{frame}
-    \frametitle{\insertsection}
+    \frametitle{ALPS: Experimentelle Evaluation}
+
     \begin{itemize}
         \item Vier Phasen
               \begin{enumerate}
@@ -621,6 +651,8 @@
         \item Betriebsaufwand
     \end{itemize}
 \end{frame}
+
+\footagendaonfalse % ab hier keine Agenda mehr im Footer
 
 \makeclosingpage{Vielen Dank für Ihre Aufmerksamkeit!}
 
