@@ -1,5 +1,5 @@
-% \documentclass[11pt,handout,aspectratio=1610]{beamer} % No animations
-\documentclass[11pt,aspectratio=1610]{beamer} % Animations
+\documentclass[11pt,handout,aspectratio=1610]{beamer} % No animations
+% \documentclass[11pt,aspectratio=1610]{beamer} % Animations
 
 \usetheme[language=de, style=blue]{UniMS}
 
@@ -117,12 +117,10 @@
 
 \begin{frame}
     \frametitle{Motivation: Design Smells in Legacy-Systemen}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item Geschäftskritische Legacy-Systeme laufen weit über ihren geplanten Lebenszyklus hinaus~\hyperlink{Ben95}{[Ben95]}
-        \item Fokus auf neue Funktionen, Wartbarkeit wird vernachlässigt~\hyperlink{Ben95}{[Ben95]}
-        \item \textbf{Design Smells}: Keine Programmierfehler, sondern strukturelle Probleme~\hyperlink{SSS16}{[SSS16]}
+        \item Fokus auf neue Funktionen, Wartbarkeit und Code-Qualität werden vernachlässigt~\hyperlink{Ben95}{[Ben95]}
+        \item $\rightarrow$ \textbf{Design Smells}: Keine Programmierfehler, sondern strukturelle Probleme~\hyperlink{SSS16}{[SSS16]}
         \item Negativer Einfluss auf das Verstehen, Testen, Korrigieren und Erweitern~\hyperlink{Alk19}{[Alk19]}
         \item Beispiele für Design Smells~\hyperlink{LG25}{[LG25]}
               \begin{itemize}
@@ -135,7 +133,7 @@
 
 \begin{frame}
     \frametitle{Mitigierung durch Architektur-Reengineering}
-    \framesubtitle{\insertsection}
+
     \begin{itemize}
         \item \textbf{Betrachtete Klasse von Legacy-Systemen}
               \begin{itemize}
@@ -148,7 +146,7 @@
               \begin{itemize}
                   \item Ansatz zum Mitigieren von Design Smells
                   \item Keine Änderungen am \textbf{Legacy-Code}
-                  \item Respektiert die \textbf{Strikten Delivery-Garantien}
+                  \item Einhaltung der \textbf{Strikten Delivery-Garantien}
               \end{itemize}
 
     \end{itemize}
@@ -156,10 +154,9 @@
 
 \begin{frame}
     \frametitle{Zielsetzung}
-    \framesubtitle{\insertsection}
 
     \begin{enumerate}
-        \item \textbf{Analyse von LPS:} gezielte Experimente, ob die Delivery-Garantien unter Fehlerbedingungen halten
+        \item \textbf{Analyse von LPS:} gezielte Experimente, ob die Delivery-Garantien unter Fehlerbedingungen eingehalten werden
         \item \textbf{Entwicklung von ALPS:} Vorteile von LPS beibehalten, Limitationen beheben
         \item \textbf{Evaluation von ALPS:} unter Fehlerbedingungen und unter realitätsnahen Bedingungen
     \end{enumerate}
@@ -184,7 +181,6 @@
 
 \begin{frame}
     \frametitle{Design Smells in MARC}
-    \framesubtitle{\insertsection}
 
     \begin{enumerate}
         \item \textbf{Synchrone} Request-Response-Ketten: Latenzen summieren sich
@@ -207,7 +203,6 @@
 
 \begin{frame}
     \frametitle{Legacy Proxy System (LPS)}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
         \item Ansatz zum Mitigieren von Design Smells
@@ -218,8 +213,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Architektur}
-    \framesubtitle{\insertsection}
+    \frametitle{LPS: Architektur}
 
     \begin{itemize}
         \item \textbf{Proof-of-Concept} Implementierung
@@ -231,14 +225,13 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Integration in MARC}
+    \frametitle{LPS: Integration in MARC}
     \centering
     \abbildung{\linewidth}{0.72\textheight}{../img/drawio/lps_squashed.pdf}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Delivery-Garantien}
-    \framesubtitle{\insertsection}
+    \frametitle{LPS: Delivery-Garantien}
 
     \begin{itemize}
         \item Nur unter \textbf{idealen Bedingungen}
@@ -257,10 +250,11 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Lücken in der ursprünglichen Evaluation}
-    \framesubtitle{\insertsection}
+    \frametitle{LPS: Ursprüngliche Evaluation}
 
     \begin{itemize}
+        \item \textbf{40\,-100\,\%} Verbesserung der Antwortzeiten
+        \item Mitigierung der ersten dre Design Smells
         \item Fokus auf Antwortzeiten
         \item \textbf{Ideale Bedingungen}
               \begin{itemize}
@@ -279,8 +273,8 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Experimente}
-    \framesubtitle{\insertsection}
+    \frametitle{LPS: Experimentelle Evaluation}
+
     \begin{itemize}
         \item Konkrete Fehlerbedingungen durch gezielte Netzwerkfehler und Latenzen provozieren
         \item Services
@@ -299,8 +293,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Reproduzierbarkeit der Experimente}
-    \framesubtitle{\insertsection}
+    \frametitle{Zuverlässigkeit der Experiment-Ergebnisse}
 
     \begin{block}{Success-Run-Theorem~[\hyperlink{Jos23}{Jos23}, \hyperlink{Kec92}{Kec92}]}
         \[ n = \frac{\ln(1-C)}{\ln R} = \frac{\ln(1-0{,}95)}{\ln(0{,}95)} \approx 58{,}4 \;\Rightarrow\; \textbf{59 Durchläufe} \]
@@ -311,7 +304,6 @@
 
 \begin{frame}
     \frametitle{Phase~1: Exactly-Once-Delivery}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
         \item \textbf{1} Alarmanlage, \textbf{1} Alarmmeldung, \textbf{1} LP~1 Instanz, \textbf{1} LP~2 Instanz
@@ -340,7 +332,6 @@
 
 \begin{frame}
     \frametitle{Phase~2: In-Order-Delivery}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
         \item \textbf{1} Alarmanlage, \textbf{2} Alarmmeldungen, \textbf{1} LP~1 Instanz, \textbf{2} LP~2 Instanzen
@@ -367,8 +358,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Limitationen}
-    \framesubtitle{\insertsection}
+    \frametitle{LPS: Limitationen}
 
     \begin{enumerate}
         \item \textbf{Exactly-Once-Delivery} verletzt bei Netzwerkfehlern zwischen LP~2 und Broker
@@ -381,7 +371,7 @@
     \bigskip
 
     \begin{block}{Vorteile}
-        Die asynchrone, transparente Proxy-Broker-Proxy-Architektur ist vorteilhaft und soll erhalten bleiben
+        Die asynchrone, transparente Proxy-Broker-Proxy-Architektur mitigiert die ersten drei Design Smells und verbessert die Performance und soll erhalten bleiben
     \end{block}
 \end{frame}
 
@@ -390,12 +380,11 @@
 \makesectionpage
 
 \begin{frame}
-    \frametitle{Anforderungen an ALPS}
-    \framesubtitle{\insertsection}
+    \frametitle{ALPS: Anforderungen}
 
     \begin{itemize}
-        \item[A~1] Vorteilhafte asynchrone Architektur von LPS beibehalten
-        \item[A~2] Transparenz zum Legacy-System beibehalten
+        \item[A~1] Asynchrone Architektur von LPS beibehalten
+        \item[A~2] Transparente Integration mit Legacy-System beibehalten
         \item[A~3] Kein Nachrichtenverlust
         \item[A~4] \textbf{Exactly-Once-Delivery} \hfill (Limitation \textbf{1} von LPS)
         \item[A~5] \textbf{In-Order-Delivery} pro Alarmanlage \hfill (Limitation \textbf{2} von LPS)
@@ -404,8 +393,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Architektur}
-    \framesubtitle{\insertsection}
+    \frametitle{ALPS: Architektur}
 
     \begin{itemize}
         \item \textbf{AMQP} basiert~\hyperlink{AMQ08}{[AMQ08]}
@@ -417,14 +405,13 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Integration in MARC}
+    \frametitle{ALPS: Integration in MARC}
     \centering
     \abbildung{\linewidth}{0.72\textheight}{../img/drawio/alps_squashed.pdf}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Delivery-Garantien}
-    \framesubtitle{\insertsection}
+    \frametitle{ALPS: Delivery-Garantien}
 
     \begin{itemize}
         \item \textbf{ALP~D: Deduplizierungschicht}
@@ -432,7 +419,7 @@
                   \item Verteilte Datenbank
                   \item Garantiert \textbf{Exactly-Once-Delivery}
               \end{itemize}
-        \item \textbf{Standard AMQP Features}
+        \item \textbf{AMQP Features und RabbitMQ Erweiterungen}
               \begin{itemize}
                   \item \texttt{x-consistent-hash}
                   \item \texttt{x-single-active-consumer}
@@ -445,8 +432,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{In-Order-Delivery Garantie}
-    \framesubtitle{\insertsection}
+    \frametitle{ALPS: In-Order-Delivery Garantie}
 
     \begin{itemize}
         \item ALP~2 verarbeitet Alarmmeldungen in der \textbf{Reihenfolge}, in der ALP~1 sie publiziert hat
@@ -470,7 +456,7 @@
     \end{itemize}
 \end{frame}
 
-\section{Experimentelle Evaluation}
+\section{ALPS: Experimentelle Evaluation}
 
 \makesectionpage
 
@@ -494,7 +480,6 @@
 
 \begin{frame}
     \frametitle{Phase~1: Exactly-Once-Delivery}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
         \item \textbf{1} Alarmanlage, \textbf{1} Alarmmeldung, \textbf{1} ALP~1 Instanz, \textbf{1} ALP~2 Instanz
@@ -522,7 +507,6 @@
 
 \begin{frame}
     \frametitle{Phase~2: In-Order-Delivery}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
         \item \textbf{1} Alarmanlage, \textbf{2} Alarmmeldungen, \textbf{1} ALP~1 Instanz, \textbf{2} ALP~2 Instanzen
@@ -550,11 +534,10 @@
 
 \begin{frame}
     \frametitle{Phase~3: Realitätsnahe Last im Normalbetrieb}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
         \item \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
-        \item \textbf{Verarbeitungszeit} nach \textbf{RAST}~\hyperlink{TG25}{[TG25]}
+        \item Verarbeitungszeitsimulation mittels \textbf{RAST}~\hyperlink{TG25}{[TG25]}
         \item \textbf{Keine} Netzwerkfehler. \textbf{Keine} Netzwerklatenzen
     \end{itemize}
 
@@ -579,11 +562,10 @@
 
 \begin{frame}
     \frametitle{Phase~4: Realitätsnahe Last mit Newtzwerkfehlern}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
         \item \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
-        \item \textbf{Verarbeitungszeit} nach \textbf{RAST}
+        \item Verarbeitungszeitsimulation mittels \textbf{RAST}
         \item \textbf{20,0\,\%} Netzwerkfehler~\hyperlink{Val24}{[Val24]}. Netzwerklatenzen nach echten internen Messungen
     \end{itemize}
 
@@ -612,15 +594,14 @@
 
 \begin{frame}
     \frametitle{Erfüllung der Anforderungen}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
-        \item[A~1] Asynchrone Entkopplung \hfill (Architektonisch)
-        \item[A~2] Transparenz \hfill (Legacy-Schnittstellen bleiben unverändert)
+        \item[A~1] Asynchrone Architektur \hfill (Architektonisch)
+        \item[A~2] Transparente Integration mit Legacy-System \hfill (Legacy-Schnittstellen unverändert)
         \item[A~3] Kein Nachrichtenverlust \hfill (AMQP Features)
         \item[A~4] \textbf{Exactly-Once-Delivery} \hfill (Deduplizierungschicht)
         \item[A~5] \textbf{In-Order-Delivery} \hfill (AMQP Features)
-        \item[A~6] Vendor-Neutralität \hfill (Standard AMQP Features)
+        \item[A~6] Vendor-Neutralität \hfill (AMQP Features)
     \end{itemize}
 
     \pause
@@ -632,12 +613,11 @@
 
 \begin{frame}
     \frametitle{Ausblick}
-    \framesubtitle{\insertsection}
 
     \begin{itemize}
         \item \textbf{Reale verteilte Umgebung}: drei Rechenzentren, Broker-Cluster, Ausfälle der einzelnen Komponente
         \item Overhead durch ALP~D
-        \item \alert{Head-of-Line-Blocking} durch fehlschlagende Meldungen
+        \item Flaschenhals durch fehlschlagende Meldungen
         \item Betriebsaufwand
     \end{itemize}
 \end{frame}
