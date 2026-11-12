@@ -1,5 +1,5 @@
-\documentclass[11pt,handout,aspectratio=1610]{beamer} % No animations
-% \documentclass[11pt,aspectratio=1610]{beamer} % Animations
+% \documentclass[11pt,handout,aspectratio=1610]{beamer} % No animations
+\documentclass[11pt,aspectratio=1610]{beamer} % Animations
 
 \usetheme[language=de, style=blue]{UniMS}
 
@@ -251,12 +251,11 @@
         \item \textbf{MQTT-Broker} (HiveMQ)~\hyperlink{Hiv25}{[Hiv25]}: Puffert die Alarmmeldungen und stellt sie für LP~2 bereit
         \item \textbf{LP~2}: Konsumiert die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
     \end{itemize}
-\end{frame}
 
-\begin{frame}
-    \frametitle{LPS: Integration in MARC}
+    \medskip
+
     \centering
-    \abbildung{\linewidth}{0.72\textheight}{../img/drawio/lps_squashed.pdf}
+    \abbildung{\linewidth}{0.50\textheight}{../img/drawio/lps_super_squashed.pdf}
 \end{frame}
 
 \begin{frame}
@@ -427,16 +426,15 @@
     \begin{itemize}
         \item \textbf{AMQP} basiert~\hyperlink{AMQ08}{[AMQ08]}
         \item \textbf{ALP~1}: Empfängt Alarmmeldungen von SRV~1 und publiziert sie an den Broker
-        \item \textbf{AMQP-Broker} (RabbitMQ)~\hyperlink{Bro26}{[Bro26]}: Puffert die Alarmmeldungen und stellt sie für ALP~2 bereit
+        \item \textbf{AMQP-Broker} (RabbitMQ)~\hyperlink{Bro26}{[Bro26]}: Puffert die Alarmmeldungen und stellt sie bereit
         \item \textbf{ALP~2}: Konsumiert die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
         \item \textbf{ALP~D}: Deduplizierungschicht vor SRV~3
     \end{itemize}
-\end{frame}
 
-\begin{frame}
-    \frametitle{ALPS: Integration in MARC}
+    \medskip
+
     \centering
-    \abbildung{\linewidth}{0.72\textheight}{../img/drawio/alps_squashed.pdf}
+    \abbildung{\linewidth}{0.50\textheight}{../img/drawio/alps_super_squashed.pdf}
 \end{frame}
 
 \begin{frame}
