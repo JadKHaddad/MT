@@ -1,4 +1,5 @@
-\documentclass[11pt,handout,aspectratio=1610]{beamer}
+% \documentclass[11pt,handout,aspectratio=1610]{beamer} % No animations
+\documentclass[11pt,aspectratio=1610]{beamer} % Animations
 
 \usetheme[language=de, style=blue]{UniMS}
 
@@ -114,8 +115,6 @@
 
 \section{Einleitung und Zielsetzung}
 
-\makesectionpage
-
 \begin{frame}
     \frametitle{Motivation: Design Smells in Legacy-Systemen}
     \framesubtitle{\insertsection}
@@ -183,18 +182,6 @@
     \abbildung{\linewidth}{0.65\textheight}{../img/drawio/marc_squashed.pdf}
 \end{frame}
 
-% \begin{frame}
-%     \frametitle{ARS: Architektur}
-%     \centering
-%     \abbildung{\linewidth}{0.72\textheight}{../img/drawio/ars.pdf}
-% \end{frame}
-
-% \begin{frame}
-%     \frametitle{Architektur}
-%     \centering
-%     \abbildung{\linewidth}{0.72\textheight}{../img/drawio/marc_squashed.pdf}
-% \end{frame}
-
 \begin{frame}
     \frametitle{Design Smells in MARC}
     \framesubtitle{\insertsection}
@@ -206,6 +193,8 @@
         \item \textbf{Exactly-Once-Delivery}: Keine Idempotenz. Duplikate werden doppelt bearbeitet
         \item \textbf{In-Order-Delivery}: Alarmmeldungen sind Zustandbehaftet. Entwarnung vor Alarm löst unnötigen Notfalleinsatz
     \end{enumerate}
+
+    \pause
 
     \begin{exampleblock}{Fokus dieser Arbeit}
         \textbf{Exactly-Once-Delivery} und \textbf{In-Order-Delivery}
@@ -280,6 +269,10 @@
               \end{itemize}
     \end{itemize}
 
+    \pause
+
+    \bigskip
+
     \begin{block}{Hypothese}
         LPS verletzt beide Garantien unter Netzwerkfehlern und hohen Latenzen
     \end{block}
@@ -325,6 +318,8 @@
         \item \textbf{Netzwerkfehler} gezielt zwischen \textbf{LP~2} und dem \textbf{MQTT-Broker}, während LP~2 auf Antwort von SRV~2 wartet
     \end{itemize}
 
+    \pause
+
     \bigskip
 
     \begin{tabularx}{\linewidth}{@{}LLLL@{}}
@@ -352,6 +347,8 @@
         \item \textbf{Hohe Netzwerklatenzen} während beide \textbf{LP~2} Instanzen Alarmmeldungen \textbf{parallel} verarbeiten
     \end{itemize}
 
+    \pause
+
     \bigskip
 
     \begin{tabularx}{\linewidth}{@{}LLL@{}}
@@ -378,6 +375,8 @@
         \item \textbf{In-Order-Delivery} verletzt bei paralleler Verarbeitung von Alarmmeldungen unter hohen Netzwerklatenzen
         \item \textbf{Vendor-Lock-in} durch das HiveMQ-spezifische Plugin
     \end{enumerate}
+
+    \pause
 
     \bigskip
 
@@ -458,7 +457,7 @@
               \begin{itemize}
                   \item \texttt{x-consistent-hash}
               \end{itemize}
-        \item Alarmmeldungen einer Alarmanlage werden \textbf{strikt sequentiell} verarbeitet
+        \item Alarmmeldungen werden \textbf{strikt sequentiell} verarbeitet
               \begin{itemize}
                   \item \texttt{x-single-active-consumer}
               \end{itemize}
@@ -483,7 +482,7 @@
                   \item \textbf{Exactly-Once-Delivery} \hfill (wie LPS)
                   \item \textbf{In-Order-Delivery} \hfill (wie LPS)
                   \item Realitätsnahe Last im Normalbetrieb
-                  \item Realitätsnahe Last mit \textbf{Netzwerkfehlern}
+                  \item Realitätsnahe Last mit \textbf{Netzwerkfehlern und Latenzen}
               \end{enumerate}
         \item Gleiche Hilfservices \hfill (wie LPS)
         \item 59 Durchläufe nach dem \textbf{Success-Run-Theorem}
@@ -501,6 +500,8 @@
         \item \textbf{1} Alarmanlage, \textbf{1} Alarmmeldung, \textbf{1} ALP~1 Instanz, \textbf{1} ALP~2 Instanz
         \item \textbf{Netzwerkfehler} gezielt zwischen \textbf{ALP~2} und dem \textbf{AMQP-Broker}, während ALP~2 auf Antwort von SRV~2 wartet
     \end{itemize}
+
+    \pause
 
     \bigskip
 
@@ -528,6 +529,8 @@
         \item \textbf{Hohe Netzwerklatenzen}
     \end{itemize}
 
+    \pause
+
     \bigskip
 
     \begin{tabularx}{\linewidth}{@{}LLL@{}}
@@ -552,8 +555,10 @@
     \begin{itemize}
         \item \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
         \item \textbf{Verarbeitungszeit} nach \textbf{RAST}~\hyperlink{TG25}{[TG25]}
-        \item \textbf{Keine} Netzwerkfehler
+        \item \textbf{Keine} Netzwerkfehler. \textbf{Keine} Netzwerklatenzen
     \end{itemize}
+
+    \pause
 
     \bigskip
 
@@ -579,8 +584,10 @@
     \begin{itemize}
         \item \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
         \item \textbf{Verarbeitungszeit} nach \textbf{RAST}
-        \item \textbf{20,0\,\%} Netzwerkfehler~\hyperlink{Val24}{[Val24]}
+        \item \textbf{20,0\,\%} Netzwerkfehler~\hyperlink{Val24}{[Val24]}. Netzwerklatenzen nach echten internen Messungen
     \end{itemize}
+
+    \pause
 
     \bigskip
 
@@ -615,6 +622,8 @@
         \item[A~5] \textbf{In-Order-Delivery} \hfill (AMQP Features)
         \item[A~6] Vendor-Neutralität \hfill (Standard AMQP Features)
     \end{itemize}
+
+    \pause
 
     \begin{block}{Ergebnis}
         Mit \textbf{95\,\%} Konfidenz und $\geq$ \textbf{95\,\%} Wahrscheinlichkeit hält ALPS die Delivery-Garantien ein
