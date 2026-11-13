@@ -674,18 +674,6 @@
     \end{itemize}
 \end{frame}
 
-% \sprechtext{
-%     \textbf{Vorbereitung auf mögliche Fragen}
-%     \begin{itemize}
-%         \item \textbf{ALP D stürzt nach dem Weiterleiten, aber vor dem Speichern ab?} Dann ist ein Duplikat möglich. Liegt explizit außerhalb der Garantie; Abhilfe bräuchte einen transaktionalen oder zweiphasigen Ansatz mit T SRV.
-%         \item \textbf{Bremst \texttt{prefetch\_count = 1} den Durchsatz?} Der Durchsatz skaliert mit der Anzahl der Queues $N$, nicht mit Consumern pro Queue. Preis für die Reihenfolge pro Alarmanlage; als Folgearbeit aufgeführt.
-%         \item \textbf{Poison Message?} Blockiert aktuell ihre Queue (Head-of-Line-Blocking). Ansätze: Dead-Letter-Queue pro Alarmanlage oder begrenzte Wiederholungen mit Benachrichtigung der Leitstelle.
-%         \item \textbf{Sind 20\,\% realistisch für MARC?} Nein, bewusst pessimistisch. Die Garantien müssen für jede Fehlerrate gelten; die Rate bestimmt nur, wie oft kritische Situationen auftreten.
-%         \item \textbf{Warum werden fast 100\,\% der Verbindungen vom Proxy getrennt?} AMQP-Verbindungen sind langlebig, HTTP nutzt Keep-Alive; die Clients schließen kaum selbst.
-%         \item \textbf{Umordnung vor dem Broker?} Ja, möglich. Deshalb gilt die In-Order-Aussage nur für Broker $\rightarrow$ ALP 2 $\rightarrow$ T SRV.
-%     \end{itemize}
-% }
-
 \section*{Referenzen}
 
 \newenvironment{reflist}{%
@@ -762,8 +750,213 @@
 
 \makecontactpage[c]
 
-% \appendix
-% \section{Backup}
+\appendix
+\section{Backup}
+
+\begin{frame}
+    \frametitle{MQTT}
+
+    \begin{itemize}
+        \item \textbf{Komponenten}
+              \begin{itemize}
+                  \item Broker
+                  \item Publishers
+                  \item Subscribers
+                  \item Topics
+              \end{itemize}
+        \item \textbf{Quality of Service (QoS)}
+              \begin{itemize}
+                  \item \textbf{QoS~0} (At-Most-Once)
+                  \item \textbf{QoS~1} (At-Least-Once)
+                  \item \textbf{QoS~2} (Exactly-Once)
+              \end{itemize}
+        \item \textbf{Shared Subscriptions}
+              \begin{itemize}
+                  \item Subscriber bilden eine Gruppe
+                  \item Eine Nachricht wird an einen einzigen Subscriber der Gruppe zugestellt
+              \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{AMQP}
+
+    \begin{itemize}
+        \item \textbf{Komponenten}
+              \begin{itemize}
+                  \item Broker
+                  \item Producers
+                  \item Consumers
+                  \item Exchanges
+                  \item Queues
+              \end{itemize}
+    \end{itemize}
+
+    \centering
+    \abbildung{\linewidth}{0.5\textheight}{../img/drawio/amqp_topo.pdf}
+\end{frame}
+
+\begin{frame}
+    \frametitle{AMQP: Features}
+
+    \begin{tabularx}{\linewidth}{@{}LLL@{}}
+        \toprule
+        \textbf{RabbitMQ}                 & \textbf{LavinMQ}                 & \textbf{Apache ActiveMQ Artemis} \\
+        \midrule
+        \texttt{x-consistent-hash}        & \texttt{Consistent-Hash-Routing} & \texttt{Consistent-Hash-Routing} \\
+        \texttt{x-single-active-consumer} & \texttt{Single Active Consumer}  & \texttt{Exclusive Queues}        \\
+        \bottomrule
+    \end{tabularx}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{LPS: Fehlerbehandlung - Sequenz}
+
+    \centering
+    \abbildung{\linewidth}{0.85\textheight}{../img/mermaid/lps_retry_prio_sequence.pdf}
+\end{frame}
+
+\begin{frame}
+    \frametitle{LPS: Excatly-Once-Delivery Verletzung - Sequenz}
+
+    \centering
+    \abbildung{\linewidth}{0.85\textheight}{../img/mermaid/lps_exactly_once_delivery_violation_sequence.pdf}
+\end{frame}
+
+\begin{frame}
+    \frametitle{LPS: In-Order-Delivery Verletzung - Sequenz}
+
+    \centering
+    \abbildung{\linewidth}{0.85\textheight}{../img/mermaid/lps_in_order_delivery_violation_sequence.pdf}
+\end{frame}
+
+\begin{frame}
+    \frametitle{ALPS: ALP~1}
+
+    \centering
+    \begin{tikzpicture}[
+            font=\scriptsize, >=stealth, thick,
+            box/.style={draw=col1, fill=col1!8, rounded corners=2pt, minimum height=8mm, align=center, inner sep=3pt},
+            msg/.style={draw=black!60, minimum width=6mm, minimum height=4.5mm, inner sep=0pt, font=\tiny\bfseries},
+            ma/.style={msg, fill=orange!35}, mb/.style={msg, fill=teal!30}, mc/.style={msg, fill=violet!25}, md/.style={msg, fill=black!10}
+        ]
+        \node[box] (srv1) at (0,0) {SRV 1};
+        \node[box, minimum width=22mm] (alp1) at (2.6,0) {\textbf{ALP 1}\\HTTP $\rightarrow$ AMQP};
+        \node[box, minimum width=26mm] (ex) at (6.5,0) {Exchange\\\texttt{x-consistent-hash}};
+
+        \foreach \y/\name in {1.0/q1, 0/q2, -1.0/qn} {
+                \draw[col1, rounded corners=1pt] (8.7,\y-0.3) rectangle (11.4,\y+0.3);
+            }
+        \node[ma] at (9.75,1.0) {A2}; \node[mc] at (10.4,1.0) {C1}; \node[ma] at (11.05,1.0) {A1};
+        \node[mb] at (10.4,0) {B2}; \node[mb] at (11.05,0) {B1};
+        \node[md] at (11.05,-1.0) {D1};
+        \node at (10.0,-0.52) {$\vdots$};
+        \node[font=\scriptsize\bfseries, anchor=west] at (8.75,1.0) {Q 1};
+        \node[font=\scriptsize\bfseries, anchor=west] at (8.75,0) {Q 2};
+        \node[font=\scriptsize\bfseries, anchor=west] at (8.75,-1.0) {Q $N$};
+
+        \draw[->] (srv1) -- node[above] {HTTP} (alp1);
+        \draw[->] (alp1) -- node[above, font=\tiny] {publish} (ex);
+        \node[font=\tiny, below=1mm of ex] {Routing Key = \texttt{device\_id}};
+        \draw[->] (ex.east) -- (8.7,1.0);
+        \draw[->] (ex.east) -- (8.7,0);
+        \draw[->] (ex.east) -- (8.7,-1.0);
+        \draw[->, col1] (11.4,0) -- ++(0.6,0) node[right, black, align=left] {ALP~2};
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+    \frametitle{ALPS: ALP~2 - Sequentielle Verarbeitung}
+
+    \centering
+    \begin{tikzpicture}[
+            font=\scriptsize, >=stealth, thick,
+            box/.style={draw=col1, fill=col1!8, rounded corners=2pt, minimum height=8mm, align=center, inner sep=3pt},
+            msg/.style={draw=black!60, minimum width=6mm, minimum height=4.5mm, inner sep=0pt, font=\tiny\bfseries},
+            ma/.style={msg, fill=orange!35}
+        ]
+        % Queue 1
+        \draw[col1, rounded corners=1pt] (0,-0.3) rectangle (2.1,0.3);
+        \node[font=\scriptsize\bfseries, above] at (1.05,0.3) {Queue 1};
+        \node[ma] at (0.6,0) {A3}; \node[ma] at (1.15,0) {A2}; \node[ma, very thick, draw=col1] at (1.75,0) {A1};
+
+        \node[box, minimum width=24mm] (i1) at (5.2,0.9) {\textbf{ALP 2 Instanz I}\\aktiv};
+        \node[box, minimum width=24mm, dashed, fill=white] (i2) at (5.2,-0.9) {\textbf{ALP 2 Instanz II}\\wartend};
+        \node[box, minimum width=14mm] (srv2) at (9.4,0.9) {SRV 2};
+
+        \draw[->] (2.1,0.1) -- node[pos=0.5, below right, font=\tiny, inner sep=1pt] {\textcircled{\tiny1} A1} (i1.west);
+        \draw[dashed, black!50] (2.1,-0.1) -- node[pos=0.5, above right, font=\tiny, inner sep=1pt] {keine Zustellung} (i2.west);
+        \draw[->] ([yshift=1.5mm]i1.east) -- node[above, font=\tiny] {\textcircled{\tiny2} Weiterleitung} ([yshift=1.5mm]srv2.west);
+        \draw[->, green!45!black] ([yshift=-1.5mm]srv2.west) -- node[below, font=\tiny] {\textcircled{\tiny3} Bestätigung} ([yshift=-1.5mm]i1.east);
+        \draw[->, green!45!black] (i1.north west) to[bend right=35] node[pos=0.4, above left, font=\tiny, black] {\textcircled{\tiny4} ACK $\rightarrow$ A1 entfernt, dann A2} (1.75,0.3);
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+    \frametitle{ALPS: ALP~2 - Fehlerbehandlung}
+
+    \centering
+    \begin{tikzpicture}[
+            font=\scriptsize, >=stealth, thick,
+            box/.style={draw=col1, fill=col1!8, rounded corners=2pt, minimum height=8mm, align=center, inner sep=3pt},
+            msg/.style={draw=black!60, minimum width=6mm, minimum height=4.5mm, inner sep=0pt, font=\tiny\bfseries},
+            ma/.style={msg, fill=orange!35}
+        ]
+        % Queue 1
+        \draw[col1, rounded corners=1pt] (0,-0.3) rectangle (2.1,0.3);
+        \node[font=\scriptsize\bfseries, above] at (1.05,0.3) {Queue 1};
+        \node[ma] at (0.6,0) {A3}; \node[ma] at (1.15,0) {A2}; \node[ma, very thick, draw=red!70!black] at (1.75,0) {A1};
+
+        \node[box, minimum width=24mm] (i1) at (5.2,0.9) {\textbf{ALP 2 Instanz I}\\aktiv $\rightarrow$ wartend};
+        \node[box, minimum width=24mm, dashed, fill=white] (i2) at (5.2,-0.9) {\textbf{ALP 2 Instanz II}\\wartend $\rightarrow$ aktiv};
+        \node[box, minimum width=14mm] (srv2) at (9.4,0.9) {SRV 2};
+
+        \draw[->] (2.1,0.1) -- node[pos=0.5, below right, font=\tiny, inner sep=1pt] {A1} (i1.west);
+        \draw[->, dashed] (2.1,-0.1) -- node[pos=0.5, above right, font=\tiny, inner sep=1pt] {\textcircled{\tiny3} A1 erneut} (i2.west);
+        \draw[->] ([yshift=1.5mm]i1.east) -- node[above, font=\tiny] {\textcircled{\tiny1} Weiterleitung} ([yshift=1.5mm]srv2.west);
+        \draw[->, red!70!black] ([yshift=-1.5mm]srv2.west) -- node[below, font=\tiny] {Fehler} ([yshift=-1.5mm]i1.east);
+        \draw[->, red!70!black] (i1.north west) to[bend right=35] node[pos=0.4, above left, font=\tiny, black] {\textcircled{\tiny2} NACK, \texttt{requeue = true}} (1.75,0.3);
+        \draw[->, dashed] (i2.east) -| node[pos=0.75, right, font=\tiny] {\textcircled{\tiny4} Weiterleitung} (srv2.south);
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+    \frametitle{ALPS: Parallele Verarbeitung - Sequenz}
+
+    \centering
+    \abbildung{\linewidth}{0.85\textheight}{../img/mermaid/alps_normal_sequence.pdf}
+\end{frame}
+
+\begin{frame}
+    \frametitle{ALPS: Fehlerbehandlung - Sequenz}
+
+    \centering
+    \abbildung{\linewidth}{0.85\textheight}{../img/mermaid/alps_retry_sequence.pdf}
+\end{frame}
+
+\begin{frame}
+    \frametitle{ALPS: ALP~D - Detanbank}
+
+    \begin{itemize}
+        \item \textbf{Mnesia}
+        \item \textbf{Erlang}, \textbf{BEAM} $\rightarrow$ Geeignet für verteilte Systeme
+        \item Eingebettet als ein \textbf{Modul} $\rightarrow$ Http Server + Datenbank
+        \item \textbf{C}onsistency, \textbf{A}vailability and \textbf{P}artition tolerance Theorem $\rightarrow$ \textbf{AP}
+        \item \textbf{Split-Brain}
+              \begin{itemize}
+                  \item Netzwerkfehler zwischen den Knoten $\rightarrow$ Divergenz
+                  \item Lösung: Einträge zusammenführen
+              \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{ALPS: ALP~D - Excatly-Once-Delivery Verletzung - Sequenz}
+
+    \centering
+    \abbildung{\linewidth}{0.85\textheight}{../img/mermaid/a_lps_dedup_exactly_once_delivery_violation_sequence.pdf}
+\end{frame}
 
 % \begin{frame}
 %     \frametitle{Backup: Warum AMQP statt MQTT?}
