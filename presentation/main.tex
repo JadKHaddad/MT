@@ -654,22 +654,35 @@
 \begin{frame}
     \frametitle{Vielen Dank für Ihre Aufmerksamkeit!}
 
-    \begin{itemize}
-        \item \textbf{Fazit}
-              \begin{itemize}
-                  \item \textbf{LPS} verletzt die Delivery-Garantien unter Fehlerbedingungen
-                  \item \textbf{ALPS} hält die Delivery-Garantien auch unter Fehlerbedingung ein
-                  \item Asynchron, transparent und vendor-neutral
-              \end{itemize}
-              \bigskip
-        \item \textbf{Ausblick}
-              \begin{itemize}
-                  \item Reale verteilte Umgebung
-                  \item Overhead durch ALP~D
-                  \item Flaschenhals durch fehlschlagende Meldungen
-                  \item Betriebsaufwand
-              \end{itemize}
-    \end{itemize}
+    \begin{columns}[T]
+        \begin{column}{0.65\textwidth}
+            \begin{itemize}
+                \item \textbf{Fazit}
+                      \begin{itemize}
+                          \item \textbf{LPS} verletzt die Delivery-Garantien unter Fehlerbedingungen
+                          \item \textbf{ALPS} hält die Delivery-Garantien auch unter Fehlerbedingung ein
+                          \item Asynchron, transparent und vendor-neutral
+                      \end{itemize}
+                      \bigskip
+                \item \textbf{Ausblick}
+                      \begin{itemize}
+                          \item Reale verteilte Umgebung
+                          \item Overhead durch ALP~D
+                          \item Flaschenhals durch fehlschlagende Meldungen
+                          \item Betriebsaufwand
+                      \end{itemize}
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.35\textwidth}
+            \centering
+            \abbildung{\linewidth}{0.55\textheight}{../qrcode/qrcode.pdf}
+
+            \smallskip
+
+            {\footnotesize Quellcode und Ergebnisse der Experimente}
+        \end{column}
+    \end{columns}
 \end{frame}
 
 \section*{Referenzen}
