@@ -237,7 +237,6 @@
         \item Ansatz zum Mitigieren von Design Smells
         \item \textbf{Proxy-Broker-Proxy-Schicht}: Transparente Integration zwischen den System-Komponenten
         \item Synchrone in \textbf{asynchrone} Kommunikation überführen
-        \item Einhaltung der \textbf{Delivery-Garantien}
     \end{itemize}
 \end{frame}
 
@@ -262,7 +261,6 @@
     \frametitle{LPS: Delivery-Garantien}
 
     \begin{itemize}
-        \item Nur unter \textbf{idealen Bedingungen}
         \item \textbf{MQTT QoS~2 (Exactly once)}
               \begin{itemize}
                   \item Garantiert \textbf{Exactly-Once-Delivery} auf dem Pfad MQTT-Broker $\rightarrow$ LP~2
@@ -284,10 +282,10 @@
         \item \textbf{40\,-100\,\%} Verbesserung der Antwortzeiten
         \item Mitigierung der ersten drei Design Smells
         \item Fokus auf Antwortzeiten
-        \item \textbf{Ideale Bedingungen}
+        \item \textbf{Unzureichende Fehlerbedingungen}
               \begin{itemize}
                   \item Keine Netzwerkfehler
-                  \item Keine Netzwerklatenzen
+                  \item Geringe Netzwerklatenzen
               \end{itemize}
     \end{itemize}
 
