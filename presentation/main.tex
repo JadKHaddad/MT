@@ -182,11 +182,19 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Zielsetzung}
+    \frametitle{Zielsetzung dieser Masterarbeit}
 
     \begin{enumerate}
-        \item \textbf{Analyse von LPS}: Gezielte Experimente, ob die Delivery-Garantien (\textbf{Exactly-Once-Delivery}, \textbf{In-Order-Delivery}) unter Fehlerbedingungen eingehalten werden
-        \item \textbf{Entwicklung von ALPS}: Eigenschaften von LPS beibehalten, Delivery-Garantien auch unter Fehlerbedingungen sicherstellen
+        \item \textbf{Analyse von LPS}: Gezielte Experimente, um Verletzung der Delivery-Garantien unter Fehlerbedingungen zu verletzen
+              \begin{itemize}
+                  \item Netzwerkfehler $\rightarrow$ Neuübertragung $\rightarrow$ Duplikate
+                  \item Hohe Netzwerklatenzen $\rightarrow$ Neuordnen
+              \end{itemize}
+        \item \textbf{Entwicklung vom Advanced Legacy Proxy System (ALPS)}: Eigenschaften von LPS beibehalten, Delivery-Garantien auch unter Fehlerbedingungen sicherstellen
+              \begin{itemize}
+                  \item Deduplizierungsschicht $\rightarrow$ Duplikate verwerfen
+                  \item Kontrollierte Nachrichtenaustausch $\rightarrow$ Neuordnen vermeiden
+              \end{itemize}
         \item \textbf{Evaluation von ALPS}: Unter Fehlerbedingungen und unter realitätsnahen Bedingungen
     \end{enumerate}
 \end{frame}
@@ -198,7 +206,7 @@
 \begin{frame}
     \frametitle{\insertsection}
     \begin{itemize}
-        \item \textbf{M}onitoring and \textbf{A}larm \textbf{R}eceiving \textbf{C}entre (MARC) (GS electronic~\hyperlink{GS25}{[GS25]})
+        \item \textbf{M}onitoring and \textbf{A}larm \textbf{R}eceiving \textbf{C}entre (MARC) (GS electronic GmbH~\hyperlink{GS25}{[GS25]})
         \item \textbf{A}larm \textbf{R}eceiving \textbf{S}oftware (ARS): Repliziert über \textbf{drei Rechenzentren}
     \end{itemize}
 
