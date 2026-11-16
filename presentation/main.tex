@@ -337,8 +337,14 @@
     \frametitle{Phase~1: Exactly-Once-Delivery}
 
     \begin{itemize}
-        \item \textbf{1} Alarmanlage, \textbf{1} Alarmmeldung, \textbf{1} LP~1 Instanz, \textbf{1} LP~2 Instanz
-        \item \textbf{Netzwerkfehler} gezielt zwischen \textbf{LP~2} und dem \textbf{MQTT-Broker}, während LP~2 auf Antwort von SRV~2 wartet
+        \item Minimale Konfigurationsparameter des Experiments:
+              \begin{itemize}
+                  \item[] \textbf{1} Alarmanlage, \textbf{1} Alarmmeldung, \textbf{1} LP~1 Instanz, \textbf{1} LP~2 Instanz
+              \end{itemize}
+        \item Auslöser der Verletzung der \textbf{Exactly-Once-Delivery}:
+              \begin{itemize}
+                  \item[] \textbf{Netzwerkfehler} zwischen \textbf{LP~2} und dem \textbf{Broker}, während LP~2 auf Antwort von SRV~2 wartet
+              \end{itemize}
     \end{itemize}
 
     \pause
@@ -356,7 +362,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        Exactly-Once-Delivery in \textbf{59/59 Durchläufen verletzt} % unter Netzwerkfehler
+        Exactly-Once-Delivery wurde in \textbf{59/59 Durchläufen} unter \textbf{Netzwerkfehlern} verletzt
     \end{alertblock}
 \end{frame}
 
@@ -365,8 +371,14 @@
     \frametitle{Phase~2: In-Order-Delivery}
 
     \begin{itemize}
-        \item \textbf{1} Alarmanlage, \textbf{2} Alarmmeldungen, \textbf{1} LP~1 Instanz, \textbf{2} LP~2 Instanzen
-        \item \textbf{Hohe Netzwerklatenzen von 2,ms} während beide \textbf{LP~2} Instanzen Alarmmeldungen \textbf{parallel} verarbeiten
+        \item Minimale Konfigurationsparameter des Experiments:
+              \begin{itemize}
+                  \item[] \textbf{1} Alarmanlage, \textbf{2} Alarmmeldungen, \textbf{1} LP~1 Instanz, \textbf{2} LP~2 Instanzen
+              \end{itemize}
+        \item Auslöser der Verletzung der \textbf{In-Order-Delivery}:
+              \begin{itemize}
+                  \item[] \textbf{Netzwerklatenzen von 2 Sekunden} während \textbf{LP~2} Instanzen Alarmmeldungen \textbf{parallel} verarbeiten
+              \end{itemize}
               % Kein regelfall aber koennen beim überlasten des systems auftauchen...
     \end{itemize}
 
@@ -385,7 +397,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        In-Order-Delivery in \textbf{59/59 Durchläufen verletzt} % unter hohen netzwerklatenzen und parallel
+        In-Order-Delivery wurde in \textbf{59/59 Durchläufen} unter hohen \textbf{Netzwerklatenzen} und \textbf{paralleler} Verarbeitung der Alarmmeldungen verletzt
     \end{alertblock}
 \end{frame}
 
@@ -393,8 +405,8 @@
     \frametitle{LPS: Limitationen}
 
     \begin{enumerate}
-        \item \textbf{Exactly-Once-Delivery} verletzt bei Netzwerkfehlern zwischen LP~2 und Broker
-        \item \textbf{In-Order-Delivery} verletzt bei paralleler Verarbeitung von Alarmmeldungen unter hohen Netzwerklatenzen
+        \item \textbf{Exactly-Once-Delivery} wird unter \textbf{Netzwerkfehlern} zwischen LP~2 und dem Broker verletzt
+        \item \textbf{In-Order-Delivery} wird unter hohen \textbf{Netzwerklatenzen} und \textbf{paralleler} Verarbeitung der Alarmmeldungen verletzt
     \end{enumerate}
 \end{frame}
 
@@ -409,8 +421,8 @@
         \item[A~1] Asynchrone Architektur von LPS beibehalten
         \item[A~2] Transparente Integration mit Legacy-System beibehalten
         \item[A~3] Kein Nachrichtenverlust von LPS beibehalten
-        \item[A~4] \textbf{Exactly-Once-Delivery} \hfill (Limitation \textbf{1} von LPS)
-        \item[A~5] \textbf{In-Order-Delivery} pro Alarmanlage \hfill (Limitation \textbf{2} von LPS)
+        \item[A~4] \textbf{Exactly-Once-Delivery} sicherstellen \hfill (Limitation \textbf{1} von LPS)
+        \item[A~5] \textbf{In-Order-Delivery} pro Alarmanlage sicherstellen \hfill (Limitation \textbf{2} von LPS)
     \end{itemize}
 \end{frame}
 
