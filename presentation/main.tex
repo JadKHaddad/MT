@@ -669,47 +669,46 @@
     \frametitle{Ausblick}
 
     \begin{itemize}
-        \item \textbf{Reale verteilte Umgebung}: drei Rechenzentren, Broker-Cluster, Ausfälle der einzelnen Komponente
-        \item Overhead durch ALP~D
-        \item Flaschenhals durch fehlschlagende Meldungen
-        \item Betriebsaufwand
+        \item Reale verteilte Umgebung:
+              \begin{itemize}
+                  \item ALPS über drei Rechenzentren verteilen
+                  \item Broker im Cluster-Modus betreiben
+              \end{itemize}
+        \item Auswirkungen von Ausfällen der einzelnen Komponente evaluieren
+        \item Overhead durch die Deduplizierungschicht evaluieren
+        \item Flaschenhals durch fehlschlagende Meldungen mitigieren
+        \item Betriebsaufwand evaluieren
     \end{itemize}
 \end{frame}
 
 \footagendaonfalse % ab hier keine Agenda mehr im Footer
 
 \begin{frame}
-    \frametitle{Vielen Dank für Ihre Aufmerksamkeit!}
+    \frametitle{Fazit}
 
     \begin{columns}[T]
         \begin{column}{0.65\textwidth}
             \begin{itemize}
-                \item \textbf{Fazit}
-                      \begin{itemize}
-                          \item \textbf{LPS} verletzt die Delivery-Garantien unter Fehlerbedingungen
-                          \item \textbf{ALPS} hält die Delivery-Garantien auch unter Fehlerbedingung ein
-                          \item Asynchron, transparent und vendor-neutral
-                      \end{itemize}
-                      \bigskip
-                \item \textbf{Ausblick}
-                      \begin{itemize}
-                          \item Reale verteilte Umgebung
-                          \item Overhead durch ALP~D
-                          \item Flaschenhals durch fehlschlagende Meldungen
-                          \item Betriebsaufwand
-                      \end{itemize}
+                \item \textbf{LPS} verletzt die \textbf{Exactly-Once-Delivery} unter \textbf{Netzwerkfehlern}
+                \item \textbf{LPS} verletzt die \textbf{In-Order-Delivery} unter hohen \textbf{Netzwerklatenzen} und \textbf{paralleler} Verarbeitung der Alarmmeldungen
+                \item \textbf{ALPS} hält die Delivery-Garantien auch unter Fehlerbedingung ein
             \end{itemize}
         \end{column}
 
         \begin{column}{0.35\textwidth}
             \centering
-            \abbildung{\linewidth}{0.55\textheight}{../qrcode/qrcode.pdf}
+            \uncover<2->{%
+                \abbildung{\linewidth}{0.55\textheight}{../qrcode/qrcode.pdf}
 
-            \smallskip
-
-            {\footnotesize Quellcode und Ergebnisse der Experimente}
+                {\footnotesize Quellcode und Ergebnisse der Experimente}
+            }
         \end{column}
     \end{columns}
+
+    \bigskip
+
+    \centering
+    \uncover<2->{{\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}Vielen Dank für Ihre Aufmerksamkeit!}}
 \end{frame}
 
 \section*{Referenzen}
