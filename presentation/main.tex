@@ -442,7 +442,7 @@
         \item \textbf{ALP~1}: Empfängt Alarmmeldungen von SRV~1 und publiziert sie an den Broker
         \item \textbf{AMQP-Broker} (RabbitMQ)~\hyperlink{Bro26}{[Bro26]}: Puffert die Alarmmeldungen und stellt sie bereit
         \item \textbf{ALP~2}: Konsumiert die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
-        \item \textbf{ALP~D}: Deduplizierungschicht vor SRV~3
+        \item \textbf{ALP~D}: Deduplizierungsschicht vor SRV~3
     \end{itemize}
 
     \medskip
@@ -454,7 +454,7 @@
 \begin{frame}
     \frametitle{ALPS: Exactly-Once-Delivery Garantie}
 
-    Garantiert anhand von einer Deduplizierungschicht
+    Garantiert anhand von einer Deduplizierungsschicht
 
     \medskip
 
@@ -662,7 +662,7 @@
         \item[A~1] Asynchrone Architektur \hfill (Architektonisch)
         \item[A~2] Transparente Integration mit Legacy-System \hfill (Legacy-Schnittstellen unverändert)
         \item[A~3] Kein Nachrichtenverlust \hfill (AMQP Features)
-        \item[A~4] \textbf{Exactly-Once-Delivery} \hfill (Deduplizierungschicht)
+        \item[A~4] \textbf{Exactly-Once-Delivery} \hfill (Deduplizierungsschicht)
         \item[A~5] \textbf{In-Order-Delivery} \hfill (AMQP Features)
     \end{itemize}
 
@@ -683,7 +683,7 @@
                   \item Broker im Cluster-Modus betreiben
               \end{itemize}
         \item Auswirkungen von Ausfällen der einzelnen Komponente evaluieren
-        \item Overhead durch die Deduplizierungschicht evaluieren
+        \item Overhead durch die Deduplizierungsschicht evaluieren
         \item Flaschenhals durch fehlschlagende Meldungen mitigieren
         \item Betriebsaufwand evaluieren
     \end{itemize}
