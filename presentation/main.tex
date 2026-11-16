@@ -152,8 +152,13 @@
         \item Fokus auf neue Funktionen; Wartbarkeit und Code-Qualität werden vernachlässigt~\hyperlink{Ben95}{[Ben95]}
         \item $\implies$ \textbf{Design Smells}: Keine Programmierfehler, sondern strukturelle Probleme im Design eines Systems~\hyperlink{SSS16}{[SSS16]}
         \item Negativer Einfluss auf das Verstehen, Testen, Korrigieren und Erweitern~\hyperlink{Alk19}{[Alk19]}
-        \item \textbf{Betrachtete Klasse von Legacy-Systemen}
+        \item Betrachtete Klasse von Legacy-Systemen
               \begin{itemize}
+                  \item Abhängigkeit von strikten Delivery-Garantien
+                        \begin{enumerate}
+                            \item \textbf{Exactly-Once-Delivery}: Nachrichten dürfen nicht doppelt verarbeitet werden
+                            \item \textbf{In-Order-Delivery}: Nachrichten müssen in der richtigen Reihenfolge verarbeitet werden
+                        \end{enumerate}
                   \item Code kaum dokumentiert
                   \item Entwickler nicht mehr verfügbar
                   \item \alert{Jede Code-Änderung ist riskant}
@@ -165,7 +170,10 @@
     \frametitle{Mitigierung durch Architektur-Reengineering}
 
     \begin{itemize}
-        \item \textbf{Architektur-Reengineering}: die Interaktion der Komponenten ändern, nicht die Komponenten
+        \item \textbf{Architektur-Reengineering}:
+              \begin{itemize}
+                  \item[] Die Interaktion der Komponenten ändern, nicht die Komponenten
+              \end{itemize}
         \item \textbf{Legacy Proxy System (LPS)}~\hyperlink{LG25}{[LG25]}
               \begin{itemize}
                   \item Ansatz zum Mitigieren von Design Smells
@@ -179,15 +187,15 @@
     \frametitle{Zielsetzung dieser Masterarbeit}
 
     \begin{enumerate}
-        \item \textbf{Analyse von LPS}: Gezielte Experimente, um Verletzung der Delivery-Garantien unter Fehlerbedingungen zu verletzen
+        \item \textbf{Analyse von LPS}: Gezielte Experimente, um Verletzung der Delivery-Garantien unter Fehlerbedingungen zu provozieren
               \begin{itemize}
-                  \item Netzwerkfehler $\rightarrow$ Neuübertragung $\rightarrow$ Duplikate
-                  \item Hohe Netzwerklatenzen + Parallelität $\rightarrow$ Neuordnen
+                  \item Netzwerkfehler $\rightarrow$ Neuübertragung der Nachrichten $\rightarrow$ Duplikate
+                  \item Hohe Netzwerklatenzen + Paralle Verarbeitung der Nachrichten $\rightarrow$ Neuordnen
               \end{itemize}
-        \item \textbf{Entwicklung vom Advanced Legacy Proxy System (ALPS)}: Eigenschaften von LPS beibehalten, Delivery-Garantien auch unter Fehlerbedingungen sicherstellen
+        \item \textbf{Entwicklung vom Advanced Legacy Proxy System (ALPS)}: Eigenschaften von LPS beibehalten und die Delivery-Garantien auch unter Fehlerbedingungen sicherstellen
               \begin{itemize}
-                  \item Deduplizierungsschicht $\rightarrow$ Duplikate verwerfen
-                  \item Sequentielle Verarbeitung $\rightarrow$ Neuordnen vermeiden
+                  \item Duplikate erkennen und verwerfen anhand einer Deduplizierungsschicht
+                  \item Neuordnen durch sequentielle Verarbeitung der Nachrichten vermeiden
               \end{itemize}
         \item \textbf{Evaluation von ALPS}: Unter Fehlerbedingungen und unter realitätsnahen Bedingungen
     \end{enumerate}
@@ -219,11 +227,11 @@
         \item \textbf{Manuelles} Ausfall-Management: Minuten statt Sekunden (\textbf{EN 50136}~\hyperlink{DIN12}{[DIN12]})
         \item \textbf{Exactly-Once-Delivery}: Keine Idempotenz
               \begin{itemize}
-                  \item Duplizierte Alarmmeldungen werden doppelt bearbeitet
+                  \item[] Duplizierte Alarmmeldungen werden doppelt bearbeitet
               \end{itemize}
         \item \textbf{In-Order-Delivery}: Alarmmeldungen sind zustandbehaftet
               \begin{itemize}
-                  \item z.\,B. Brandalarm: Entwarnung vor Alarm $\rightarrow$ unnötige Noteinsätze
+                  \item[] z.\,B. Brandalarm: Entwarnung vor Alarm $\rightarrow$ unnötige Noteinsätze
               \end{itemize}
 
     \end{enumerate}
@@ -751,8 +759,8 @@
         \item[{[GS25]}] GS electronic company group. Unternehmenswebsite. 2025. \url{https://www.gselectronic.de}. Abgerufen am 07.10.2025.
 
         % HiveMQ
-        \hypertarget{Hiv25}{}
-        \item[{[Hiv25]}] HiveMQ GmbH. \textit{HiveMQ Community Edition}. GitHub-Repository, 2025. \url{https://github.com/hivemq/hivemq-community-edition}.
+        % \hypertarget{Hiv25}{}
+        % \item[{[Hiv25]}] HiveMQ GmbH. \textit{HiveMQ Community Edition}. GitHub-Repository, 2025. \url{https://github.com/hivemq/hivemq-community-edition}.
 
         % Success-Run-Theorem (derivation)
         \hypertarget{Jos23}{}
