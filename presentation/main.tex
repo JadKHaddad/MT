@@ -296,7 +296,7 @@
 
     \begin{itemize}
         \item Mitigierung der ersten drei Design Smells
-        \item \textbf{40\,-100\,\%} Verbesserung der Antwortzeiten
+        \item $\implies$ \textbf{40\,-\,100\,\%} Verbesserung der Antwortzeiten
         \item Schwerpunkt der Evaluation lag auf Normalbetrieb und nicht auf Simulation der Fehlerbedingungen
               \begin{itemize}
                   \item Evaluation wurde in einem kontrollierten Testumgebung durchgeführt
@@ -311,7 +311,7 @@
 
     \begin{itemize}
         \item Konkrete Fehlerbedingungen durch gezielte Netzwerkfehler und hohe Latenzen provozieren
-        \item In dieser Masterarbiet entwickelte \textbf{Services} zum Ausführen von Experimenten
+        \item In dieser Masterarbeit entwickelte \textbf{Services} zum Ausführen von Experimenten
               \begin{itemize}
                   \item \textbf{Alarmanlagen-Simulator}: Simuliert das Verhalten von Alarmanlagen
                   \item \textbf{TCP-Proxy}: Simuliert Netzwerkfehler und Latenzen
@@ -323,6 +323,7 @@
                   \item \textbf{Exactly-Once-Delivery}
                   \item \textbf{In-Order-Delivery}
               \end{enumerate}
+        \item Erfolgskriterium der Experimente: Verletzung der Delivery-Garantien
     \end{itemize}
 \end{frame}
 
@@ -330,7 +331,7 @@
     \frametitle{Zuverlässigkeit der Experiment-Ergebnisse}
 
     \begin{itemize}
-        \item Success-Run-Theorem~[\hyperlink{Jos23}{Jos23}, \hyperlink{Kec92}{Kec92}] ist ein verfahren, um die Zuverlässigkeit von Ergebnissen von Experimenten zu belegen
+        \item Success-Run-Theorem~[\hyperlink{Jos23}{Jos23}, \hyperlink{Kec92}{Kec92}] ist ein Verfahren, um die Zuverlässigkeit von Ergebnissen von Experimenten zu belegen
         \item Definition vom Erfolgskriterium wird abhängig vom konkreten Experiment gewählt
     \end{itemize}
 
@@ -370,7 +371,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        Exactly-Once-Delivery wurde in \textbf{59/59 Durchläufen} unter \textbf{Netzwerkfehlern} verletzt
+        Exactly-Once-Delivery wurde in \textbf{59/59 Durchläufen} bei \textbf{Netzwerkfehlern} verletzt
     \end{alertblock}
 \end{frame}
 
@@ -404,7 +405,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        In-Order-Delivery wurde in \textbf{59/59 Durchläufen} unter hohen \textbf{Netzwerklatenzen} und \textbf{paralleler} Verarbeitung der Alarmmeldungen verletzt
+        In-Order-Delivery wurde in \textbf{59/59 Durchläufen} bei hohen \textbf{Netzwerklatenzen} und \textbf{paralleler} Verarbeitung der Alarmmeldungen verletzt
     \end{alertblock}
 \end{frame}
 
@@ -412,8 +413,8 @@
     \frametitle{LPS: Limitationen}
 
     \begin{enumerate}
-        \item \textbf{Exactly-Once-Delivery} wird unter \textbf{Netzwerkfehlern} zwischen LP~2 und dem Broker verletzt
-        \item \textbf{In-Order-Delivery} wird unter hohen \textbf{Netzwerklatenzen} und \textbf{paralleler} Verarbeitung der Alarmmeldungen verletzt
+        \item \textbf{Exactly-Once-Delivery} wird bei unter \textbf{Netzwerkfehlern} zwischen LP~2 und dem Broker verletzt
+        \item \textbf{In-Order-Delivery} wird bei hohen \textbf{Netzwerklatenzen} und \textbf{paralleler} Verarbeitung der Alarmmeldungen verletzt
     \end{enumerate}
 \end{frame}
 
@@ -453,12 +454,12 @@
 \begin{frame}
     \frametitle{ALPS: Exactly-Once-Delivery Garantie}
 
-    Garantiert anhand von einer Deduplizierungsschicht (ALP~D)
+    Garantiert mittels einer Deduplizierungsschicht (ALP~D)
 
     \medskip
 
     \begin{itemize}
-        \item Empfängt Alarmmeldungen über eine \textbf{HTTP}-Schnittstelle
+        \item Empfängt Alarmmeldungen
         \item Speichert bereits verarbeitete Alarmmeldungen in einer verteilten \textbf{Datenbank}
         \item Überprüft jede eingehende Alarmmeldung
               \begin{itemize}
@@ -472,7 +473,7 @@
 \begin{frame}
     \frametitle{ALPS: In-Order-Delivery Garantie}
 
-    Garantiert anhand von AMQP Features und RabbitMQ Erweiterungen
+    Garantiert mittels AMQP Features und RabbitMQ Erweiterungen
 
     \medskip
 
@@ -611,7 +612,7 @@
                   \item Realitätsnahe Last im Normalbetrieb
                   \item Realitätsnahe Last mit \textbf{Netzwerkfehlern und Latenzen}
               \end{enumerate}
-        \item Gleiche Hilfservices (wie LPS)
+        \item Gleiche Hilfservices (wie beim LPS-Experiment)
         \item 59 Durchläufe nach dem \textbf{Success-Run-Theorem}
               \begin{itemize}
                   \item Erfolgskriterium: Delivery-Garantien eingehalten und kein Nachrichtenverlust
@@ -691,7 +692,7 @@
     \begin{itemize}
         \item Realitätsnahe Konfigurationsparameter des Experiments:
               \begin{itemize}
-                  \item[] \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
+                  \item[] \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen pro Alarmanlage, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
               \end{itemize}
         \item Verarbeitungszeitsimulation mittels \textbf{RAST}~\hyperlink{TG25}{[TG25]}
         \item \textbf{Keine} Netzwerkfehler. \textbf{Keine} Netzwerklatenzen
@@ -722,7 +723,7 @@
     \begin{itemize}
         \item Gleiche realitätsnahe Konfigurationsparameter des Experiments (wie Phase~3):
               \begin{itemize}
-                  \item[] \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
+                  \item[] \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen pro Alarmanlage, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
               \end{itemize}
         \item Gleiche Verarbeitungszeitsimulation mittels \textbf{RAST} (wie Phase~3)
         \item \textbf{20,0\,\%} Netzwerkfehler~\hyperlink{Val24}{[Val24]}
@@ -796,7 +797,7 @@
             \begin{itemize}
                 \item \textbf{LPS} verletzt die \textbf{Exactly-Once-Delivery} unter \textbf{Netzwerkfehlern}
                 \item \textbf{LPS} verletzt die \textbf{In-Order-Delivery} unter hohen \textbf{Netzwerklatenzen} und \textbf{paralleler} Verarbeitung der Alarmmeldungen
-                \item \textbf{ALPS} hält die Delivery-Garantien auch unter Fehlerbedingung ein
+                \item \textbf{ALPS} hält die Delivery-Garantien bei den gleichen Fehlerbedingung ein
             \end{itemize}
         \end{column}
 
