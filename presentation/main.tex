@@ -444,28 +444,30 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{ALPS: Delivery-Garantien}
+    \frametitle{ALPS: Exactly-Once-Delivery Garantie}
+
+    Garantiert anhand von einer Deduplizierungschicht
+
+    \medskip
 
     \begin{itemize}
-        \item \textbf{ALP~D: Deduplizierungschicht}
+        \item Empfängt Alarmmeldungen über eine \textbf{HTTP}-Schnittstelle
+        \item Speichert bereits verarbeitete Alarmmeldungen in einer verteilten \textbf{Datenbank}
+        \item Überprüft jede eingehende Alarmmeldung
               \begin{itemize}
-                  \item Verteilte Datenbank
-                  \item Garantiert \textbf{Exactly-Once-Delivery}
-              \end{itemize}
-        \item \textbf{AMQP Features und RabbitMQ Erweiterungen}
-              \begin{itemize}
-                  \item \texttt{x-consistent-hash}
-                  \item \texttt{x-single-active-consumer}
-                  \item \texttt{prefetch-count=1}
-                  \item \texttt{consumer-nack}
-                  \item \texttt{requeue=true}
-                  \item Garantiert \textbf{In-Order-Delivery}
+                  \item Wenn die Alarmmeldung in der Datenbank existiert, wird sie verworfen
+                  \item Wenn die Alarmmeldung nicht in der Datenbank existiert, wird sie an den nächsten Service weitergeleitet und in der Datenbank gespeichert
               \end{itemize}
     \end{itemize}
+
 \end{frame}
 
 \begin{frame}
     \frametitle{ALPS: In-Order-Delivery Garantie}
+
+    Garantiert anhand von AMQP Features und RabbitMQ Erweiterungen
+
+    \medskip
 
     \begin{itemize}
         \item ALP~2 verarbeitet Alarmmeldungen in der \textbf{Reihenfolge}, in der ALP~1 sie publiziert hat
@@ -497,7 +499,7 @@
     \frametitle{ALPS: Experimentelle Evaluation}
 
     \begin{itemize}
-        \item Vier Phasen
+        \item Vier Phasen der Evaluation
               \begin{enumerate}
                   \item \textbf{Exactly-Once-Delivery} (wie LPS)
                   \item \textbf{In-Order-Delivery} (wie LPS)
@@ -507,7 +509,7 @@
         \item Gleiche Hilfservices (wie LPS)
         \item 59 Durchläufe nach dem \textbf{Success-Run-Theorem}
               \begin{itemize}
-                  \item Erfolg: Delivery-Garantien eingehalten und kein Nachrichtenverlust
+                  \item Erfolgskriterium: Delivery-Garantien eingehalten und kein Nachrichtenverlust
               \end{itemize}
     \end{itemize}
 \end{frame}
@@ -516,8 +518,14 @@
     \frametitle{Phase~1: Exactly-Once-Delivery}
 
     \begin{itemize}
-        \item \textbf{1} Alarmanlage, \textbf{1} Alarmmeldung, \textbf{1} ALP~1 Instanz, \textbf{1} ALP~2 Instanz
-        \item \textbf{Netzwerkfehler} gezielt zwischen \textbf{ALP~2} und dem \textbf{AMQP-Broker}, während ALP~2 auf Antwort von SRV~2 wartet
+        \item Gleiche Konfigurationsparameter des Experiments (wie LPS):
+              \begin{itemize}
+                  \item[] \textbf{1} Alarmanlage, \textbf{1} Alarmmeldung, \textbf{1} ALP~1 Instanz, \textbf{1} ALP~2 Instanz
+              \end{itemize}
+        \item Gleicher Auslöser der Verletzung der \textbf{Exactly-Once-Delivery} (wie LPS):
+              \begin{itemize}
+                  \item[] \textbf{Netzwerkfehler} zwischen \textbf{ALP~2} und dem \textbf{Broker}, während ALP~2 auf Antwort von SRV~2 wartet
+              \end{itemize}
     \end{itemize}
 
     \pause
@@ -535,7 +543,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        Exactly-Once-Delivery in \textbf{59/59 Durchläufen eingehalten}
+        Exactly-Once-Delivery wurden in \textbf{59/59 Durchläufen} unter den provozierten \textbf{Netzwerkfehlern} eingehalten
     \end{alertblock}
 \end{frame}
 
@@ -543,8 +551,14 @@
     \frametitle{Phase~2: In-Order-Delivery}
 
     \begin{itemize}
-        \item \textbf{1} Alarmanlage, \textbf{2} Alarmmeldungen, \textbf{1} ALP~1 Instanz, \textbf{2} ALP~2 Instanzen
-        \item \textbf{Hohe Netzwerklatenzen}
+        \item Gleiche Konfigurationsparameter des Experiments (wie LPS):
+              \begin{itemize}
+                  \item[] \textbf{1} Alarmanlage, \textbf{2} Alarmmeldungen, \textbf{1} ALP~1 Instanz, \textbf{2} ALP~2 Instanzen
+              \end{itemize}
+        \item Gleicher Auslöser der Verletzung der \textbf{In-Order-Delivery}  (wie LPS):
+              \begin{itemize}
+                  \item[] \textbf{Netzwerklatenzen von 2 Sekunden}
+              \end{itemize}
     \end{itemize}
 
     \pause
@@ -562,7 +576,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        In-Order-Delivery in \textbf{59/59 Durchläufen eingehalten}
+        In-Order-Delivery wurde in \textbf{59/59 Durchläufen} unter den provozierten \textbf{Netzwerklatenzen} eingehalten
     \end{alertblock}
 \end{frame}
 
@@ -570,7 +584,10 @@
     \frametitle{Phase~3: Realitätsnahe Last im Normalbetrieb}
 
     \begin{itemize}
-        \item \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
+        \item Realitätsnahe Konfigurationsparameter des Experiments:
+              \begin{itemize}
+                  \item[] \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
+              \end{itemize}
         \item Verarbeitungszeitsimulation mittels \textbf{RAST}~\hyperlink{TG25}{[TG25]}
         \item \textbf{Keine} Netzwerkfehler. \textbf{Keine} Netzwerklatenzen
     \end{itemize}
@@ -590,7 +607,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        Delivery-Garantien in \textbf{59/59 Durchläufen eingehalten}
+        Delivery-Garantien wurden in \textbf{59/59 Durchläufen} eingehalten
     \end{alertblock}
 \end{frame}
 
@@ -598,10 +615,13 @@
     \frametitle{Phase~4: Realitätsnahe Last mit Newtzwerkfehlern}
 
     \begin{itemize}
-        \item \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
-        \item Verarbeitungszeitsimulation mittels \textbf{RAST}
+        \item Gleiche realitätsnahe Konfigurationsparameter des Experiments (wie Phase~3):
+              \begin{itemize}
+                  \item[] \textbf{50} Alarmanlagen, \textbf{60} Alarmmeldungen, \textbf{3} ALP~1 Instanzen, \textbf{3} ALP~2 Instanzen
+              \end{itemize}
+        \item Gleiche Verarbeitungszeitsimulation mittels \textbf{RAST} (wie Phase~3)
         \item \textbf{20,0\,\%} Netzwerkfehler~\hyperlink{Val24}{[Val24]}
-        \item Netzwerklatenzen nach Messungen bei der Firma GS electronic
+        \item Netzwerklatenzen nach Messungen bei der Firma GS electronic GmbH
     \end{itemize}
 
     \pause
@@ -619,7 +639,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        Delivery-Garantien in \textbf{59/59 Durchläufen eingehalten}
+        Delivery-Garantien wurden in \textbf{59/59 Durchläufen} eingehalten
     \end{alertblock}
 \end{frame}
 
