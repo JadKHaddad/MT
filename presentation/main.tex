@@ -152,11 +152,11 @@
         \item Fokus auf neue Funktionen; Wartbarkeit und Code-Qualität werden vernachlässigt~\hyperlink{Ben95}{[Ben95]}
         \item $\implies$ \textbf{Design Smells}: Keine Programmierfehler, sondern strukturelle Probleme im Design eines Systems~\hyperlink{SSS16}{[SSS16]}
         \item Negativer Einfluss auf das Verstehen, Testen, Korrigieren und Erweitern~\hyperlink{Alk19}{[Alk19]}
-        \item Beispiele für Design Smells~\hyperlink{LG25}{[LG25]}
+        \item \textbf{Betrachtete Klasse von Legacy-Systemen}
               \begin{itemize}
-                  \item Synchrone Request-Response-Ketten
-                  \item Heterogene Redundanzmodi
-                  \item Strikte Delivery-Garantien (\textbf{Exactly-Once, In-Order})
+                  \item Code kaum dokumentiert
+                  \item Entwickler nicht mehr verfügbar
+                  \item \alert{Jede Code-Änderung ist riskant}
               \end{itemize}
     \end{itemize}
 \end{frame}
@@ -165,12 +165,6 @@
     \frametitle{Mitigierung durch Architektur-Reengineering}
 
     \begin{itemize}
-        \item \textbf{Betrachtete Klasse von Legacy-Systemen}
-              \begin{itemize}
-                  \item Code kaum dokumentiert
-                  \item Entwickler nicht mehr verfügbar
-                  \item \alert{Jede Code-Änderung ist riskant}
-              \end{itemize}
         \item \textbf{Architektur-Reengineering}: die Interaktion der Komponenten ändern, nicht die Komponenten
         \item \textbf{Legacy Proxy System (LPS)}~\hyperlink{LG25}{[LG25]}
               \begin{itemize}
@@ -188,12 +182,12 @@
         \item \textbf{Analyse von LPS}: Gezielte Experimente, um Verletzung der Delivery-Garantien unter Fehlerbedingungen zu verletzen
               \begin{itemize}
                   \item Netzwerkfehler $\rightarrow$ Neuübertragung $\rightarrow$ Duplikate
-                  \item Hohe Netzwerklatenzen $\rightarrow$ Neuordnen
+                  \item Hohe Netzwerklatenzen + Parallelität $\rightarrow$ Neuordnen
               \end{itemize}
         \item \textbf{Entwicklung vom Advanced Legacy Proxy System (ALPS)}: Eigenschaften von LPS beibehalten, Delivery-Garantien auch unter Fehlerbedingungen sicherstellen
               \begin{itemize}
                   \item Deduplizierungsschicht $\rightarrow$ Duplikate verwerfen
-                  \item Kontrollierte Nachrichtenaustausch $\rightarrow$ Neuordnen vermeiden
+                  \item Sequentielle Verarbeitung $\rightarrow$ Neuordnen vermeiden
               \end{itemize}
         \item \textbf{Evaluation von ALPS}: Unter Fehlerbedingungen und unter realitätsnahen Bedingungen
     \end{enumerate}
@@ -223,8 +217,15 @@
         \item \textbf{Synchrone} Request-Response-Ketten: Latenzen summieren sich
         \item \textbf{Heterogene} Redundanzmodi: Durchsatz begrenzt durch eine SRV~3 Instanz
         \item \textbf{Manuelles} Ausfall-Management: Minuten statt Sekunden (\textbf{EN 50136}~\hyperlink{DIN12}{[DIN12]})
-        \item \textbf{Exactly-Once-Delivery}: Keine Idempotenz. Duplikate werden doppelt bearbeitet
-        \item \textbf{In-Order-Delivery}: Alarmmeldungen sind Zustandbehaftet. Entwarnung vor Alarm löst unnötigen Notfalleinsatz
+        \item \textbf{Exactly-Once-Delivery}: Keine Idempotenz
+              \begin{itemize}
+                  \item Duplizierte Alarmmeldungen werden doppelt bearbeitet
+              \end{itemize}
+        \item \textbf{In-Order-Delivery}: Alarmmeldungen sind zustandbehaftet
+              \begin{itemize}
+                  \item z.\,B. Brandalarm: Entwarnung vor Alarm $\rightarrow$ unnötige Noteinsätze
+              \end{itemize}
+
     \end{enumerate}
 
     \pause
@@ -249,14 +250,12 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{LPS: Architektur}
+    \frametitle{LPS: Proof-of-Concept Implementierung}
 
     \begin{itemize}
-        \item \textbf{Proof-of-Concept} Implementierung
-        \item \textbf{MQTT} basiert~\hyperlink{OAS19}{[OAS19]}. \textbf{Publish-Subscribe} Protokoll
-        \item \textbf{LP~1}: Empfängt Alarmmeldungen von SRV~1 und publiziert sie an den Broker
-        \item \textbf{MQTT-Broker} (HiveMQ)~\hyperlink{Hiv25}{[Hiv25]}: Puffert die Alarmmeldungen und stellt sie für LP~2 bereit
-        \item \textbf{LP~2}: Konsumiert die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
+        \item \textbf{LP~1}: Empfängt Alarmmeldungen von SRV~1 und sendet sie an den Broker
+        \item \textbf{MQTT Broker}: Puffert die Alarmmeldungen und stellt sie für LP~2 bereit
+        \item \textbf{LP~2}: Empfängt die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
     \end{itemize}
 
     \medskip
@@ -271,12 +270,14 @@
     \begin{itemize}
         \item \textbf{MQTT QoS~2 (Exactly once)}
               \begin{itemize}
+                  \item Garantiert \textbf{Exactly-Once-Delivery} auf Protokollebene
                   \item Garantiert \textbf{Exactly-Once-Delivery} auf dem Pfad MQTT-Broker $\rightarrow$ LP~2
               \end{itemize}
-        \item \textbf{HiveMQ-Plugin}
+        \item \textbf{Broker-Plugin}
               \begin{itemize}
-                  \item Retry-Topic
-                  \item Höhere Priorität für fehlgeschlagene Alarmmeldungen
+                  \item Fehlgeschlagene Alarmmeldungen werden auf ein separates Retry-Topic publiziert
+                  \item Alarmmeldungen im Retry-Topic haben eine höhere Priorität und werden zuerst verarbeitet
+                  \item Keine Alarmmeldungen mehr im Retry-Topic $\rightarrow$ Verarbeitung aus dem Originalen Topic
                   \item Garantiert \textbf{In-Order-Delivery}
               \end{itemize}
     \end{itemize}
@@ -286,22 +287,15 @@
     \frametitle{LPS: Ursprüngliche Evaluation}
 
     \begin{itemize}
-        \item \textbf{40\,-100\,\%} Verbesserung der Antwortzeiten
         \item Mitigierung der ersten drei Design Smells
-        \item \textbf{Unzureichende Fehlerbedingungen}
+        \item \textbf{40\,-100\,\%} Verbesserung der Antwortzeiten
+        \item Schwerpunkt der Evaluation lag auf Normalbetrieb und nicht auf Simulation der Fehlerbedingungen
               \begin{itemize}
-                  \item Keine Netzwerkfehler
-                  \item Geringe Netzwerklatenzen
+                  \item Evaluation wurde in einem kontrollierten Testumgebung durchgeführt
+                  \item Netzwerkfehler und Latenzen, die im realen System vorkommen, wurden nicht betrachtet
               \end{itemize}
     \end{itemize}
 
-    \pause
-
-    \bigskip
-
-    \begin{block}{Hypothese}
-        LPS verletzt beide Garantien unter Netzwerkfehlern und hohen Latenzen
-    \end{block}
 \end{frame}
 
 \begin{frame}
@@ -309,17 +303,17 @@
 
     \begin{itemize}
         \item Konkrete Fehlerbedingungen durch gezielte Netzwerkfehler und hohe Latenzen provozieren
-        \item Services
+        \item In dieser Masterarbiet entwickelte \textbf{Services} zum Ausführen von Experimenten
               \begin{itemize}
                   \item \textbf{Alarmanlagen-Simulator}: Simuliert das Verhalten von Alarmanlagen
                   \item \textbf{TCP-Proxy}: Simuliert Netzwerkfehler und Latenzen
-                  \item \textbf{Server-Simulator}: Simuliert SRV 3
-                  \item \textbf{Validator}: Validiert Vollständigkeit und Delivery-Garantien
+                  \item \textbf{Server-Simulator}: Simuliert SRV 3 in MARC
+                  \item \textbf{Validator}: Validiert die Vollständigkeit der beim Alarmanlagen-Simulator angekommenen Alarmmeldungen und die Delivery-Garantien
               \end{itemize}
-        \item Zwei Phasen
+        \item Zwei Phasen der Evaluation
               \begin{enumerate}
-                  \item \textbf{Exactly-Once-Delivery}
-                  \item \textbf{In-Order-Delivery}
+                  \item Phase~1: beschäftigt sich mit \textbf{Exactly-Once-Delivery}
+                  \item Phase~2: beschäftigt sich mit \textbf{In-Order-Delivery}
               \end{enumerate}
     \end{itemize}
 \end{frame}
@@ -327,7 +321,12 @@
 \begin{frame}
     \frametitle{Zuverlässigkeit der Experiment-Ergebnisse}
 
-    \begin{block}{Success-Run-Theorem~[\hyperlink{Jos23}{Jos23}, \hyperlink{Kec92}{Kec92}]}
+    \begin{itemize}
+        \item Success-Run-Theorem~[\hyperlink{Jos23}{Jos23}, \hyperlink{Kec92}{Kec92}] ist ein verfahren, um die Zuverlässigkeit von Ergebnissen von Experimenten zu belegen
+        \item Definition vom Erfolgskriterium wird abhängig vom konkreten Experiment gewählt
+    \end{itemize}
+
+    \begin{block}{Success-Run-Theorem}
         \[ n = \frac{\ln(1-C)}{\ln R} = \frac{\ln(1-0{,}95)}{\ln(0{,}95)} \approx 58{,}4 \;\Rightarrow\; \textbf{59 Durchläufe} \]
 
         Alle \textbf{59} erfolgreich $\rightarrow$ mit \textbf{95\,\%} Konfidenz ist ein einzelner Durchlauf mit $\geq$ \textbf{95\,\%} Wahrscheinlichkeit erfolgreich
@@ -357,7 +356,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        Exactly-Once-Delivery in \textbf{59/59 Durchläufen verletzt}
+        Exactly-Once-Delivery in \textbf{59/59 Durchläufen verletzt} % unter Netzwerkfehler
     \end{alertblock}
 \end{frame}
 
@@ -367,7 +366,8 @@
 
     \begin{itemize}
         \item \textbf{1} Alarmanlage, \textbf{2} Alarmmeldungen, \textbf{1} LP~1 Instanz, \textbf{2} LP~2 Instanzen
-        \item \textbf{Hohe Netzwerklatenzen} während beide \textbf{LP~2} Instanzen Alarmmeldungen \textbf{parallel} verarbeiten
+        \item \textbf{Hohe Netzwerklatenzen von 2,ms} während beide \textbf{LP~2} Instanzen Alarmmeldungen \textbf{parallel} verarbeiten
+              % Kein regelfall aber koennen beim überlasten des systems auftauchen...
     \end{itemize}
 
     \pause
@@ -385,7 +385,7 @@
     \bigskip
 
     \begin{alertblock}{Ergebnis}
-        In-Order-Delivery in \textbf{59/59 Durchläufen verletzt}
+        In-Order-Delivery in \textbf{59/59 Durchläufen verletzt} % unter hohen netzwerklatenzen und parallel
     \end{alertblock}
 \end{frame}
 
@@ -408,17 +408,17 @@
     \begin{itemize}
         \item[A~1] Asynchrone Architektur von LPS beibehalten
         \item[A~2] Transparente Integration mit Legacy-System beibehalten
-        \item[A~3] Kein Nachrichtenverlust
+        \item[A~3] Kein Nachrichtenverlust von LPS beibehalten
         \item[A~4] \textbf{Exactly-Once-Delivery} \hfill (Limitation \textbf{1} von LPS)
         \item[A~5] \textbf{In-Order-Delivery} pro Alarmanlage \hfill (Limitation \textbf{2} von LPS)
     \end{itemize}
 \end{frame}
 
 \begin{frame}
-    \frametitle{ALPS: Architektur}
+    \frametitle{ALPS: Implementierung}
 
     \begin{itemize}
-        \item \textbf{AMQP} basiert~\hyperlink{AMQ08}{[AMQ08]}
+        \item Basiert auf dem \textbf{AMQP} Protokoll~\hyperlink{AMQ08}{[AMQ08]}
         \item \textbf{ALP~1}: Empfängt Alarmmeldungen von SRV~1 und publiziert sie an den Broker
         \item \textbf{AMQP-Broker} (RabbitMQ)~\hyperlink{Bro26}{[Bro26]}: Puffert die Alarmmeldungen und stellt sie bereit
         \item \textbf{ALP~2}: Konsumiert die Alarmmeldungen vom Broker und leitet sie an SRV~2 weiter
@@ -628,7 +628,7 @@
 
     \pause
 
-    \begin{block}{Ergebnis}
+    \begin{block}{Ergebnis nach dem Success-Run-Theorem}
         Mit \textbf{95\,\%} Konfidenz und $\geq$ \textbf{95\,\%} Wahrscheinlichkeit hält ALPS die Delivery-Garantien ein
     \end{block}
 \end{frame}
