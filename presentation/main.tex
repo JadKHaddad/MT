@@ -1025,4 +1025,27 @@
     \abbildung{\linewidth}{0.85\textheight}{../img/drawio/exp_alps.pdf}
 \end{frame}
 
+\begin{frame}
+    \frametitle{Warum AMQP und nicht Kafka?}
+
+    \small
+    \begin{tabularx}{\linewidth}{@{}L L L@{}}
+        \toprule
+        \textbf{Anforderung}   & \textbf{AMQP (RabbitMQ)}              & \textbf{Kafka}                 \\
+        \midrule
+        Pub/Sub wie in LPS     & Broker mit Queues                     & Log-basiert, Pull-Modell       \\
+        Reihenfolge pro Gerät  & \texttt{x-consistent-hash}            & Partitionierung nach Schlüssel \\
+        Strikt sequentiell     & \texttt{x-single-active-consumer}     & Consumer Group                 \\
+        Fehler ohne Neuordnung & \texttt{nack} + \texttt{requeue=true} & Anwendungscode                 \\
+        Exactly-Once bis SRV~2 & Deduplizierung (ALP~D)                & Deduplizierung (ALP~D)         \\
+        \bottomrule
+    \end{tabularx}
+
+    \bigskip
+
+    \begin{block}{Entscheidung}
+        Architektur von LPS beibehalten, nur das Protokoll ersetzen: Garantien durch \textbf{Protokoll-Features} statt durch eigenen Code
+    \end{block}
+\end{frame}
+
 \end{document}
