@@ -11,11 +11,6 @@ Design Smells bezeichnen strukturelle Probleme in einem Softwaresystem, die die 
 
 \textit{Refactoring} bezeichnet die Umstrukturierung von bestehendem Code, bei der die interne Struktur verbessert wird, ohne das externe Verhalten des Systems zu verändern~\citep{laguna_systematic_2013}. Neben diesem \textit{Code-Refactoring} gibt es \textit{Architectural Refactoring}, das statt einzelner Codeabschnitte die Architektur eines Systems betrifft, beispielsweise Kommunikationspfade oder Betriebsmodi. \textit{Reengineering} ist weiter gefasst und bezeichnet die Untersuchung und Veränderung eines bestehenden Systems, um es in eine neue Form zu überführen~\citep{laguna_systematic_2013}. Es ist besonders für Legacy-Systeme relevant, die weiterhin betrieben werden, aber nur schwer oder mit hohem Risiko geändert werden können~\citep{stevens_systems_1998}. In dieser Masterarbeit wird ein \textit{Architektur-Reengineering} betrachtet. Dabei wird nicht der Code des Legacy-Systems geändert, sondern die Art, wie die Komponenten des Systems miteinander interagieren. Dadurch werden die Auswirkungen der Design Smells reduziert, ohne die bestehende Funktionalität zu verändern.
 
-\section{Legacy Proxy System}
-\label{sec:grundlagen-lps}
-
-\gls{lps} ist ein \textit{Architektur-Reengineering-Ansatz} für verteilte Legacy-Systeme. Dabei wird eine \textit{Proxy-Schicht} zwischen den bestehenden Services des Legacy-Systems eingefügt, die deren synchrone Kommunikation über einen Message Broker in eine asynchrone Kommunikation überführt. Dadurch werden Design Smells wie \textit{synchrone Request-Response-Ketten} reduziert, ohne den Quellcode der Services zu ändern. Die Architektur und die Komponenten von \gls{lps} werden im Abschnitt~\ref{sec:lps} im Detail beschrieben.
-
 \section{Asynchrone Messaging-Protokolle}
 \label{sec:grundlagen-messaging-protocolls}
 
