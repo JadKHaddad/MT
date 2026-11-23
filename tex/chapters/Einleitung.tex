@@ -18,7 +18,7 @@ Malekpour et al.~\citep{malekpour} untersuchen die \gls{fifo}-Ordnung in \textit
 
 Bhola et al.~\citep{bhola} untersuchen die \textit{Exactly-Once-Delivery} in inhaltsbasierten \textit{Publish/Subscribe-Systemen}, in denen ein Netzwerk von Brokern die Nachrichten der Publisher an die Subscriber weiterleitet. Die Autoren stellen ein Protokoll vor, das jede Nachricht genau einmal an alle interessierten Subscriber zustellt, wahlweise in der Sendereihenfolge des Publishers oder in einer für alle Subscriber einheitlichen Gesamtordnung. Die Garantie gilt, solange der Subscriber mit dem System verbunden bleibt. Eine persistente Speicherung ist ausschließlich an dem Broker erforderlich, der die Nachrichten der Publisher protokolliert, während die zwischengeschalteten Broker lediglich \textit{Soft State} halten, der bei einem Ausfall verloren gehen darf. Das Protokoll toleriert den Verlust und die Vertauschung von Nachrichten sowie den Ausfall von Brokern und Verbindungen. Der Ansatz erreicht zwar beide Garantien, betrachtet jedoch keine Fehler zwischen einem Consumer und nachgelagerten Services, sodass die Garantien nicht Ende zu Ende gelten. Zudem ist das Protokoll in den Brokern selbst implementiert (im System Gryphon), sodass der Ansatz nicht ohne Weiteres mit fertigen Message-Broker-Produkten umsetzbar ist.
 
-Die Arbeiten von Baldoni et al. und Malekpour et al. garantieren die \textit{In-Order-Delivery} nicht. Baldoni et al. erkennen Verletzungen der \textit{In-Order-Delivery} nur und markieren sie, Malekpour et al. verringern sie nur mit hoher Wahrscheinlichkeit. Zudem behandeln beide weder den Verlust noch die Duplikate von Nachrichten und streben keine \textit{Exactly-Once-Delivery} an. Außerdem müssen die Endpunkte, also Publisher und Subscriber, das jeweilige Verfahren selbst umsetzen, etwa durch das Vergeben und Auswerten von Zeitstempeln oder durch den Umgang mit markierten Nachrichten. In einem Legacy-System ist dies riskant, da das Verfahren in jedem Endpunkt eingebracht werden muss und die Anwendung markierte Nachrichten ohne Änderungen am Quellcode nicht behandeln kann. Bhola et al. erreichen zwar beide Garantien, jedoch nicht Ende zu Ende, und das Protokoll ist in den Brokern selbst implementiert, sodass es nicht ohne Weiteres mit fertigen Message-Broker-Produkten umsetzbar ist. Diese Lücke motiviert das Ziel dieser Masterarbeit.
+Die Arbeiten von Baldoni et al. und Malekpour et al. garantieren die \textit{In-Order-Delivery} nicht: Baldoni et al. erkennen und markieren Verletzungen lediglich, Malekpour et al. verringern sie nur mit hoher Wahrscheinlichkeit. Beide behandeln weder den Verlust noch Duplikate von Nachrichten und streben keine \textit{Exactly-Once-Delivery} an. Zudem müssen Publisher und Subscriber das jeweilige Verfahren selbst umsetzen, etwa durch das Vergeben und Auswerten von Zeitstempeln oder durch den Umgang mit markierten Nachrichten. In einem Legacy-System ist dies riskant, da das Verfahren in jeden Endpunkt eingebracht werden muss und die Anwendung markierte Nachrichten ohne Änderung des Quellcodes nicht behandeln kann. Bhola et al. erreichen zwar beide Garantien, jedoch nicht Ende zu Ende. Außerdem ist ihr Protokoll in den Brokern selbst implementiert und daher nicht ohne Weiteres mit fertigen Message-\allowbreak Brokern umsetzbar. Diese Lücke motiviert das Ziel dieser Masterarbeit.
 
 \section{Zielsetzung}
 \label{sec:zielsetzung}
@@ -33,11 +33,9 @@ Ziel dieser Masterarbeit ist, ein \textit{Architektur-Reengineering} für vertei
       \item \textbf{Experimentelle Evaluation von \gls{alps}}: Die Einhaltung der Delivery-Garantien und die Nachrichtenintegrität von \gls{alps} werden sowohl unter Fehlerbedingungen als auch unter realitätsnahen Bedingungen experimentell überprüft.
 \end{itemize}
 
-Die Arbeit beantwortet die folgende Forschungsfrage:
+Diese Masterarbeit beantwortet die folgende Forschungsfrage:
 
-\begin{quote}
-      \textbf{Forschungsfrage:} Kann ein transparentes, asynchrones \textit{Architektur-Reengineering} eines verteilten Legacy-Systems so gestaltet werden, dass die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} Ende zu Ende eingehalten werden?
-\end{quote}
+\paragraph{Forschungsfrage:} Kann ein transparentes, asynchrones \textit{Architektur-Reengi\-neer\-ing} eines verteilten Legacy-Systems so gestaltet werden, dass die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} Ende zu Ende eingehalten werden?
 
 \section{Aufbau der Arbeit}
 \label{sec:aufbau}
