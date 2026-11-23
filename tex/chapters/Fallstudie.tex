@@ -4,10 +4,10 @@
 Als Fallstudie betrachtet diese Masterarbeit das in~\citep{liebig_2025_architectural_refactoring} untersuchte verteilte Legacy-System \textit{\enquote{\gls{marc}}}~\footnote{Weil das reale \gls{marc} mehr als 30 Komponenten umfasst, wird in dieser Masterarbeit eine für die Analyse reduzierte Sicht auf die relevanten Kommunikations- und Servicepfade verwendet.} der Firma GS electronic Gebr. Schönweitz GmbH~\citep{gselectronic}. \gls{marc} ist ein verteiltes Alarmempfangssystem, das externe Alarmanlagen überwacht sowie Alarmmeldungen empfängt, verarbeitet und in einer Datenbank persistiert, um sie für die anschließende Bearbeitung durch Mitarbeitende in einer Leitstelle bereitzustellen. Abbildung~\ref{fig:marc-simple-architektur} zeigt eine vereinfachte Architektur von \gls{marc} sowie seine zentrale Komponente \textit{\enquote{\gls{ars}}} zur Verarbeitung von Alarmmeldungen. Ist \gls{ars} nicht verfügbar, können keine Alarmmeldungen bearbeitet werden.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{./img/drawio/marc_simple.pdf}
-    \caption{Vereinfachte Gesamtarchitektur des Legacy-Systems \acrshort{marc}.}
-    \label{fig:marc-simple-architektur}
+	\centering
+	\includegraphics[width=\textwidth]{./img/drawio/marc_simple.pdf}
+	\caption{Vereinfachte Gesamtarchitektur des Legacy-Systems \acrshort{marc}.}
+	\label{fig:marc-simple-architektur}
 \end{figure}
 
 \section{Architektur}
@@ -16,19 +16,19 @@ Als Fallstudie betrachtet diese Masterarbeit das in~\citep{liebig_2025_architect
 Wie im vorherigen Abschnitt beschrieben, bildet die \gls{ars} die zentrale Komponente des \gls{marc}-Systems. Ihre Hauptaufgabe besteht darin, eingehende Alarmmeldungen zu empfangen, zu verarbeiten und in einer Datenbank zu persistieren. Intern setzt sich die \gls{ars} aus mehreren Services zusammen, die im Folgenden als \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 bezeichnet werden (siehe Abbildung~\ref{fig:ars-architektur}). \gls{srv}~1 stellt dabei die primäre \gls{http}-Schnittstelle bereit, über die Alarmmeldungen von den externen Alarmanlagen entgegengenommen werden. Nach dem Empfang einer Alarmmeldung durchläuft sie eine synchrone \textit{Request-Response-Kette}~\footnote{Request-Response-Kette bezeichnet eine sequentielle Folge synchroner Request-Response-Interaktionen über mehrere Services, bei der jeder nachgelagerte Schritt erst nach erfolgreicher Antwort des vorherigen Schritts fortgesetzt wird.} über alle beteiligten Services bis hin zu \gls{srv}~3, welcher die finale Verarbeitung und die Persistierung der Alarmmeldung in einer Datenbank übernimmt. Die Kommunikation innerhalb dieser Kette erfolgt über eine Kombination aus \gls{http}-Requests und einem proprietären \gls{tcp}-Protokoll. Erst nachdem \gls{srv}~3 die Verarbeitung der Alarmmeldung erfolgreich abgeschlossen hat, wird eine Bestätigung über die Verarbeitungskette an die sendende Alarmanlage zurückgeleitet. Die Antworten der einzelnen Services dienen ausschließlich als Bestätigung des erfolgreichen Empfangs beziehungsweise der erfolgreichen Verarbeitung und enthalten keine zusätzlichen Nutzdaten. Bei negativen Bestätigungen, Netzwerkfehlern oder Timeouts senden die Alarmanlagen die Alarmmeldungen erneut. Abbildung~\ref{fig:ars-architektur} veranschaulicht die interne Verarbeitungskette der \gls{ars}. Eine eingehende Alarmmeldung wird von \gls{srv}~1 angenommen, synchron über \gls{srv}~2 an \gls{srv}~3 weitergereicht und erst nach erfolgreicher Verarbeitung bestätigt.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{./img/drawio/ars.pdf}
-    \caption{Interne Service-Architektur der Alarm Receiving Software (\acrshort{ars}).}
-    \label{fig:ars-architektur}
+	\centering
+	\includegraphics[width=\textwidth]{./img/drawio/ars.pdf}
+	\caption{Interne Service-Architektur der Alarm Receiving Software (\acrshort{ars}).}
+	\label{fig:ars-architektur}
 \end{figure}
 
 \gls{marc} ist über drei Rechenzentren repliziert, wobei in jedem Replikat eine eigene Instanz von \gls{ars} betrieben wird. Während die Services \gls{srv}~1 und \gls{srv}~2 in allen \gls{ars}-Instanzen zur Lastverteilung im Aktiv-Aktiv-Modus operieren, ist \gls{srv}~3 im Aktiv-Passiv-Modus ausgelegt. Folglich ist zu jedem Zeitpunkt nur eine Instanz von \gls{srv}~3 aktiv und für die Verarbeitung von Alarmmeldungen zuständig. Abbildung~\ref{fig:marc-architektur} zeigt die replizierte \gls{marc}-Architektur über drei Rechenzentren und wie die verschiedenen Services miteinander interagieren. Die Alarmanlagen senden ihre Alarmmeldungen an \gls{srv}~1 der Replikate, und jedes \gls{srv}~1 reicht sie an \gls{srv}~2 seines Replikats weiter. Alle \gls{srv}~2-Instanzen leiten die Alarmmeldungen anschließend an die eine aktive \gls{srv}~3-Instanz weiter. Die \gls{srv}~3-Instanzen der übrigen Replikate sind passiv und in der Abbildung gestrichelt dargestellt. Zwischen den Replikaten findet eine Datenreplikation statt.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{./img/drawio/marc.pdf}
-    \caption{Replizierte \acrshort{marc}-Architektur über drei Rechenzentren mit Aktiv-Aktiv- und Aktiv-Passiv-Betrieb.}
-    \label{fig:marc-architektur}
+	\centering
+	\includegraphics[width=\textwidth]{./img/drawio/marc.pdf}
+	\caption{Replizierte \acrshort{marc}-Architektur über drei Rechenzentren mit Aktiv-Aktiv- und Aktiv-Passiv-Betrieb.}
+	\label{fig:marc-architektur}
 \end{figure}
 
 \section{Design Smells im MARC}
@@ -37,33 +37,33 @@ Wie im vorherigen Abschnitt beschrieben, bildet die \gls{ars} die zentrale Kompo
 Die Architektur von \gls{marc} führt laut~\citep{liebig_2025_architectural_refactoring} zu mehreren strukturellen Problemen, die dort als folgende Design Smells klassifiziert werden:
 
 \begin{itemize}
-    \item \textbf{Smell~1}: \textit{Synchrone Request-Response-Ketten}. Die sequentielle Kopplung der \gls{ars}-Services \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 führt zu einer Akkumulation der Latenzen, da sich die Gesamtantwortzeit der Verarbeitung einer Alarmmeldung aus der Summe der Latenzen der einzelnen Services ergibt.
+	\item \textbf{Smell~1}: \textit{Synchrone Request-Response-Ketten}. Die sequentielle Kopplung der \gls{ars}-Services \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 führt zu einer Akkumulation der Latenzen, da sich die Gesamtantwortzeit der Verarbeitung einer Alarmmeldung aus der Summe der Latenzen der einzelnen Services ergibt.
 
-    \item \textbf{Smell~2}: \textit{Heterogene Redundanzmodi}. Der parallele Einsatz von Aktiv-Aktiv für die \gls{ars}-Services \gls{srv}~1 und \gls{srv}~2 sowie Aktiv-Passiv für \gls{srv}~3 (siehe Abbildung~\ref{fig:marc-architektur}) innerhalb derselben Verarbeitungskette verursacht einen Flaschenhals. Dadurch wird der Gesamtdurchsatz des Systems auf die Kapazität einer einzelnen aktiven \gls{srv}~3-Instanz begrenzt.
+	\item \textbf{Smell~2}: \textit{Heterogene Redundanzmodi}. Der parallele Einsatz von Aktiv-Aktiv für die \gls{ars}-Services \gls{srv}~1 und \gls{srv}~2 sowie Aktiv-Passiv für \gls{srv}~3 (siehe Abbildung~\ref{fig:marc-architektur}) innerhalb derselben Verarbeitungskette verursacht einen Flaschenhals. Dadurch wird der Gesamtdurchsatz des Systems auf die Kapazität einer einzelnen aktiven \gls{srv}~3-Instanz begrenzt.
 
-    \item \textbf{Smell~3}: \textit{Manuelles Ausfall-Management}. Das System kann Ausfälle nicht autonom beheben, sondern erfordert eine manuelle Überwachung und Intervention durch Mitarbeitende. Dieser manuelle Arbeitsschritt dauert oft Minuten, während die \textit{EN 50136}~\citep{din_en_50136-12012-08_alarm_2012}, eine für diese Klasse von Systemen relevante Norm, Reaktionen innerhalb weniger Sekunden fordert. Dadurch ist das System im Ernstfall zu langsam und fehleranfällig.
+	\item \textbf{Smell~3}: \textit{Manuelles Ausfall-Management}. Das System kann Ausfälle nicht autonom beheben, sondern erfordert eine manuelle Überwachung und Intervention durch Mitarbeitende. Dieser manuelle Arbeitsschritt dauert oft Minuten, während die \textit{EN 50136}~\citep{din_en_50136-12012-08_alarm_2012}, eine für diese Klasse von Systemen relevante Norm, Reaktionen innerhalb weniger Sekunden fordert. Dadurch ist das System im Ernstfall zu langsam und fehleranfällig.
 
-    \item \textbf{Smell~4}: \textit{Abhängigkeit von Exactly-Once-Delivery}. Das System ist auf eine \textit{Exactly-Once-Delivery} angewiesen, da der Verarbeitung von Alarmmeldungen die \textit{Idempotenz}~\footnote{Idempotenz bedeutet, dass eine Operation beliebig oft wiederholt werden kann, ohne dass sich der Systemzustand nach der ersten erfolgreichen Anwendung ändert~\citep{helland2012idempotence}.} fehlt. Das bedeutet intuitiv, dass das System nicht nativ mit Duplikaten umgehen kann, die durch wiederholte Übertragungen der Alarmanlagen entstehen. Mitarbeitende in der Leitstelle müssen Duplikate selbstständig erkennen. Das führt in der Praxis zu Fehlverhalten oder zur gleichzeitigen Bearbeitung derselben Alarmmeldung durch mehrere Mitarbeitende in der Leitstelle.
+	\item \textbf{Smell~4}: \textit{Abhängigkeit von Exactly-Once-Delivery}. Das System ist auf eine \textit{Exactly-Once-Delivery} angewiesen, da der Verarbeitung von Alarmmeldungen die \textit{Idempotenz}~\footnote{Idempotenz bedeutet, dass eine Operation beliebig oft wiederholt werden kann, ohne dass sich der Systemzustand nach der ersten erfolgreichen Anwendung ändert~\citep{helland2012idempotence}.} fehlt. Das bedeutet intuitiv, dass das System nicht nativ mit Duplikaten umgehen kann, die durch wiederholte Übertragungen der Alarmanlagen entstehen. Mitarbeitende in der Leitstelle müssen Duplikate selbstständig erkennen. Das führt in der Praxis zu Fehlverhalten oder zur gleichzeitigen Bearbeitung derselben Alarmmeldung durch mehrere Mitarbeitende in der Leitstelle.
 
-    \item \textbf{Smell~5}: \textit{Strikte Reihenfolgeabhängigkeit (In-Order-Delivery)}. Das System ist auf die korrekte zeitliche Abfolge von Alarmmeldungen angewiesen, da Alarmmeldungen zustandsbehaftet sind. Aufgrund fehlender Mechanismen zur Neuordnung können Paketverluste oder hohe Latenzen dazu führen, dass Alarmmeldungen in der falschen Reihenfolge verarbeitet werden. Ein kritisches Beispiel dafür ist der Empfang einer Entwarnung vor der eigentlichen Alarmmeldung: Wird die verspätete Alarmmeldung zuletzt verarbeitet, überschreibt sie den Status der Entwarnung. Dies führt zu einer fehlerhaften Interpretation und unnötigen Notfalleinsätzen.
+	\item \textbf{Smell~5}: \textit{Strikte Reihenfolgeabhängigkeit (In-Order-Delivery)}. Das System ist auf die korrekte zeitliche Abfolge von Alarmmeldungen angewiesen, da Alarmmeldungen zustandsbehaftet sind. Aufgrund fehlender Mechanismen zur Neuordnung können Paketverluste oder hohe Latenzen dazu führen, dass Alarmmeldungen in der falschen Reihenfolge verarbeitet werden. Ein kritisches Beispiel dafür ist der Empfang einer Entwarnung vor der eigentlichen Alarmmeldung: Wird die verspätete Alarmmeldung zuletzt verarbeitet, überschreibt sie den Status der Entwarnung. Dies führt zu einer fehlerhaften Interpretation und unnötigen Notfalleinsätzen.
 \end{itemize}
 
 Abbildung~\ref{fig:exactly-once-diagram} zeigt einen beispielhaften Kommunikationsablauf, der zu einer Verletzung der \textit{Exactly-Once-Delivery} führt: Eine Alarmmeldung wird aufgrund eines Netzwerkfehlers erneut übertragen und dadurch mehrfach verarbeitet.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.653\textwidth]{./img/mermaid/marc_exactly_once_delivery_violation_sequence.pdf}
-    \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{Exactly-Once-Delivery} im \acrshort{marc}-System führt.}
-    \label{fig:exactly-once-diagram}
+	\centering
+	\includegraphics[width=0.653\textwidth]{./img/mermaid/marc_exactly_once_delivery_violation_sequence.pdf}
+	\caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{Exactly-Once-Delivery} im \acrshort{marc}-System führt.}
+	\label{fig:exactly-once-diagram}
 \end{figure}
 
 Abbildung~\ref{fig:in-order-diagram} zeigt einen beispielhaften Kommunikationsablauf, der zu einer Verletzung der \textit{In-Order-Delivery} führt: Eine später erzeugte Alarmmeldung wird vor einer früheren Alarmmeldung verarbeitet, da variable Netzwerklatenzen die Reihenfolge verändern können.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.826\textwidth]{./img/mermaid/marc_in_order_delivery_violation_sequence.pdf}
-    \caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{In-Order-Delivery} im \acrshort{marc}-System führt.}
-    \label{fig:in-order-diagram}
+	\centering
+	\includegraphics[width=0.826\textwidth]{./img/mermaid/marc_in_order_delivery_violation_sequence.pdf}
+	\caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{In-Order-Delivery} im \acrshort{marc}-System führt.}
+	\label{fig:in-order-diagram}
 \end{figure}
 
 \section{Legacy Proxy System}
@@ -75,38 +75,38 @@ Abbildung~\ref{fig:in-order-diagram} zeigt einen beispielhaften Kommunikationsab
 Nachdem in vorherigen Abschnitten das \gls{marc}-System beschrieben wurde, betrachtet dieser Abschnitt das in~\citep{liebig_2025_architectural_refactoring} vorgeschlagene \gls{lps}. Auf Basis der zuvor identifizierten Design Smells in Abschnitt~\ref{sec:design-smells} schlägt die Arbeit~\citep{liebig_2025_architectural_refactoring} ein Ar\-chi\-tek\-tur-Reengineering vor, um die Auswirkungen der identifizierten Design Smells zu mitigieren, ohne Modifikationen am Quellcode der Legacy-Services vorzunehmen. Der Kern dieses Ansatzes ist die transparente Integration des \gls{lps} zwischen den Services des \gls{marc}-Systems. Die Grundidee des \gls{lps} besteht in der Entkopplung der synchronen Verarbeitungskette zwischen den Services \gls{srv}~1 und \gls{srv}~2 durch eine \textit{Proxy-Broker-Proxy-Architektur}~\footnote{Eine Proxy-Broker-Proxy-Architektur bezeichnet ein Integrationsmuster, bei dem ein Message Broker von zwei Proxies gekapselt wird. Dies ermöglicht es, synchrone Kommunikationspfade transparent in asynchrone Kommunikationspfade zu überführen, ohne die bestehenden Schnittstellen der ursprünglichen Endpunkte anzupassen~\citep{hohpe2004enterprise}.}. Das \gls{lps} wird zwischen \gls{srv}~1 und \gls{srv}~2 positioniert und setzt sich aus drei Komponenten zusammen: dem \gls{lpone}, einem Message Broker und dem \gls{lptwo}. Abbildung~\ref{fig:lps-architektur} zeigt die transparente Integration von \gls{lps} in \gls{marc} zwischen \gls{srv}~1 und \gls{srv}~2. Die zuvor direkte synchrone Kopplung wird durch die Kette \textit{\gls{lpone} $\rightarrow$ Broker $\rightarrow$ \gls{lptwo}} ersetzt, sodass eingehende Alarmmeldungen zunächst entgegengenommen und im Broker gepuffert werden, bevor sie asynchron weiterverarbeitet werden. Die bestehende Legacy-Schnittstelle bleibt dabei nach außen unverändert.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{./img/drawio/lps.pdf}
-    \caption{Gesamtarchitektur von \acrshort{marc} nach der Integration von \acrshort{lps}.}
-    \label{fig:lps-architektur}
+	\centering
+	\includegraphics[width=\textwidth]{./img/drawio/lps.pdf}
+	\caption{Gesamtarchitektur von \acrshort{marc} nach der Integration von \acrshort{lps}.}
+	\label{fig:lps-architektur}
 \end{figure}
 
 In der Proof-of-Concept-Implementierung der Arbeit~\citep{liebig_2025_architectural_refactoring} wird das Protokoll \gls{mqtt}~v5 genutzt, um das \gls{lps} zu realisieren, wobei \textit{HiveMQ}~\citep{hivemq_2025} als Broker zum Einsatz kommt. Im Normalbetrieb nimmt \gls{lpone} die Alarmmeldungen von \gls{srv}~1 entgegen und publiziert sie auf einem entsprechenden Topic, das im Folgenden als Main-Topic bezeichnet wird. Sobald der Broker den Eingang bestätigt, sendet \gls{lpone} unmittelbar eine Bestätigung an das vorgelagerte System zurück. Dadurch wird die synchrone Wartezeit der ursprünglichen Verarbeitungskette reduziert. Parallel dazu konsumiert \gls{lptwo} die Alarmmeldungen aus dem Main-Topic und leitet sie asynchron an \gls{srv}~2 weiter. Abbildung~\ref{fig:lps-normalfluss} zeigt einen beispielhaften Verarbeitungsablauf einer Alarmmeldung innerhalb von \gls{lps} im Normalbetrieb. Unter Normalbetrieb wird die fehlerfreie Verarbeitung einer Alarmmeldung verstanden, bei der weder Netzwerkfehler noch negative Bestätigungen der nachgelagerten Services (\gls{srv}~2, \gls{srv}~3) auftreten.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.826\textwidth]{./img/mermaid/lps_normal_sequence.pdf}
-    \caption{Sequenzdiagramm eines beispielhaften Verarbeitungsablaufs einer Alarmmeldung innerhalb von \acrshort{lps} im Normalbetrieb.}
-    \label{fig:lps-normalfluss}
+	\centering
+	\includegraphics[width=0.826\textwidth]{./img/mermaid/lps_normal_sequence.pdf}
+	\caption{Sequenzdiagramm eines beispielhaften Verarbeitungsablaufs einer Alarmmeldung innerhalb von \acrshort{lps} im Normalbetrieb.}
+	\label{fig:lps-normalfluss}
 \end{figure}
 
 Um die strengen Delivery-Garantien des Legacy-Systems einzuhalten, kombiniert \gls{lps} mehrere Mechanismen. Die Kommunikation zwischen \gls{lpone}, Broker und \gls{lptwo} erfolgt über \gls{mqtt} \gls{qos}~2, was eine \textit{Exactly-Once-Delivery} auf diesem Teilpfad garantiert. Um die \textit{In-Order-Delivery} der Alarmmeldungen zu gewährleisten, werden die \gls{lptwo}-Instanzen so konfiguriert, dass Alarmmeldungen innerhalb derselben Instanz anhand von \texttt{max\_\allowbreak inflight\_\allowbreak messages = 1} sequentiell verarbeitet werden. Für Fehlerfälle wie Netzwerkfehler oder negative Bestätigungen der nachgelagerten Services, die hinter \gls{lptwo} auftreten, wird ein \textit{Retry}-Mechanismus~\footnote{Retry bezeichnet das erneute Zustellen einer zuvor fehlgeschlagenen Nachricht.} eingeführt. Bei fehlgeschlagener Über\-tra\-gung einer Alarmmeldung an die nachgelagerten Services wird diese Alarmmeldung auf ein separates Topic, das im Folgenden als Retry-Topic bezeichnet wird, publiziert. Der Retry-Mechanismus wird durch eine Broker-Erweiterung (Plugin) umgesetzt, die Alarmmeldungen aus dem Retry-Topic strikt priorisiert. Sobald sich Alarmmeldungen im Retry-Topic befinden, wird die Auslieferung regulärer Alarmmeldungen aus dem Main-Topic temporär pausiert. Erst nach der erfolgreichen Verarbeitung der Alarmmeldungen aus dem Retry-Topic wird der reguläre Fluss fortgesetzt. Dies verhindert, dass neuere Alarmmeldungen eine ältere, zuvor fehlgeschlagene Alarmmeldung überholen, und dadurch wird die Reihenfolge eingehalten. Der Ablauf dieses Mechanismus gestaltet sich wie folgt:
 
 \begin{enumerate}
-    \item \gls{lpone} publiziert eine Alarmmeldung in das Main-Topic.
-    \item \gls{lptwo} konsumiert die Alarmmeldung aus dem Main-Topic und versucht sie an \gls{srv}~2 weiterzuleiten.
-    \item Im Fehlerfall wird die Alarmmeldung in das Retry-Topic publiziert.
-    \item Das Broker-Plugin pausiert die Auslieferung von regulären Alarmmeldungen aus dem Main-Topic und priorisiert die Auslieferung der Alarmmeldungen aus dem Retry-Topic.
-    \item Nach erfolgreicher Verarbeitung aller Alarmmeldungen im Retry-Topic wird die Auslieferung von regulären Alarmmeldungen fortgesetzt.
+	\item \gls{lpone} publiziert eine Alarmmeldung in das Main-Topic.
+	\item \gls{lptwo} konsumiert die Alarmmeldung aus dem Main-Topic und versucht sie an \gls{srv}~2 weiterzuleiten.
+	\item Im Fehlerfall wird die Alarmmeldung in das Retry-Topic publiziert.
+	\item Das Broker-Plugin pausiert die Auslieferung von regulären Alarmmeldungen aus dem Main-Topic und priorisiert die Auslieferung der Alarmmeldungen aus dem Retry-Topic.
+	\item Nach erfolgreicher Verarbeitung aller Alarmmeldungen im Retry-Topic wird die Auslieferung von regulären Alarmmeldungen fortgesetzt.
 \end{enumerate}
 
 Abbildung~\ref{fig:lps-retry-priorisierung} zeigt einen beispielhaften Verarbeitungsablauf einer Alarmmeldung innerhalb von \gls{lps} im Fehlerfall.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.828\textwidth]{./img/mermaid/lps_retry_prio_sequence.pdf}
-    \caption{Sequenzdiagramm eines beispielhaften Verarbeitungsablaufs einer Alarmmeldung innerhalb von \acrshort{lps} im Fehlerfall.}
-    \label{fig:lps-retry-priorisierung}
+	\centering
+	\includegraphics[width=0.828\textwidth]{./img/mermaid/lps_retry_prio_sequence.pdf}
+	\caption{Sequenzdiagramm eines beispielhaften Verarbeitungsablaufs einer Alarmmeldung innerhalb von \acrshort{lps} im Fehlerfall.}
+	\label{fig:lps-retry-priorisierung}
 \end{figure}
 
 \subsection{Auswirkungen auf die Design Smells}
@@ -115,14 +115,14 @@ Abbildung~\ref{fig:lps-retry-priorisierung} zeigt einen beispielhaften Verarbeit
 Durch die Integration von \gls{lps} werden die Auswirkungen der zuvor identifizierten Design Smells in Abschnitt~\ref{sec:design-smells} mitigiert:
 
 \begin{itemize}
-    \item \textbf{Smell~1}: \textit{Synchrone Request-Response-Ketten}. Die direkte synchrone Kopplung zwischen \gls{srv}~1 und \gls{srv}~2 wird aufgrund der asynchronen Verarbeitung der Alarmmeldungen durch die \textit{Proxy-Broker-Proxy-Archi\-tek\-tur} aufgebrochen. \gls{lpone} bestätigt den Eingang einer Alarmmeldung an die vorgelagerten Services direkt nach dem Publizieren der Alarmmeldung an den Broker. Dadurch wird die Latenzakkumulation entlang der Verarbeitungskette reduziert.
+	\item \textbf{Smell~1}: \textit{Synchrone Request-Response-Ketten}. Die direkte synchrone Kopplung zwischen \gls{srv}~1 und \gls{srv}~2 wird aufgrund der asynchronen Verarbeitung der Alarmmeldungen durch die \textit{Proxy-Broker-Proxy-Archi\-tek\-tur} aufgebrochen. \gls{lpone} bestätigt den Eingang einer Alarmmeldung an die vorgelagerten Services direkt nach dem Publizieren der Alarmmeldung an den Broker. Dadurch wird die Latenzakkumulation entlang der Verarbeitungskette reduziert.
 
-    \item \textbf{Smell~2}: \textit{Heterogene Redundanzmodi}. Die \textit{Proxy-Broker-Proxy-Archi\-tek\-tur} und der Einsatz mehrerer \gls{lptwo}-Instanzen machen das System widerstandsfähiger gegenüber Ausfällen oder Netzwerkfehlern.
+	\item \textbf{Smell~2}: \textit{Heterogene Redundanzmodi}. Die \textit{Proxy-Broker-Proxy-Archi\-tek\-tur} und der Einsatz mehrerer \gls{lptwo}-Instanzen machen das System widerstandsfähiger gegenüber Ausfällen oder Netzwerkfehlern.
 
-          % TODO: TF is this?
-    \item \textbf{Smell~3}: \textit{Manuelles Ausfall-Management}. Zwar bleibt die Notwendigkeit manueller Eingriffe bei schwerwiegenden Ausfällen formal bestehen, jedoch werden die unmittelbaren negativen Auswirkungen auf die Antwortzeiten vorgelagerter Systeme reduziert, da eingehende Alarmmeldungen sicher im Broker zwischengespeichert werden.
+	      % TODO: TF is this?
+	\item \textbf{Smell~3}: \textit{Manuelles Ausfall-Management}. Zwar bleibt die Notwendigkeit manueller Eingriffe bei schwerwiegenden Ausfällen formal bestehen, jedoch werden die unmittelbaren negativen Auswirkungen auf die Antwortzeiten vorgelagerter Systeme reduziert, da eingehende Alarmmeldungen sicher im Broker zwischengespeichert werden.
 
-    \item \textbf{Smell~4 \& Smell~5}: \textit{Exactly-Once-Delivery} \& \textit{In-Order-Delivery} werden über \gls{qos}~2 und den Retry-Mechanismus adressiert.
+	\item \textbf{Smell~4 \& Smell~5}: \textit{Exactly-Once-Delivery} \& \textit{In-Order-Delivery} werden über \gls{qos}~2 und den Retry-Mechanismus adressiert.
 \end{itemize}
 
 Zur Validierung des Ansatzes wurden in~\citep{liebig_2025_architectural_refactoring} Experimente durch\-ge\-führt, bei denen simulierte Alarmanlagen Alarmmeldungen an das System senden. Der Fokus der Experimente lag auf der Reduktion der Antwortzeiten sowie der Einhaltung der \textit{Exactly-Once-Delivery}. Die Experimente belegten, dass die Antwortzeiten von \gls{marc} nach dem Integrieren von \gls{lps} sowohl im Normalbetrieb als auch unter Fehlerbedingungen verbessert wurden und \gls{marc} bei der dort betrachteten Anzahl simulierter Alarmanlagen die Vorgaben der europäischen Norm EN 50136~\citep{din_en_50136-12012-08_alarm_2012} erfüllt. Die Garantien der \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} konnten laut den Experimenten in~\citep{liebig_2025_architectural_refactoring} ebenso eingehalten werden.
@@ -135,55 +135,55 @@ Nach dem Betrachten der in~\citep{liebig_2025_architectural_refactoring} durchge
 \subsection{Experimente}
 \label{sub-sec:lps-experimente}
 
-Die in diesem Abschnitt durchgeführten Experimente simulieren das Legacy-System nach dem Integrieren von \gls{lps}. Bei den Experimenten werden Alarmanlagen simuliert, die Alarmmeldungen periodisch an das System senden. Die gesendeten Alarmmeldungen bestehen hauptsächlich aus zwei Feldern: \texttt{device\_id} und \texttt{triggertime}. \texttt{device\_id} ist der Identifikator einer Alarmanlage und \texttt{triggertime} ist der Identifikator einer Alarmmeldung. Es ist garantiert, dass die \texttt{triggertime} der gesendeten Alarmmeldungen monoton steigend ist. Außerdem sind die simulierten Alarmanlagen so eingestellt, dass sie das Übertragen von Alarmmeldungen erneut versuchen, falls Fehler beim Übertragen auftreten. Wiederholte Alarmmeldungen enthalten die gleiche \texttt{triggertime} wie die ursprünglich fehlgeschlagene Alarmmeldung. Die Legacy-Services \gls{srv}~1 und \gls{srv}~2 werden durch die Proxy-Services \textit{\gls{srv}~1 PROXY} und \textit{\gls{srv}~2 PROXY} nachgebildet (siehe unten), während \gls{srv}~3 durch einen Service simuliert wird, dessen Aufgabe es ist, Alarmmeldungen vom \textit{\gls{srv}~2 PROXY} zu empfangen und zu speichern. Die gespeicherten Alarmmeldungen werden abschließend auf \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} geprüft. Zum Ausführen der Experimente werden vier \textit{Hilfsservices} eingeführt, die im Laufe dieser Masterarbeit entwickelt wurden:
+Die in diesem Abschnitt durchgeführten Experimente simulieren das Legacy-System nach dem Integrieren von \gls{lps}. Bei den Experimenten werden Alarmanlagen simuliert, die Alarmmeldungen periodisch an das System senden. Die gesendeten Alarmmeldungen bestehen hauptsächlich aus zwei Feldern: \texttt{device\_\allowbreak id} und \texttt{triggertime}. \texttt{device\_\allowbreak id} ist der Identifikator einer Alarmanlage und \texttt{triggertime} ist der Identifikator einer Alarmmeldung. Es ist garantiert, dass die \texttt{triggertime} der gesendeten Alarmmeldungen monoton steigend ist. Außerdem sind die simulierten Alarmanlagen so eingestellt, dass sie das Übertra\-gen von Alarmmeldungen erneut versuchen, falls Fehler beim Übertragen auftreten. Wiederholte Alarmmeldungen enthalten die gleiche \texttt{triggertime} wie die ursprünglich fehlgeschlagene Alarmmeldung. Die Legacy-Services \gls{srv}~1 und \gls{srv}~2 werden durch die Proxy-Services \textit{\gls{srv}~1 PROXY} und \textit{\gls{srv}~2 PROXY} nachgebildet (siehe unten), während \gls{srv}~3 durch einen Service simuliert wird, dessen Aufgabe es ist, Alarmmeldungen vom \textit{\gls{srv}~2 PROXY} zu empfangen und zu speichern. Die gespeicherten Alarmmeldungen werden abschließend auf \textit{Exactly-Once-Delivery} und \textit{In-Order-Delivery} geprüft. Zum Ausführen der Experimente werden vier \textit{Hilfsservices} eingeführt, die im Laufe dieser Masterarbeit entwickelt wurden:
 
 \begin{itemize}
-    \item \textbf{Alarmanlagen-Simulator:} Der Alarmanlagen-Simulator bildet externe Alarmanlagen nach und erzeugt periodisch Alarmmeldungen, die an das System gesendet werden. Die gesamte Anzahl simulierter Alarmanlagen ($N_{\text{device}}$) sowie die Anzahl gesendeter Alarmmeldungen pro Alarmanlage ($N_{\text{alarm}}$) sind einstellbar. Außerdem sind die minimale ($I_{\text{min,alarm}}$) und die maximale Wartezeit ($I_{\text{max,alarm}}$) zwischen zwei gesendeten Alarmmeldungen einer Alarmanlage einstellbar. Die tatsächliche Wartezeit wird vor jeder Alarmmeldung zufällig zwischen $I_{\text{min,alarm}}$ und $I_{\text{max,alarm}}$ bestimmt. Gilt hingegen $I_{\text{min,alarm}} = I_{\text{max,alarm}}$, ergibt sich ein festes Sendeintervall ($I_{\text{alarm}}$), sodass die Alarmmeldungen einer Alarmanlage in exakt gleichen zeitlichen Abständen gesendet werden. Erfolgreich gesendete Alarmmeldungen werden abschließend in einer Datei gespeichert (\texttt{device-results.\allowbreak json}).
+	\item \textbf{Alarmanlagen-Simulator:} Der Alarmanlagen-Simulator bildet externe Alarmanlagen nach und erzeugt periodisch Alarmmeldungen, die an das System gesendet werden. Die gesamte Anzahl simulierter Alarmanlagen ($N_{\text{device}}$) sowie die Anzahl gesendeter Alarmmeldungen pro Alarmanlage ($N_{\text{alarm}}$) sind einstellbar. Außerdem sind die minimale ($I_{\text{min,alarm}}$) und die maximale Wartezeit ($I_{\text{max,alarm}}$) zwischen zwei gesendeten Alarmmeldungen einer Alarmanlage einstellbar. Die tatsächliche Wartezeit wird vor jeder Alarmmeldung zufällig zwischen $I_{\text{min,alarm}}$ und $I_{\text{max,alarm}}$ bestimmt. Gilt hingegen $I_{\text{min,alarm}} = I_{\text{max,alarm}}$, ergibt sich ein festes Sendeintervall ($I_{\text{alarm}}$), sodass die Alarmmeldungen einer Alarmanlage in exakt gleichen zeitlichen Abständen gesendet werden. Erfolgreich gesendete Alarmmeldungen werden abschließend in einer Datei gespeichert (\texttt{device-results.\allowbreak json}).
 
-    \item \textbf{\gls{tcp}-Proxy:} Der \gls{tcp}-Proxy dient zur gezielten Simulation von Netzwerkfehlern und Übertragungslatenzen zwischen zwei Komponenten des simulierten Systems. Dazu wird er transparent zwischen zwei Kommunikationspartnern \textit{A} und \textit{B} positioniert, wobei \textit{A} der verbindende Client ist, und leitet akzeptierte \gls{tcp}-Verbindungen von \textit{A} an \textit{B} weiter. Über eine einstellbare Fehlerrate ($E_{\text{tcp}}$) lehnt der Proxy Verbindungen von \textit{A} zufällig ab. Die minimale ($T_{\text{min,tcp}}$) und die maximale Dauer ($T_{\text{max,tcp}}$) einer akzeptierten Verbindung sind einstellbar. Die tatsächliche Dauer wird für jede Verbindung zufällig zwischen $T_{\text{min,tcp}}$ und $T_{\text{max,tcp}}$ bestimmt. Nach Ablauf dieser Dauer wird die Verbindung getrennt, was zu einem Netzwerkfehler zwischen \textit{A} und \textit{B} führt. Analog zum \textit{Alarmanlagen-Simulator} ergibt sich bei $T_{\text{min,tcp}} = T_{\text{max,tcp}}$ eine feste Verbindungsdauer ($T_{\text{tcp}}$), sodass jede Verbindung nach exakt derselben Dauer getrennt wird. Auf diese Weise lassen sich instabile Netzwerkverbindungen, Verbindungsabbrüche und temporäre Kommunikationsausfälle in die Experimente einbringen. Darüber hinaus kann der \gls{tcp}-Proxy die Datenübertragung in beide Richtungen verzögern und damit langsame Netzwerkübertragungen simulieren. Als Upstream wird dabei die Richtung von \textit{A} nach \textit{B} bezeichnet, als Downstream die Gegenrichtung von \textit{B} nach \textit{A}. Für den Upstream sind eine minimale ($L_{\text{min,up}}$) und eine maximale Latenz ($L_{\text{max,up}}$), für den Downstream eine minimale ($L_{\text{min,down}}$) und eine maximale Latenz ($L_{\text{max,down}}$) einstellbar. Die Latenz ist als Verzögerung pro Byte definiert: Für jeden Lesevorgang wird eine Latenz zufällig zwischen dem jeweiligen Minimal- und Maximalwert bestimmt und mit der Anzahl der gelesenen Bytes multipliziert. Die daraus resultierende Verzögerung wird abgewartet, bevor die gelesenen Daten weitergeleitet werden. Beträgt die Latenz beispielsweise 1\,ms pro Byte und werden in einem Lesevorgang 1024\,Byte gelesen, werden diese Daten um 1024\,ms verzögert weitergeleitet. Analog zur Verbindungsdauer ergibt sich bei $L_{\text{min,up}} = L_{\text{max,up}}$ bzw.~$L_{\text{min,down}} = L_{\text{max,down}}$ eine feste Latenz ($L_{\text{up}}$ bzw.~$L_{\text{down}}$). Abschließend werden die Zeitstempel, an denen eine Verbindung getrennt wurde, in einer Datei gespeichert (\texttt{tcp-proxy-results.\allowbreak json}).
+	\item \textbf{\gls{tcp}-Proxy:} Der \gls{tcp}-Proxy dient zur gezielten Simulation von Netzwerkfehlern und Übertragungslatenzen zwischen zwei Komponenten des simulierten Systems. Dazu wird er transparent zwischen zwei Kommunikationspartnern \textit{A} und \textit{B} positioniert, wobei \textit{A} der verbindende Client ist, und leitet akzeptierte \gls{tcp}-Verbindungen von \textit{A} an \textit{B} weiter. Über eine einstellbare Fehlerrate ($E_{\text{tcp}}$) lehnt der Proxy Verbindungen von \textit{A} zufällig ab. Die minimale ($T_{\text{min,tcp}}$) und die maximale Dauer ($T_{\text{max,tcp}}$) einer akzeptierten Verbindung sind einstellbar. Die tatsächliche Dauer wird für jede Verbindung zufällig zwischen $T_{\text{min,tcp}}$ und $T_{\text{max,tcp}}$ bestimmt. Nach Ablauf dieser Dauer wird die Verbindung getrennt, was zu einem Netzwerkfehler zwischen \textit{A} und \textit{B} führt. Analog zum \textit{Alarmanlagen-Simulator} ergibt sich bei $T_{\text{min,tcp}} = T_{\text{max,tcp}}$ eine feste Verbindungsdauer ($T_{\text{tcp}}$), sodass jede Verbindung nach exakt derselben Dauer getrennt wird. Auf diese Weise lassen sich instabile Netzwerkverbindungen, Verbindungsabbrüche und temporäre Kommunikationsausfälle in die Experimente einbringen. Darüber hinaus kann der \gls{tcp}-Proxy die Datenübertragung in beide Richtungen verzögern und damit langsame Netzwerkübertragungen simulieren. Als Upstream wird dabei die Richtung von \textit{A} nach \textit{B} bezeichnet, als Downstream die Gegenrichtung von \textit{B} nach \textit{A}. Für den Upstream sind eine minimale ($L_{\text{min,up}}$) und eine maximale Latenz ($L_{\text{max,up}}$), für den Downstream eine minimale ($L_{\text{min,down}}$) und eine maximale Latenz ($L_{\text{max,down}}$) einstellbar. Die Latenz ist als Verzögerung pro Byte definiert: Für jeden Lesevorgang wird eine Latenz zufällig zwischen dem jeweiligen Minimal- und Maximalwert bestimmt und mit der Anzahl der gelesenen Bytes multipliziert. Die daraus resultierende Verzögerung wird abgewartet, bevor die gelesenen Daten weitergeleitet werden. Beträgt die Latenz beispielsweise 1\,ms pro Byte und werden in einem Lesevorgang 1024\,Byte gelesen, werden diese Daten um 1024\,ms verzögert weitergeleitet. Analog zur Verbindungsdauer ergibt sich bei $L_{\text{min,up}} = L_{\text{max,up}}$ bzw.~$L_{\text{min,down}} = L_{\text{max,down}}$ eine feste Latenz ($L_{\text{up}}$ bzw.~$L_{\text{down}}$). Abschließend werden die Zeitstempel, an denen eine Verbindung getrennt wurde, in einer Datei gespeichert (\texttt{tcp-proxy-results.\allowbreak json}).
 
-    \item \textbf{Server-Simulator:} Der Server-Simulator simuliert den nachgelagerten Service \gls{srv}~3 und stellt damit den Endpunkt der experimentellen Verarbeitungskette dar. Er empfängt Alarmmeldungen und bestätigt deren erfolgreiche Verarbeitung. Der Server-Simulator ist mit einer einstellbaren Idle-Zeit ($T_{\text{idle}}$) konfigurierbar, die dazu dient, ihn zu terminieren und somit das Experiment zu beenden, nachdem eine bestimmte Zeit lang keine Alarmmeldungen mehr empfangen wurden. Abschließend werden erfolgreich verarbeitete Alarmmeldungen in einer Datei gespeichert (\texttt{server-results.\allowbreak json}).
+	\item \textbf{Server-Simulator:} Der Server-Simulator simuliert den nachgelagerten Service \gls{srv}~3 und stellt damit den Endpunkt der experimentellen Verarbeitungskette dar. Er empfängt Alarmmeldungen und bestätigt deren erfolgreiche Verarbeitung. Der Server-Simulator ist mit einer einstellbaren Idle-Zeit ($T_{\text{idle}}$) konfigurierbar, die dazu dient, ihn zu terminieren und somit das Experiment zu beenden, nachdem eine bestimmte Zeit lang keine Alarmmeldungen mehr empfangen wurden. Abschließend werden erfolgreich verarbeitete Alarmmeldungen in einer Datei gespeichert (\texttt{server-results.\allowbreak json}).
 
-    \item \textbf{Validator:} Der Validator wird immer nach Abschluss eines Durchlaufs ausgeführt und vergleicht die vom Alarmanlagen-Simulator gesendeten Alarmmeldungen mit den beim Server-Simulator angekommenen Alarmmeldungen. Konkret werden die Vollständigkeit der Zustellung der Alarmmeldungen sowie die Einhaltung der \textit{In-Order-Delivery} und \textit{Exactly-Once-Delivery} validiert. Die Vollständigkeit der Alarmmeldungen wird validiert, indem geprüft wird, dass jede gesendete Alarmmeldung aus \texttt{device-\allowbreak results} mindestens einmal in \texttt{server-\allowbreak results} vorkommt. Die \textit{Exactly-Once-Delivery} wird dadurch validiert, dass jede gesendete Alarmmeldung aus \texttt{device-\allowbreak results} höchstens einmal in \texttt{ser-\allowbreak ver-\allowbreak results} vorkommt. Die \textit{In-Order-Delivery} wird pro Alarmanlage validiert, indem zunächst mehrfach angekommene Alarmmeldungen entfernt werden und danach geprüft wird, ob alle Alarmmeldungen jeder einzelnen Alarmanlage anhand des Felds \texttt{triggertime} monoton steigend sind. Jede Verletzung der Monotonie einer Alarmanlage wird als \textit{Außer Reihenfolge} klassifiziert. Zur Veranschaulichung der Validierung von \textit{In-Order-Delivery} wird die folgende Sequenz empfangener Alarmmeldungen betrachtet:
+	\item \textbf{Validator:} Der Validator wird immer nach Abschluss eines Durchlaufs ausgeführt und vergleicht die vom Alarmanlagen-Simulator gesendeten Alarmmeldungen mit den beim Server-Simulator angekommenen Alarmmeldungen. Konkret werden die Vollständigkeit der Zustellung der Alarmmeldungen sowie die Einhaltung der \textit{In-Order-Delivery} und \textit{Exactly-Once-Delivery} validiert. Die Vollständigkeit der Alarmmeldungen wird validiert, indem geprüft wird, dass jede gesendete Alarmmeldung aus \texttt{device-\allowbreak results} mindestens einmal in \texttt{server-\allowbreak results} vorkommt. Die \textit{Exactly-Once-Delivery} wird dadurch validiert, dass jede gesendete Alarmmeldung aus \texttt{device-\allowbreak results} höchstens einmal in \texttt{ser-\allowbreak ver-\allowbreak results} vorkommt. Die \textit{In-Order-Delivery} wird pro Alarmanlage validiert, indem zunächst mehrfach angekommene Alarmmeldungen entfernt werden und danach geprüft wird, ob alle Alarmmeldungen jeder einzelnen Alarmanlage anhand des Felds \texttt{triggertime} monoton steigend sind. Jede Verletzung der Monotonie einer Alarmanlage wird als \textit{Außer Reihenfolge} klassifiziert. Zur Veranschaulichung der Validierung von \textit{In-Order-Delivery} wird die folgende Sequenz empfangener Alarmmeldungen betrachtet:
 
-          \begin{table}[H]
-              \centering
-              \begin{tabular}{|l|l|l|}
-                  \hline
-                  \textbf{Index} & \textbf{device\_id} & \textbf{triggertime} \\
-                  \hline
-                  \#1            & 1                   & 0                    \\
-                  \#2            & 1                   & 2                    \\
-                  \#3            & 1                   & 3                    \\
-                  \#4            & 1                   & 1                    \\
-                  \#5            & 1                   & 4                    \\
-                  \hline
-              \end{tabular}
-              \caption{Beispielhafte Sequenz empfangener Alarmmeldungen zur Veranschaulichung der In-Order-Delivery-Validierung.}
-              \label{tab:in-order-delivery-seq-beispiel}
-          \end{table}
+	      \begin{table}[H]
+		      \centering
+		      \begin{tabular}{|l|l|l|}
+			      \hline
+			      \textbf{Index} & \textbf{device\_id} & \textbf{triggertime} \\
+			      \hline
+			      \#1            & 1                   & 0                    \\
+			      \#2            & 1                   & 2                    \\
+			      \#3            & 1                   & 3                    \\
+			      \#4            & 1                   & 1                    \\
+			      \#5            & 1                   & 4                    \\
+			      \hline
+		      \end{tabular}
+		      \caption{Beispielhafte Sequenz empfangener Alarmmeldungen zur Veranschaulichung der In-Order-Delivery-Validierung.}
+		      \label{tab:in-order-delivery-seq-beispiel}
+	      \end{table}
 
-          Alarmmeldung~\#4 ist in der falschen Reihenfolge angekommen, da ihre \texttt{triggertime} kleiner als die \texttt{triggertime} der vorherigen Alarmmeldung~\#3 ist. Alarmmeldung~\#5 ist laut der Validierung hingegen in der richtigen Reihenfolge angekommen, da ihre \texttt{triggertime} größer als die der vorherigen Alarmmeldung~\#4 ist. Diese Validierung dient nicht als quantitative Metrik zum Zählen von \textit{Außer Reihenfolge} angekommenen Alarmmeldungen, sondern als qualitative Metrik, die die Verletzung der \textit{In-Order-Delivery} aufzeigt. Die genaue Anzahl der \textit{Außer Reihenfolge} angekommenen Alarmmeldungen kann je nach verwendetem Algorithmus variieren. Beispielsweise kann ein Algorithmus die Alarmmeldungen~\#2 und \#3 als \textit{Außer Reihenfolge} klassifizieren, da sie vor der Alarmmeldung~\#4 mit einer kleineren \texttt{triggertime} angekommen sind. Die \texttt{triggertime}-Werte sind in diesem Beispiel vereinfachte, aufsteigende Zahlen und keine realen Uhrzeiten, da für die Validierung nur ihre Reihenfolge relevant ist.
+	      Alarmmeldung~\#4 ist in der falschen Reihenfolge angekommen, da ihre \texttt{triggertime} kleiner als die \texttt{triggertime} der vorherigen Alarmmeldung~\#3 ist. Alarmmeldung~\#5 ist laut der Validierung hingegen in der richtigen Reihenfolge angekommen, da ihre \texttt{triggertime} größer als die der vorherigen Alarmmeldung~\#4 ist. Diese Validierung dient nicht als quantitative Metrik zum Zählen von \textit{Außer Reihenfolge} angekommenen Alarmmeldungen, sondern als qualitative Metrik, die die Verletzung der \textit{In-Order-Delivery} aufzeigt. Die genaue Anzahl der \textit{Außer Reihenfolge} angekommenen Alarmmeldungen kann je nach verwendetem Algorithmus variieren. Beispielsweise kann ein Algorithmus die Alarmmeldungen~\#2 und \#3 als \textit{Außer Reihenfolge} klassifizieren, da sie vor der Alarmmeldung~\#4 mit einer kleineren \texttt{triggertime} angekommen sind. Die \texttt{triggertime}-Werte sind in diesem Beispiel vereinfachte, aufsteigende Zahlen und keine realen Uhrzeiten, da für die Validierung nur ihre Reihenfolge relevant ist.
 \end{itemize}
 
 Zur Auswertung der Experimente werden die in Tabelle~\ref{tab:exp-metrics} dargestellten Metriken verwendet.
 
 \begin{table}[H]
-    \centering
-    \caption{Metriken zur Auswertung der Experimente.}
-    \label{tab:exp-metrics}
-    \begin{tabular}{|l|l|}
-        \hline
-        \textbf{Metrik}       & \textbf{Beschreibung}                                 \\
-        \hline
-        $N_{\text{sent}}$     & Insgesamt gesendete Alarmmeldungen                    \\
-        $N_{\text{received}}$ & Insgesamt empfangene Alarmmeldungen (inkl.~Duplikate) \\
-        $N_{\text{loss}}$     & Verlorene Alarmmeldungen                              \\
-        $N_{\text{ooo}}$      & Außer Reihenfolge empfangene Alarmmeldungen           \\
-        $N_{\text{unique}}$   & Eindeutige empfangene Alarmmeldungen                  \\
-        $N_{\text{dup}}$      & Duplikate ($N_{\text{received}} - N_{\text{unique}}$) \\
-        \hline
-    \end{tabular}
+	\centering
+	\caption{Metriken zur Auswertung der Experimente.}
+	\label{tab:exp-metrics}
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Metrik}       & \textbf{Beschreibung}                                 \\
+		\hline
+		$N_{\text{sent}}$     & Insgesamt gesendete Alarmmeldungen                    \\
+		$N_{\text{received}}$ & Insgesamt empfangene Alarmmeldungen (inkl.~Duplikate) \\
+		$N_{\text{loss}}$     & Verlorene Alarmmeldungen                              \\
+		$N_{\text{ooo}}$      & Außer Reihenfolge empfangene Alarmmeldungen           \\
+		$N_{\text{unique}}$   & Eindeutige empfangene Alarmmeldungen                  \\
+		$N_{\text{dup}}$      & Duplikate ($N_{\text{received}} - N_{\text{unique}}$) \\
+		\hline
+	\end{tabular}
 \end{table}
 
 Die Raten in den Ergebnistabellen beziehen sich bei $N_{\text{sent}}$ und $N_{\text{loss}}$ auf $N_{\text{sent}}$ und bei $N_{\text{received}}$, $N_{\text{unique}}$, $N_{\text{dup}}$ und $N_{\text{ooo}}$ auf $N_{\text{received}}$.
@@ -191,10 +191,10 @@ Die Raten in den Ergebnistabellen beziehen sich bei $N_{\text{sent}}$ und $N_{\t
 Für die Durchführung der Experimente wird die originale Implementierung von \gls{lps} aus dem offiziellen GitHub-Repository~\citep{legacy_proxy_pattern_repo} herangezogen. Sie umfasst die Komponenten \textit{\gls{lpone}} und \textit{\gls{lptwo}}, das Broker-Plugin für den Retry-Mechanismus sowie die Services \textit{\gls{srv}~1 PROXY} und \textit{\gls{srv}~2 PROXY}, die in~\citep{liebig_2025_architectural_refactoring} als Vertreter der Legacy-Services \gls{srv}~1 und \gls{srv}~2 eingesetzt werden und deren Rolle in der Verarbeitungskette übernehmen. Diese Komponenten stammen aus der originalen Implementierung und wurden nicht in dieser Masterarbeit entwickelt. Die oben beschriebenen vier Hilfsservices wurden hingegen in dieser Masterarbeit entwickelt. Nach dem Zusammenstellen der beteiligten Komponenten ergibt sich die in Abbildung~\ref{fig:exp-setup} dargestellte Architektur der Experimente.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{./img/drawio/exp_lps.pdf}
-    \caption{Architektur der Experimente von \acrshort{lps} und Kommunikationspfade der beteiligten Komponenten.}
-    \label{fig:exp-setup}
+	\centering
+	\includegraphics[width=\textwidth]{./img/drawio/exp_lps.pdf}
+	\caption{Architektur der Experimente von \acrshort{lps} und Kommunikationspfade der beteiligten Komponenten.}
+	\label{fig:exp-setup}
 \end{figure}
 
 Im Vergleich zu Abbildung~\ref{fig:lps-architektur} ersetzt der Experimentaufbau die Alarmanlagen sowie \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 durch den \textit{Alarmanlagen-Simulator}, den \textit{\gls{srv}~1 PROXY}, den \textit{\gls{srv}~2 PROXY} und den \textit{Server-Simulator} und ergänzt die \textit{\gls{tcp}-Proxies} $P_{\text{mqtt}}$ und $P_{\text{srv}}$. Die Unterscheidung der \gls{marc}-Replikate in aktiv und passiv wird im Experimentaufbau nicht abgebildet. Abbildung~\ref{fig:exp-setup} veranschaulicht die Architektur der durchgeführten Experimente sowie die Interaktionen der einzelnen Komponenten. Der \textit{Alarmanlagen-Simulator} generiert periodisch Alarmmeldungen und sendet sie per \gls{http} an den \textit{\gls{srv}~1 PROXY}. Dieser nimmt die Alarmmeldungen entgegen und leitet sie an \gls{lpone} weiter. \gls{lpone} publiziert die empfangenen Alarmmeldungen an den Broker. Sobald der Broker den Eingang bestätigt, sendet \gls{lpone} eine positive Bestätigung zurück, die über den \textit{\gls{srv}~1 PROXY} beim \textit{Alarmanlagen-Simulator} ankommt und die erfolgreiche Übertragung signalisiert. Jede \gls{lptwo}-Instanz verbindet sich über einen \textit{\gls{tcp}-Proxy} ($P_{\text{mqtt}}$) mit dem Broker, konsumiert die Alarmmeldungen aus dem Broker und leitet sie über einen \textit{\gls{tcp}-Proxy} ($P_{\text{srv}}$) an den \textit{\gls{srv}~2 PROXY} weiter. Dieser übergibt die Alarmmeldungen abschließend an den \textit{Server-Simulator}, der die Speicherung der Alarmmeldungen übernimmt und somit die Rolle des ursprünglichen Services \gls{srv}~3 von \textit{\gls{marc}} einnimmt. Bei beiden \textit{\gls{tcp}-Proxies} übernimmt die \gls{lptwo}-Instanz die Rolle von \textit{A}, während der Broker bzw.~der \textit{\gls{srv}~2 PROXY} die Rolle von \textit{B} einnimmt. Der Upstream bezeichnet somit jeweils die Richtung von \gls{lptwo} zum Broker bzw.~zum \textit{\gls{srv}~2 PROXY}. Die \textit{\gls{tcp}-Proxies} werden gezielt auf beiden Pfaden der \gls{lptwo}-Instanzen positioniert, da Netzwerkfehler oder Übertragungslatenzen auf diesen Pfaden zur Verletzung der Delivery-Garantien führen können, wie in den Abschnitten~\ref{sub-sub:lps-verletzung-eod} und~\ref{sub-sub:lps-verletzung-iod} beschrieben wird. Alle übrigen Kommunikationspfade werden als fehlerfrei angenommen, da sie für die Verletzung der Delivery-Garantien in den Experimenten keine Rolle spielen.
@@ -205,15 +205,15 @@ Im Vergleich zu Abbildung~\ref{fig:lps-architektur} ersetzt der Experimentaufbau
 Die Experimente sind stochastisch, da Verbindungsdauern, Fehler und Latenzen zufällig erzeugt werden. Damit die Experimente reproduzierbar sind, werden alle Zufallswerte von einem Pseudozufallszahlengenerator erzeugt, der mit einem einstellbaren Seed $S$ initialisiert wird. Der Seed wird allen Hilfsservices (siehe Abschnitt~\ref{sub-sec:lps-experimente}) übergeben, die Zufallswerte erzeugen, also dem \textit{Alarmanlagen-Simulator} und dem \textit{\gls{tcp}-Proxy}. Bei gleichem Seed erzeugen diese Services in jedem Durchlauf dieselbe Folge von Zufallswerten. Der Seed legt jedoch nicht das gesamte zeitliche Verhalten des Systems fest: Das Scheduling durch das \gls{os}, der Verbindungsaufbau sowie die Verarbeitungszeiten des Brokers und der \gls{lps}-Komponenten werden nicht durch den Seed gesteuert. Daher können sich Durchläufe mit demselben Seed in ihren Ergebnissen unterscheiden. Aus dem Ergebnis eines einzelnen Durchlaufs lässt sich somit keine belastbare Aussage ableiten. Aus diesem Grund wird jedes Experiment mit demselben Seed mehrfach wiederholt. Die Anzahl der benötigten Wiederholungen $n$ wird nach dem \textit{Success-Run-Theorem}~\citep{joshi2023, kececioglu1992} bestimmt:
 
 \begin{equation}
-    n = \frac{\ln(1 - C)}{\ln(R)}
-    \label{eq:success-run}
+	n = \frac{\ln(1 - C)}{\ln(R)}
+	\label{eq:success-run}
 \end{equation}
 
 Dabei ist $R$ die Zuverlässigkeit (\textit{Reliability}): Die minimale Wahrscheinlichkeit, mit der ein einzelner Durchlauf ein zuvor festgelegtes Erfolgskriterium erfüllt. $C$ ist die Konfidenz (\textit{Confidence}), mit der diese Aussage getroffen werden soll. In dieser Masterarbeit werden $R = 95\,\%$ und $C = 95\,\%$ verwendet. Diese Kombination ist in der Zuverlässigkeitsprüfung und Prozessvalidierung gängig~\citep{qualitymag, schenkelberg2024}. Daraus ergibt sich:
 
 \begin{equation}
-    n = \frac{\ln(1 - 0{,}95)}{\ln(0{,}95)} \approx 58{,}4 \;\rightarrow\; n = 59
-    \label{eq:success-run-n}
+	n = \frac{\ln(1 - 0{,}95)}{\ln(0{,}95)} \approx 58{,}4 \;\rightarrow\; n = 59
+	\label{eq:success-run-n}
 \end{equation}
 
 Jedes Experiment wird somit 59-mal wiederholt. Erfüllen alle 59 Durchläufe das Erfolgskriterium, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein einzelner Durchlauf das Erfolgskriterium mit einer Wahrscheinlichkeit von mindestens 95\,\% erfüllt. Verfehlt hingegen mindestens ein Durchlauf das Erfolgskriterium, kann diese Aussage nicht getroffen werden. In den folgenden Experimenten zu \gls{lps} gilt ein Durchlauf als erfolgreich, wenn die jeweils untersuchte Delivery-Garantie verletzt wird. Dadurch wird gezeigt, dass die Verletzung nicht nur zufällig in einem einzelnen Durchlauf auftritt, sondern sich mit dem gewählten Seed reproduzierbar provozieren lässt. Der Seed wird für jedes Experiment wie folgt bestimmt: Das Experiment wird mit verschiedenen Seeds ausgeführt, bis ein Seed gefunden wird, mit dem die untersuchte Verletzung konsistent auftritt. Anschließend wird das Experiment mit diesem Seed 59-mal wiederholt. Die gezielte Auswahl des Seeds ist zulässig, da die Experimente nicht die Häufigkeit einer Verletzung unter beliebigen Bedingungen messen, sondern zeigen sollen, dass \gls{lps} die Delivery-Garantien unter bestimmten Fehlerbedingungen verletzt. Der Seed legt diese Fehlerbedingungen fest und macht sie reproduzierbar.
@@ -224,38 +224,38 @@ Jedes Experiment wird somit 59-mal wiederholt. Erfüllen alle 59 Durchläufe das
 In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzung der \textit{Exactly-Once-Delivery}-Garantie in \gls{lps} provoziert. Konkret wird die \gls{tcp}-Verbindung zwischen \gls{lptwo} und dem Broker unterbrochen, während \gls{lptwo} eine Alarmmeldung weitergeleitet hat und auf die Antwort des \textit{\gls{srv}~2 PROXY} wartet. Dadurch wird die gleiche Alarmmeldung mehrfach verarbeitet, was zu einer Verletzung der \textit{Exactly-Once-Delivery} führt. Der Aufbau des Experiments entspricht Abbildung~\ref{fig:exp-setup}. Als Broker wird \textit{HiveMQ CE} in Version \textit{2025.5} verwendet. Die für das Experiment ausgewählten Parameter werden in Tabelle~\ref{tab:exp-lps-eod-config} dargestellt.
 
 \begin{table}[H]
-    \centering
-    \renewcommand{\arraystretch}{1.4}
-    \caption{Konfiguration des Experiments zur Verletzung der Exactly-Once-Delivery in \acrshort{lps}.}
-    \label{tab:exp-lps-eod-config}
-    \begin{tabular}{|l|l|l|}
-        \hline
-        \textbf{Parameter}                 & \textbf{Beschreibung}                          & \textbf{Wert} \\
-        \hline
-        $N_{\text{lp~1}}$                  & Anzahl \gls{lpone}-Instanzen                   & 1             \\
-        $N_{\text{lp~2}}$                  & Anzahl \gls{lptwo}-Instanzen                   & 1             \\
-        $N_{\text{device}}$                & Anzahl Alarmanlagen                            & 1             \\
-        $N_{\text{alarm}}$                 & Anzahl Alarmmeldungen pro Alarmanlage          & 1             \\
-        $T_{\text{idle}}$                  & Server-Idle-Zeit                               & 20\,s         \\
-        $T_{\text{min,tcp}}^{\text{mqtt}}$ & Minimale Verbindungsdauer im $P_{\text{mqtt}}$ & 0\,s          \\
-        $T_{\text{max,tcp}}^{\text{mqtt}}$ & Maximale Verbindungsdauer im $P_{\text{mqtt}}$ & 4\,s          \\
-        $L_{\text{min,down}}^{\text{srv}}$ & Minimale Downstream-Latenz im $P_{\text{srv}}$ & 0\,ms/Byte    \\
-        $L_{\text{max,down}}^{\text{srv}}$ & Maximale Downstream-Latenz im $P_{\text{srv}}$ & 27\,ms/Byte   \\
-        $S$                                & Seed des Pseudozufallszahlengenerators         & 6             \\
-        \hline
-    \end{tabular}
+	\centering
+	\renewcommand{\arraystretch}{1.4}
+	\caption{Konfiguration des Experiments zur Verletzung der Exactly-Once-Delivery in \acrshort{lps}.}
+	\label{tab:exp-lps-eod-config}
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Parameter}                 & \textbf{Beschreibung}                          & \textbf{Wert} \\
+		\hline
+		$N_{\text{lp~1}}$                  & Anzahl \gls{lpone}-Instanzen                   & 1             \\
+		$N_{\text{lp~2}}$                  & Anzahl \gls{lptwo}-Instanzen                   & 1             \\
+		$N_{\text{device}}$                & Anzahl Alarmanlagen                            & 1             \\
+		$N_{\text{alarm}}$                 & Anzahl Alarmmeldungen pro Alarmanlage          & 1             \\
+		$T_{\text{idle}}$                  & Server-Idle-Zeit                               & 20\,s         \\
+		$T_{\text{min,tcp}}^{\text{mqtt}}$ & Minimale Verbindungsdauer im $P_{\text{mqtt}}$ & 0\,s          \\
+		$T_{\text{max,tcp}}^{\text{mqtt}}$ & Maximale Verbindungsdauer im $P_{\text{mqtt}}$ & 4\,s          \\
+		$L_{\text{min,down}}^{\text{srv}}$ & Minimale Downstream-Latenz im $P_{\text{srv}}$ & 0\,ms/Byte    \\
+		$L_{\text{max,down}}^{\text{srv}}$ & Maximale Downstream-Latenz im $P_{\text{srv}}$ & 27\,ms/Byte   \\
+		$S$                                & Seed des Pseudozufallszahlengenerators         & 6             \\
+		\hline
+	\end{tabular}
 \end{table}
 
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-    \item $N_{\text{lp~1}}$, $N_{\text{lp~2}}$, $N_{\text{device}}$, $N_{\text{alarm}}$: Minimale Anzahl generierter Alarmmeldungen und beteiligter Komponenten, mit der eine Verletzung der \textit{Exactly-Once-Delivery} auftreten kann.
+	\item $N_{\text{lp~1}}$, $N_{\text{lp~2}}$, $N_{\text{device}}$, $N_{\text{alarm}}$: Minimale Anzahl generierter Alarmmeldungen und beteiligter Komponenten, mit der eine Verletzung der \textit{Exactly-Once-Delivery} auftreten kann.
 
-    \item $L_{\text{min,down}}^{\text{srv}}$, $L_{\text{max,down}}^{\text{srv}}$: Die Downstream-Latenz im $P_{\text{srv}}$ verzögert die Antwort des \textit{\gls{srv}~2 PROXY} an \gls{lptwo}. Bei einer Antwortgröße von 189\,Bytes und $L_{\text{max,down}}^{\text{srv}} = 27$\,ms/Byte ergibt sich eine maximale Verzögerung von $189 \cdot 27\,\text{ms} = 5{,}103$\,s.
+	\item $L_{\text{min,down}}^{\text{srv}}$, $L_{\text{max,down}}^{\text{srv}}$: Die Downstream-Latenz im $P_{\text{srv}}$ verzögert die Antwort des \textit{\gls{srv}~2 PROXY} an \gls{lptwo}. Bei einer Antwortgröße von 189\,Bytes und $L_{\text{max,down}}^{\text{srv}} = 27$\,ms/Byte ergibt sich eine maximale Verzögerung von $189 \cdot 27\,\text{ms} = 5{,}103$\,s.
 
-    \item $T_{\text{min,tcp}}^{\text{mqtt}}$, $T_{\text{max,tcp}}^{\text{mqtt}}$: Die maximale Verbindungsdauer im $P_{\text{mqtt}}$ liegt mit 4\,s unter der maximalen Verzögerung von 5{,}103\,s. Dadurch kann die Verbindung zum Broker getrennt werden, während \gls{lptwo} auf die Antwort wartet. Dabei stellen $L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{max,tcp}}^{\text{mqtt}}$ lediglich Obergrenzen dar. Die tatsächliche Latenz sowie die tatsächliche Verbindungsdauer werden jeweils zufällig zwischen dem entsprechenden Minimalwert (jeweils 0) und dem entsprechenden Maximalwert bestimmt. Wären die Werte fest, also $L_{\text{min,down}}^{\text{srv}} = L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{min,tcp}}^{\text{mqtt}} = T_{\text{max,tcp}}^{\text{mqtt}}$ (also genau 5{,}103\,s Verzögerung und 4\,s Verbindung), würde jede Verbindung zum Broker getrennt, bevor die Antwort bei \gls{lptwo} ankommt, sodass \gls{lptwo} die Alarmmeldung nie bestätigen könnte. Der Broker würde sie daher endlos erneut zustellen und das Experiment würde nicht terminieren. Durch die Zufälligkeit kommt die Antwort hingegen irgendwann innerhalb der Verbindungsdauer an, die Alarmmeldung wird bestätigt und das Experiment anschließend beendet.
+	\item $T_{\text{min,tcp}}^{\text{mqtt}}$, $T_{\text{max,tcp}}^{\text{mqtt}}$: Die maximale Verbindungsdauer im $P_{\text{mqtt}}$ liegt mit 4\,s unter der maximalen Verzögerung von 5{,}103\,s. Dadurch kann die Verbindung zum Broker getrennt werden, während \gls{lptwo} auf die Antwort wartet. Dabei stellen $L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{max,tcp}}^{\text{mqtt}}$ lediglich Obergrenzen dar. Die tatsächliche Latenz sowie die tatsächliche Verbindungsdauer werden jeweils zufällig zwischen dem entsprechenden Minimalwert (jeweils 0) und dem entsprechenden Maximalwert bestimmt. Wären die Werte fest, also $L_{\text{min,down}}^{\text{srv}} = L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{min,tcp}}^{\text{mqtt}} = T_{\text{max,tcp}}^{\text{mqtt}}$ (also genau 5{,}103\,s Verzögerung und 4\,s Verbindung), würde jede Verbindung zum Broker getrennt, bevor die Antwort bei \gls{lptwo} ankommt, sodass \gls{lptwo} die Alarmmeldung nie bestätigen könnte. Der Broker würde sie daher endlos erneut zustellen und das Experiment würde nicht terminieren. Durch die Zufälligkeit kommt die Antwort hingegen irgendwann innerhalb der Verbindungsdauer an, die Alarmmeldung wird bestätigt und das Experiment anschließend beendet.
 
-    \item $S$: Mit dem Seed $S = 6$ tritt die Verletzung konsistent auf (siehe Abschnitt~\ref{sub-sub:lps-methodik}).
+	\item $S$: Mit dem Seed $S = 6$ tritt die Verletzung konsistent auf (siehe Abschnitt~\ref{sub-sub:lps-methodik}).
 \end{itemize}
 
 Ein Durchlauf gilt als erfolgreich, wenn mindestens eine Alarmmeldung mehrfach beim \textit{Server-Simulator} ankommt, also $N_{\text{dup}} > 0$.
@@ -263,30 +263,30 @@ Ein Durchlauf gilt als erfolgreich, wenn mindestens eine Alarmmeldung mehrfach b
 \paragraph{Ergebnisse} Die Ergebnisse der 59 Durchläufe werden in Tabelle~\ref{tab:exp-lps-eod-results} zusammengefasst.
 
 \begin{table}[H]
-    \centering
-    \caption{Ergebnisse des Experiments zur Verletzung der Exactly-Once-Delivery in \acrshort{lps}.}
-    \label{tab:exp-lps-eod-results}
-    \begin{tabular}{|l|l|l|l|}
-        \hline
-        \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
-        \hline
-        $N_{\text{sent}}$     & 1                           & 59                     & 100{,}0\,\%   \\
-        $N_{\text{received}}$ & 3                           & 177                    & 100{,}0\,\%   \\
-        $N_{\text{unique}}$   & 1                           & 59                     & 33{,}3\,\%    \\
-        $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
-        $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-        $N_{\text{dup}}$      & 2                           & 118                    & 66{,}7\,\%    \\
-        \hline
-    \end{tabular}
+	\centering
+	\caption{Ergebnisse des Experiments zur Verletzung der Exactly-Once-Delivery in \acrshort{lps}.}
+	\label{tab:exp-lps-eod-results}
+	\begin{tabular}{|l|l|l|l|}
+		\hline
+		\textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
+		\hline
+		$N_{\text{sent}}$     & 1                           & 59                     & 100{,}0\,\%   \\
+		$N_{\text{received}}$ & 3                           & 177                    & 100{,}0\,\%   \\
+		$N_{\text{unique}}$   & 1                           & 59                     & 33{,}3\,\%    \\
+		$N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
+		$N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+		$N_{\text{dup}}$      & 2                           & 118                    & 66{,}7\,\%    \\
+		\hline
+	\end{tabular}
 \end{table}
 
 In allen 59 Durchläufen wurde die \textit{Exactly-Once-Delivery} verletzt. Eine mög\-li\-che Erklärung ist: \gls{lptwo} konsumiert eine Alarmmeldung aus dem Broker und leitet sie an den \textit{\gls{srv}~2 PROXY} weiter. Während die Alarmmeldung verarbeitet wird, wird die Verbindung zwischen \gls{lptwo} und dem Broker getrennt. \gls{lptwo} baut die Verbindung erneut auf, konsumiert die gleiche Alarmmeldung erneut und leitet sie weiter. Dadurch wird die gleiche Alarmmeldung mehrfach verarbeitet. Jedes Duplikat entspricht somit einem Verarbeitungsversuch, bei dem die Verbindung vor Abschluss der Verarbeitung getrennt wurde. Erst wenn die Verarbeitung innerhalb der Verbindungsdauer abgeschlossen wird, bestätigt \gls{lptwo} die Alarmmeldung und der Broker stellt sie nicht erneut zu. Abbildung~\ref{fig:lps-exactly-once-delivery-violation-sequence} veranschaulicht diese Erklärung als Sequenzdiagramm. Da in allen 59 Durchläufen das Erfolgskriterium erfüllt wurde, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein Durchlauf mit dem Seed $S = 6$ die Verletzung der \textit{Exactly-Once-Delivery} mit einer Wahrscheinlichkeit von mindestens 95\,\% reproduziert. Damit ist gezeigt, dass \gls{lps} beim Auftreten von Netzwerkfehlern zwischen \gls{lptwo} und dem Broker die \textit{Exactly-Once-Delivery}-Garantie verletzt.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.479\textwidth]{./img/mermaid/lps_exactly_once_delivery_violation_sequence.pdf}
-    \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Exactly-Once-Delivery in \acrshort{lps}.}
-    \label{fig:lps-exactly-once-delivery-violation-sequence}
+	\centering
+	\includegraphics[width=0.479\textwidth]{./img/mermaid/lps_exactly_once_delivery_violation_sequence.pdf}
+	\caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Exactly-Once-Delivery in \acrshort{lps}.}
+	\label{fig:lps-exactly-once-delivery-violation-sequence}
 \end{figure}
 
 \subsubsection{Verletzung der In-Order-Delivery}
@@ -295,38 +295,38 @@ In allen 59 Durchläufen wurde die \textit{Exactly-Once-Delivery} verletzt. Eine
 In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzung der \textit{In-Order-Delivery}-Garantie in \gls{lps} provoziert. Es wird gezeigt, dass die parallele Verarbeitung von Alarmmeldungen durch mehrere \gls{lptwo}-Instanzen zu einer Verletzung der \textit{In-Order-Delivery} führen kann. Der Aufbau des Experiments entspricht Abbildung~\ref{fig:exp-setup}. Ursprünglich wurde \textit{HiveMQ CE} in Version \textit{2025.5} als Message Broker verwendet. Jedoch ist das Experiment aufgrund eines ungelösten Bugs~\citep{hivemq_issue_558} in \textit{HiveMQ CE} gescheitert. Der Bug verhindert die parallele Verarbeitung von \gls{mqtt}-Nachrichten durch mehrere Consumer einer einzelnen \textit{Shared Subscription}. Dieser Bug scheint auch in älteren Versionen von \textit{HiveMQ CE} zu existieren~\citep{hivemq_issue_558}. Daher wurde auf \textit{HiveMQ CE} verzichtet und stattdessen \textit{Mosquitto}~\citep{mosquitto} in Version \textit{2.1.2} als Message Broker verwendet. Die Verwendung eines anderen Brokers ist dadurch gerechtfertigt, dass \gls{lps} standardisierte \gls{mqtt}~v5-Features verwendet, die von allen \gls{mqtt}~v5-kompatiblen Brokern unterstützt werden. Außerdem ist dieses Experiment so aufgebaut, dass weder fehlerhafte Verarbeitungen der Alarmmeldungen noch Netzwerkfehler auftreten. Dadurch publizieren die \gls{lptwo}-Instanzen keine Alarmmeldungen auf das Retry-Topic, und das \textit{HiveMQ}-spezifische Plugin des Retry-Mechanismus kommt nicht zum Einsatz. Die für das Experiment ausgewählten Parameter werden in Tabelle~\ref{tab:exp-lps-iod-config} dargestellt.
 
 \begin{table}[H]
-    \centering
-    \renewcommand{\arraystretch}{1.4}
-    \caption{Konfiguration des Experiments zur Verletzung der In-Order-Delivery in \acrshort{lps}.}
-    \label{tab:exp-lps-iod-config}
-    \begin{tabular}{|l|l|l|}
-        \hline
-        \textbf{Parameter}               & \textbf{Beschreibung}                        & \textbf{Wert} \\
-        \hline
-        $N_{\text{lp~1}}$                & Anzahl \gls{lpone}-Instanzen                 & 1             \\
-        $N_{\text{lp~2}}$                & Anzahl \gls{lptwo}-Instanzen                 & 2             \\
-        $N_{\text{device}}$              & Anzahl Alarmanlagen                          & 1             \\
-        $N_{\text{alarm}}$               & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
-        $I_{\text{alarm}}$               & Sendeintervall pro Alarmanlage               & 1\,s          \\
-        $T_{\text{idle}}$                & Server-Idle-Zeit                             & 20\,s         \\
-        $T_{\text{tcp}}^{\text{mqtt}}$   & Verbindungsdauer im $P_{\text{mqtt}}$        & $\infty$      \\
-        $L_{\text{min,up}}^{\text{srv}}$ & Minimale Upstream-Latenz im $P_{\text{srv}}$ & 0\,ms/Byte    \\
-        $L_{\text{max,up}}^{\text{srv}}$ & Maximale Upstream-Latenz im $P_{\text{srv}}$ & 10\,ms/Byte   \\
-        $S$                              & Seed des Pseudozufallszahlengenerators       & 6             \\
-        \hline
-    \end{tabular}
+	\centering
+	\renewcommand{\arraystretch}{1.4}
+	\caption{Konfiguration des Experiments zur Verletzung der In-Order-Delivery in \acrshort{lps}.}
+	\label{tab:exp-lps-iod-config}
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Parameter}               & \textbf{Beschreibung}                        & \textbf{Wert} \\
+		\hline
+		$N_{\text{lp~1}}$                & Anzahl \gls{lpone}-Instanzen                 & 1             \\
+		$N_{\text{lp~2}}$                & Anzahl \gls{lptwo}-Instanzen                 & 2             \\
+		$N_{\text{device}}$              & Anzahl Alarmanlagen                          & 1             \\
+		$N_{\text{alarm}}$               & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
+		$I_{\text{alarm}}$               & Sendeintervall pro Alarmanlage               & 1\,s          \\
+		$T_{\text{idle}}$                & Server-Idle-Zeit                             & 20\,s         \\
+		$T_{\text{tcp}}^{\text{mqtt}}$   & Verbindungsdauer im $P_{\text{mqtt}}$        & $\infty$      \\
+		$L_{\text{min,up}}^{\text{srv}}$ & Minimale Upstream-Latenz im $P_{\text{srv}}$ & 0\,ms/Byte    \\
+		$L_{\text{max,up}}^{\text{srv}}$ & Maximale Upstream-Latenz im $P_{\text{srv}}$ & 10\,ms/Byte   \\
+		$S$                              & Seed des Pseudozufallszahlengenerators       & 6             \\
+		\hline
+	\end{tabular}
 \end{table}
 
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-    \item $N_{\text{lp~1}}$, $N_{\text{lp~2}}$, $N_{\text{device}}$, $N_{\text{alarm}}$: Minimale Anzahl generierter Alarmmeldungen und beteiligter Komponenten, mit der eine Verletzung der \textit{In-Order-Delivery} auftreten kann.
+	\item $N_{\text{lp~1}}$, $N_{\text{lp~2}}$, $N_{\text{device}}$, $N_{\text{alarm}}$: Minimale Anzahl generierter Alarmmeldungen und beteiligter Komponenten, mit der eine Verletzung der \textit{In-Order-Delivery} auftreten kann.
 
-    \item $I_{\text{alarm}}$, $L_{\text{min,up}}^{\text{srv}}$, $L_{\text{max,up}}^{\text{srv}}$: Diese Parameter werden so gewählt, dass verschiedene Alarmmeldungen parallel durch mehrere \gls{lptwo}-Instanzen verarbeitet werden und die Wahrscheinlichkeit erhöht wird, dass sie in der falschen Reihenfolge beim \textit{Server-Simulator} ankommen. Die Upstream-Latenz im $P_{\text{srv}}$ verzögert dabei die Weiterleitung einer Alarmmeldung von \gls{lptwo} an den \textit{\gls{srv}~2 PROXY}. Bei einer Requestgröße von 411\,Bytes und $L_{\text{max,up}}^{\text{srv}} = 10$\,ms/Byte ergibt sich eine maximale Verzögerung von $411 \cdot 10\,\text{ms} = 4{,}11$\,s. Da die tatsächliche Latenz zufällig zwischen $L_{\text{min,up}}^{\text{srv}} = 0$\,ms/Byte und $L_{\text{max,up}}^{\text{srv}}$ bestimmt wird und die maximale Verzögerung deutlich größer als $I_{\text{alarm}}$ ist, kann die zweite Alarmmeldung vor der ersten beim \textit{Server-Simulator} ankommen, obwohl sie 1\,s später gesendet wurde. Bei einer festen Latenz ($L_{\text{min,up}}^{\text{srv}} = L_{\text{max,up}}^{\text{srv}}$) wäre dies nicht möglich, da beide Alarmmeldungen gleich lange verzögert würden und somit in der Sendereihenfolge beim \textit{Server-Simulator} ankämen.
+	\item $I_{\text{alarm}}$, $L_{\text{min,up}}^{\text{srv}}$, $L_{\text{max,up}}^{\text{srv}}$: Diese Parameter werden so gewählt, dass verschiedene Alarmmeldungen parallel durch mehrere \gls{lptwo}-Instanzen verarbeitet werden und die Wahrscheinlichkeit erhöht wird, dass sie in der falschen Reihenfolge beim \textit{Server-Simulator} ankommen. Die Upstream-Latenz im $P_{\text{srv}}$ verzögert dabei die Weiterleitung einer Alarmmeldung von \gls{lptwo} an den \textit{\gls{srv}~2 PROXY}. Bei einer Requestgröße von 411\,Bytes und $L_{\text{max,up}}^{\text{srv}} = 10$\,ms/Byte ergibt sich eine maximale Verzögerung von $411 \cdot 10\,\text{ms} = 4{,}11$\,s. Da die tatsächliche Latenz zufällig zwischen $L_{\text{min,up}}^{\text{srv}} = 0$\,ms/Byte und $L_{\text{max,up}}^{\text{srv}}$ bestimmt wird und die maximale Verzögerung deutlich größer als $I_{\text{alarm}}$ ist, kann die zweite Alarmmeldung vor der ersten beim \textit{Server-Simulator} ankommen, obwohl sie 1\,s später gesendet wurde. Bei einer festen Latenz ($L_{\text{min,up}}^{\text{srv}} = L_{\text{max,up}}^{\text{srv}}$) wäre dies nicht möglich, da beide Alarmmeldungen gleich lange verzögert würden und somit in der Sendereihenfolge beim \textit{Server-Simulator} ankämen.
 
-    \item $T_{\text{tcp}}^{\text{mqtt}}$: Da in diesem Experiment keine Netzwerkfehler auftreten sollen, bleiben die Verbindungen im $P_{\text{mqtt}}$ unbegrenzt bestehen.
+	\item $T_{\text{tcp}}^{\text{mqtt}}$: Da in diesem Experiment keine Netzwerkfehler auftreten sollen, bleiben die Verbindungen im $P_{\text{mqtt}}$ unbegrenzt bestehen.
 
-    \item $S$: Mit dem Seed $S = 6$ tritt die Verletzung konsistent auf (siehe Abschnitt~\ref{sub-sub:lps-methodik}).
+	\item $S$: Mit dem Seed $S = 6$ tritt die Verletzung konsistent auf (siehe Abschnitt~\ref{sub-sub:lps-methodik}).
 \end{itemize}
 
 Ein Durchlauf gilt als erfolgreich, wenn mindestens eine Alarmmeldung als \textit{Außer Reihenfolge} klassifiziert wird, also $N_{\text{ooo}} > 0$.
@@ -334,30 +334,30 @@ Ein Durchlauf gilt als erfolgreich, wenn mindestens eine Alarmmeldung als \texti
 \paragraph{Ergebnisse} Die Ergebnisse der 59 Durchläufe werden in Tabelle~\ref{tab:exp-lps-iod-results} zusammengefasst.
 
 \begin{table}[H]
-    \centering
-    \caption{Ergebnisse des Experiments zur Verletzung der In-Order-Delivery in \acrshort{lps}.}
-    \label{tab:exp-lps-iod-results}
-    \begin{tabular}{|l|l|l|l|}
-        \hline
-        \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
-        \hline
-        $N_{\text{sent}}$     & 2                           & 118                    & 100{,}0\,\%   \\
-        $N_{\text{received}}$ & 2                           & 118                    & 100{,}0\,\%   \\
-        $N_{\text{unique}}$   & 2                           & 118                    & 100{,}0\,\%   \\
-        $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
-        $N_{\text{ooo}}$      & 1                           & 59                     & 50{,}0\,\%    \\
-        $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-        \hline
-    \end{tabular}
+	\centering
+	\caption{Ergebnisse des Experiments zur Verletzung der In-Order-Delivery in \acrshort{lps}.}
+	\label{tab:exp-lps-iod-results}
+	\begin{tabular}{|l|l|l|l|}
+		\hline
+		\textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
+		\hline
+		$N_{\text{sent}}$     & 2                           & 118                    & 100{,}0\,\%   \\
+		$N_{\text{received}}$ & 2                           & 118                    & 100{,}0\,\%   \\
+		$N_{\text{unique}}$   & 2                           & 118                    & 100{,}0\,\%   \\
+		$N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
+		$N_{\text{ooo}}$      & 1                           & 59                     & 50{,}0\,\%    \\
+		$N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+		\hline
+	\end{tabular}
 \end{table}
 
 In allen 59 Durchläufen wurde die \textit{In-Order-Delivery} verletzt. Eine mögliche Erklärung ist, dass aufgrund der \textit{Shared Subscriptions} mehrere \gls{lptwo}-Instanzen Alarmmeldungen parallel verarbeiten. Bei hohen Netzwerklatenzen kann dies dazu führen, dass Alarmmeldungen in der falschen Reihenfolge beim letzten Service der Verarbeitungskette ankommen. In diesem Experiment ist der letzte Service der Verarbeitungskette der \textit{Server-Simulator}. Im realen \gls{marc}-System ist es \gls{srv}~3, der die Alarmmeldungen in der Datenbank persistiert. Abbildung~\ref{fig:lps-in-order-delivery-violation-sequence} veranschaulicht diese Erklärung als Sequenzdiagramm. Da in allen 59 Durchläufen das Erfolgskriterium erfüllt wurde, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein Durchlauf mit dem Seed $S = 6$ die Verletzung der \textit{In-Order-Delivery} mit einer Wahrscheinlichkeit von mindestens 95\,\% reproduziert. Damit ist gezeigt, dass \gls{lps} bei hohen Netzwerklatenzen durch die parallele Verarbeitung von Alarmmeldungen durch mehrere \gls{lptwo}-Instanzen die \textit{In-Order-Delivery}-Garantie verletzt.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{./img/mermaid/lps_in_order_delivery_violation_sequence.pdf}
-    \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen zur Verletzung der In-Order-Delivery in \acrshort{lps}.}
-    \label{fig:lps-in-order-delivery-violation-sequence}
+	\centering
+	\includegraphics[width=\textwidth]{./img/mermaid/lps_in_order_delivery_violation_sequence.pdf}
+	\caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen zur Verletzung der In-Order-Delivery in \acrshort{lps}.}
+	\label{fig:lps-in-order-delivery-violation-sequence}
 \end{figure}
 
 \subsubsection{Ausführung der Experimente}
@@ -371,7 +371,7 @@ Alle Experimente in diesem Abschnitt wurden mithilfe von \textit{Docker Compose}
 Die Experimente im vorherigen Abschnitt~\ref{sub-sec:lps-experimente} zeigen, dass \gls{lps} die Delivery-Garantien unter bestimmten Bedingungen verletzt. Beim Auftreten von Netzwerkfehlern zwischen \gls{lptwo} und dem Broker wird die \textit{Exactly-Once-Delivery}-Garantie verletzt, und bei hohen Netzwerklatenzen wird die \textit{In-Order-Delivery}-Garantie verletzt, wenn mehrere \gls{lptwo}-Instanzen Alarmmeldungen parallel verarbeiten. Eine weitere Limitation von \gls{lps} hat sich beim Durchführen der Experimente indirekt gezeigt. Das entwickelte Plugin des Retry-Mechanismus ist vendor-spezifisch und kann nicht auf andere Broker übertragen werden. Dies führt zu einer Abhängigkeit von einem bestimmten Broker (\textit{Vendor-Lock-in}\footnote{Vendor-Lock-in bezeichnet die starke technische Abhängigkeit von einem konkreten Anbieter oder Produkt.}), was die Portabilität und Flexibilität des Systems einschränkt. Zusammenfassend ergeben sich folgende Limitationen von \gls{lps}:
 
 \begin{itemize}
-    \item Verletzung der \textit{Exactly-Once-Delivery}-Garantie.
-    \item Verletzung der \textit{In-Order-Delivery}-Garantie.
-    \item Vendor-Lock-in durch das vendor-spezifische Plugin.
+	\item Verletzung der \textit{Exactly-Once-Delivery}-Garantie.
+	\item Verletzung der \textit{In-Order-Delivery}-Garantie.
+	\item Vendor-Lock-in durch das vendor-spezifische Plugin.
 \end{itemize}

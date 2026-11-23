@@ -43,7 +43,7 @@ Um die \textit{In-Order-Delivery} zu garantieren, sollen mithilfe von \gls{amqp}
 
     \item \textbf{A~3}: Alarmmeldungen pro Alarmanlage sollen immer sequentiell von einer einzigen \gls{alptwo}-Instanz verarbeitet werden: Parallele Verarbeitung von Alarmmeldungen einer einzelnen Alarmanlage soll unterbunden werden. Jedoch ist die parallele Verarbeitung von Alarmmeldungen verschiedener Alarmanlagen weiterhin erlaubt.
 
-    \item \textbf{A~4}: Netzwerkfehler und fehlgeschlagene Verarbeitungen in \gls{alptwo}-Instanzen sollen nicht zu einem Verlust führen: Alarmmeldungen, die von einer \gls{alptwo}-Instanz nicht verarbeitet werden können, sollen erneut zugestellt werden, bis sie erfolgreich verarbeitet wurden. Dabei soll die Reihenfolge der Alarmmeldungen pro Alarmanlage beibehalten werden.
+    \item \textbf{A~4}: Netzwerkfehler und fehlgeschlagene Verarbeitungen in \gls{alptwo}-In\-stan\-zen sollen nicht zu einem Verlust führen: Alarmmeldungen, die von einer \gls{alptwo}-Instanz nicht verarbeitet werden können, sollen erneut zugestellt werden, bis sie erfolgreich verarbeitet wurden. Dabei soll die Reihenfolge der Alarmmeldungen pro Alarmanlage beibehalten werden.
 \end{itemize}
 
 Die Erfüllung dieser Anforderungen garantiert die \textit{In-Order-Delivery} pro Alarmanlage.
