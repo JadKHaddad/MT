@@ -24,15 +24,15 @@ Die folgenden Befehle laden alle benötigten Docker-Images.
 docker pull rabbitmq:4.3.6-management
 # Mosquitto-Broker
 docker pull eclipse-mosquitto:2.1.2-alpine
-# Simulation-Runner und Kernkomponenten von ALPS
-# (ALP I, ALP II, Alarmanlagen-Simulator, Server-Simulator, Validator, TCP-Proxy)
+# Simulation-Runner, Kernkomponenten von ALPS (ALP I, ALP II)
+# und Hilfsservices (Alarmanlagen-Simulator, Server-Simulator, Validator, TCP-Proxy)
 docker pull jadkhaddad/lps-rs:0.1.0
 # ALP Dedup
 docker pull jadkhaddad/lps-gleam:0.1.0
 # Auswertungsskripte zur Plot-Erzeugung
 docker pull jadkhaddad/lps-scripts:0.1.0
-# Kernkomponenten von LPS
-# (SRV I PROXY, SRV II PROXY, LP I, LP II)
+# Kernkomponenten von LPS (LP I, LP II) und Vertreter der Legacy-Services
+# (SRV 1 PROXY, SRV 2 PROXY)
 docker pull jadkhaddad/lps-mqtt-python:0.1.0
 # HiveMQ-Broker mit den verwendeten Plugins
 docker pull jadkhaddad/lps-mqtt-hivemq:0.1.0
@@ -42,7 +42,7 @@ docker pull jadkhaddad/lps-mqtt-hivemq:0.1.0
 
 \subsection{Konfigurationsdateien anlegen}
 
-Vor dem Start der Experimente werden die benötigten Konfigurationen als \gls{yaml}-Dateien angelegt. Diese Dateien enthalten die Parameter für Last, Fehlerprofile und Laufzeit der Experimente. Eine Konfigurationsdatei besteht aus einem allgemeinen Teil und einem szenariospezifischen Teil, entweder für \gls{alps} oder für \gls{lps}. Parameter, die mit \texttt{(optional)} gekennzeichnet sind, können weggelassen werden. Fehlerraten werden als Wahrscheinlichkeit zwischen \texttt{0} und \texttt{1} angegeben. Zeitwerte werden als Dauerangaben angegeben, z.\,B.~\texttt{500ms} oder \texttt{10s}.
+Vor dem Start der Experimente werden die benötigten Konfigurationen als \gls{yaml}-Dateien angelegt. Diese Dateien enthalten die Parameter für Last, Fehlerbedingungen und Laufzeit der Experimente. Eine Konfigurationsdatei besteht aus einem allgemeinen Teil und einem szenariospezifischen Teil, entweder für \gls{alps} oder für \gls{lps}. Parameter, die mit \texttt{(optional)} gekennzeichnet sind, können weggelassen werden. Fehlerraten werden als Wahrscheinlichkeit zwischen \texttt{0} und \texttt{1} angegeben. Zeitwerte werden als Dauerangaben angegeben, z.\,B.~\texttt{500ms} oder \texttt{10s}.
 
 \begin{yamlcode}[title={Allgemeiner Teil}]
 # Zielverzeichnis der erzeugten Simulationsartefakte
@@ -50,18 +50,18 @@ simulation_dir: "simulation"
 # Externes Docker-Netzwerk, in dem die Services gestartet werden
 simulation_docker_network: "lps-simulation-net"
 
-# Image für Simulation-Runner und Kernkomponenten von ALPS
+# Image für Simulation-Runner, Kernkomponenten von ALPS und Hilfsservices
 lps_rust_image: "jadkhaddad/lps-rs:0.1.0"
 # Image für die Auswertungsskripte
 lps_scripts_image: "jadkhaddad/lps-scripts:0.1.0"
 # Image für ALP Dedup
 lps_gleam_image: "jadkhaddad/lps-gleam:0.1.0"
-# Image für die die Kernkomponenten von LPS
+# Image für die Kernkomponenten von LPS
 lps_mqtt_python_image: "jadkhaddad/lps-mqtt-python:0.1.0"
 # Image für den HiveMQ-Broker
 lps_mqtt_hivemq_image: "jadkhaddad/lps-mqtt-hivemq:0.1.0"
 
-# (optional) Zufallsgenerator-Seed
+# (optional) Seed des Pseudozufallszahlengenerators
 seed: 1
 \end{yamlcode}
 
@@ -72,11 +72,11 @@ seed: 1
 devices:
   # Anzahl simulierter Alarmanlagen
   devices_count: 100
-  # Maximales Intervall zwischen zwei Meldungen pro Alarmanlage
+  # Maximales Intervall zwischen zwei Alarmmeldungen pro Alarmanlage
   max_event_interval: 500ms
-  # (optional) Minimales Intervall zwischen zwei Meldungen
+  # (optional) Minimales Intervall zwischen zwei Alarmmeldungen
   min_event_interval: 100ms
-  # Maximale Anzahl erzeugter Meldungen pro Alarmanlage
+  # Maximale Anzahl erzeugter Alarmmeldungen pro Alarmanlage
   max_events: 100
   # Wartezeit bis zum erneuten Sendeversuch nach einem Fehler
   retry_duration: 500ms
@@ -97,16 +97,16 @@ server:
   server_count: 3
   # (optional) Aktiviert ALP Dedup
   deduplication: true
-  # (optional) Server beendet sich nach dieser Leerlaufzeit, wenn keine Anfragen mehr eintreffen
+  # (optional) Server beendet sich nach dieser Server-Idle-Zeit, wenn keine Requests mehr eintreffen
   shutdown_after_idle_duration: 30s
 
   # Zufallsbasiertes Verhalten (ignoriert bei use_gs_prod_workload: true)
 
-  # Wahrscheinlichkeit für Fehlerantworten
+  # Wahrscheinlichkeit für negative Antworten
   failure_rate: 0.1
-  # (optional) Maximale Verarbeitungszeit einer Anfrage
+  # (optional) Maximale Verarbeitungszeit eines Requests
   max_work_duration: 50ms
-  # (optional) Minimale Verarbeitungszeit einer Anfrage
+  # (optional) Minimale Verarbeitungszeit eines Requests
   min_work_duration: 10ms
   # (optional) Maximale zusätzliche Antwortverzögerung
   max_response_duration: 50ms
@@ -115,7 +115,7 @@ server:
 
   # (optional) Verarbeitungszeiten werden vom Vorhersagemodell bestimmt
   use_gs_prod_workload: false
-  # (optional) Hintergrundlast in Anfragen pro Sekunde
+  # (optional) Hintergrundlast in Requests pro Sekunde
   # (nur wirksam bei use_gs_prod_workload: true)
   background_load_per_second: 10.0
 \end{yamlcode}
@@ -125,7 +125,7 @@ server:
 \begin{yamlcode}[title={Allgemeiner Teil}]
 # Server-Simulator
 server:
-  # (optional) Fehlerproxy vor dem Server
+  # (optional) TCP-Proxy vor dem Server-Simulator
   tcp_proxy:
     # Adresse des Proxys
     socket_addr: 0.0.0.0:9000
@@ -164,7 +164,7 @@ amqp:
     consumers_count: 3
     # Wartezeit vor dem Reconnect nach einem Verbindungsabbruch
     reconnect_duration: 500ms
-    # (optional) Fehlerproxy zwischen ALP II und Broker
+    # (optional) TCP-Proxy zwischen ALP II und Broker
     amqp_proxy:
       socket_addr: "0.0.0.0:5673"
       connection:
@@ -176,7 +176,7 @@ amqp:
           min_upstream_latency: 10ms
           max_downstream_latency: 10ms
           min_downstream_latency: 10ms
-    # (optional) Fehlerproxy zwischen ALP II und Server
+    # (optional) TCP-Proxy zwischen ALP II und Server-Simulator
     server_proxy:
       socket_addr: "0.0.0.0:3001"
       connection:
@@ -202,7 +202,7 @@ mqtt:
   consumers:
     # Anzahl der LP II-Instanzen (mindestens 1)
     consumers_count: 3
-    # (optional) Fehlerproxy zwischen LP II und Broker
+    # (optional) TCP-Proxy zwischen LP II und Broker
     mqtt_proxy:
       socket_addr: "0.0.0.0:1884"
       connection:
@@ -250,7 +250,7 @@ docker run --rm -it \
 
 \subsection{Ergebnisse}
 
-Nach Abschluss eines Laufs befinden sich die erzeugten Ergebnisse im Verzeichnis  \texttt{\$(pwd)/<simulation\_dir>/mount}
+Nach Abschluss eines Durchlaufs befinden sich die erzeugten Ergebnisse im Verzeichnis  \texttt{\$(pwd)/<simulation\_dir>/mount}
 
 \newpage
 
