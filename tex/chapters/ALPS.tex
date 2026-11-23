@@ -264,10 +264,12 @@ In dieser Phase wird \gls{alps} unter realitätsnahen Bedingungen im Normalbetri
 
 \paragraph{Aufbau}
 
+% TODO: colors here in the picture. visit all pictures for colors
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{./img/drawio/exp_alps.pdf}
-    \caption{Architektur der realitätsnahen Experimente zur Einhaltung der Delivery-Garantien in \acrshort{alps} und die Kommunikationspfade der beteiligten Komponenten.}
+    \caption{Architektur der realitätsnahen Experimente zur Einhaltung der Delivery-Garantien in \acrshort{alps} und die Kommunikationspfade der beteiligten Komponenten. Gegenüber Abbildung~\ref{fig:exp-setup} neue Komponenten sind farbig hervorgehoben.}
     \label{fig:alps-exp-setup}
 \end{figure}
 
@@ -277,7 +279,7 @@ Die Komponenten kommunizieren über drei \textit{\gls{tcp}-Proxies}. Der $P_{\te
 
 \paragraph{Vorhersagemodell}
 
-Die Verarbeitungszeiten des Legacy-Systems werden mithilfe eines trainierten Vorhersagemodells nachgebildet, das nach dem \gls{rast}-Ansatz erstellt wurde~\citep{rast22, rast25}. Das Modell wurde mit Regressionsverfahren aus den Request-Logs des Legacy-Systems trainiert. Diese Logs enthalten für jeden Request den Typ sowie die Zeitstempel für Beginn und Ende der Verarbeitung. Aus mehreren Regressionsverfahren wurde das mit dem besten Score ausgewählt. Das Training selbst ist nicht Teil dieser Masterarbeit und wird in~\citep{rast22, rast25} im Detail beschrieben. Das Modell erwartet drei Eingabewerte:
+Die Verarbeitungszeiten von \gls{marc} werden mithilfe eines trainierten Vorhersagemodells nachgebildet, das nach dem \gls{rast}-Ansatz erstellt wurde~\citep{rast22, rast25}. Das Modell wurde mit Regressionsverfahren aus den Request-Logs von \gls{marc} trainiert. Diese Logs enthalten für jeden Request den Typ sowie die Zeitstempel für Beginn und Ende der Verarbeitung. Aus mehreren Regressionsverfahren wurde das mit dem besten Score ausgewählt. Das Training selbst ist nicht Teil dieser Masterarbeit und wird in~\citep{rast22, rast25} im Detail beschrieben. Das Modell erwartet drei Eingabewerte:
 
 \begin{itemize}
     \item \texttt{PR1N}: Anzahl paralleler Requests zu Beginn des Requests
@@ -285,7 +287,7 @@ Die Verarbeitungszeiten des Legacy-Systems werden mithilfe eines trainierten Vor
     \item \texttt{CMD}: Request-Typ
 \end{itemize}
 
-Die Ausgabe des Modells ist ein einzelner Zahlenwert: die vorhergesagte Verarbeitungszeit eines Requests. Sie beschreibt, wie lange das Legacy-System für den Request voraussichtlich braucht. Die Netzwerklatenz ist darin nicht enthalten. Um das Modell ins Experiment zu integrieren, wird der \textit{Server-Simulator} so modifiziert, dass die Parameter \texttt{PR1N} und \texttt{PR2N} für jeden Request berechnet werden. Da die Häufigkeit der Request-Typen nicht bekannt ist, wird \texttt{CMD} bei jedem eingehenden Request zufällig aus den 347 Request-Typen gezogen. Anschließend werden die drei Parameter dem Modell übergeben, und der \textit{Server-Simulator} verzögert seinen Response gemäß der vorhergesagten Verarbeitungszeit. Zusätzlich wird wie in~\citep{rast22} eine konstante Hintergrundlast von 70 Requests pro Sekunde erzeugt. Sie entspricht dem höchsten Wert im Lastmuster von \gls{marc}, stellt die Requests an die übrigen Serverprogramme dar und fließt ebenfalls in \texttt{PR1N} und \texttt{PR2N} des Vorhersagemodells ein.
+Die Ausgabe des Modells ist ein einzelner Zahlenwert: die vorhergesagte Verarbeitungszeit eines Requests. Sie beschreibt, wie lange \gls{marc} für den Request voraussichtlich braucht. Die Netzwerklatenz ist darin nicht enthalten. Um das Modell ins Experiment zu integrieren, wird der \textit{Server-Simulator} so modifiziert, dass die Parameter \texttt{PR1N} und \texttt{PR2N} für jeden Request berechnet werden. Der Request-Typ \texttt{CMD} unterscheidet 347 Typen von Requests. Da die Häufigkeit der Request-Typen nicht bekannt ist, wird \texttt{CMD} bei jedem eingehenden Request zufällig aus diesen 347 Request-Typen gezogen. Anschließend werden die drei Parameter dem Modell übergeben, und der \textit{Server-Simulator} verzögert seinen Response gemäß der vorhergesagten Verarbeitungszeit. Zusätzlich wird wie in~\citep{rast22} eine konstante Hintergrundlast von 70 Requests pro Sekunde erzeugt. Sie entspricht dem höchsten Wert im Lastmuster von \gls{marc}, stellt die Requests an die übrigen Serverprogramme dar und fließt ebenfalls in \texttt{PR1N} und \texttt{PR2N} des Vorhersagemodells ein.
 
 \paragraph{Parameter}
 
@@ -324,7 +326,7 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
     \item $N_{\text{queue}}$: Minimale Anzahl an Queues, bei der jede \gls{alptwo}-Instanz eine Queue aktiv verarbeiten kann.
 
-    \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: Laut~\citep{rast22} verarbeitet \gls{marc} etwa 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. Würde das Experiment diese Last in Echtzeit nachbilden, dauerte ein Durchlauf 24 Stunden, und 59 Wiederholungen bräuchten 59 Tage. Das ist im zeitlichen Rahmen dieser Masterarbeit nicht möglich. Stattdessen werden die Parameter so gewählt, dass ein Durchlauf etwa 5 Minuten dauert und alle 59 Durchläufe zusammen etwa 5 Stunden benötigen. Die Anzahl der Alarmanlagen 50 ist groß genug, damit die Alarmmeldungen über den \texttt{x-consistent-hash} Exchange auf alle drei Queues verteilt werden. Pro Alarmanlage werden 60 Alarmmeldungen gesendet, damit die Reihenfolge über aufeinanderfolgende Alarmmeldungen einer Alarmanlage geprüft wird. Die Alarmmeldungsrate im Experiment liegt damit deutlich über der des realen \gls{marc}-Systems, sodass die Komponenten von \gls{alps} stärker belastet werden als im Produktivbetrieb.
+    \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: Laut~\citep{rast22} verarbeitet \gls{marc} etwa 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. Würde das Experiment diese Last in Echtzeit nachbilden, dauerte ein Durchlauf 24 Stunden, und 59 Wiederholungen bräuchten 59 Tage. Das ist im zeitlichen Rahmen dieser Masterarbeit nicht möglich. Stattdessen werden die Parameter so gewählt, dass ein Durchlauf etwa 5 Minuten dauert und alle 59 Durchläufe zusammen etwa 5 Stunden benötigen. Die Anzahl der Alarmanlagen 50 ist groß genug, damit die Alarmmeldungen über den \texttt{x-consistent-hash} Exchange auf alle drei Queues verteilt werden. Pro Alarmanlage werden 60 Alarmmeldungen gesendet, damit die Reihenfolge über aufeinanderfolgende Alarmmeldungen einer Alarmanlage geprüft wird. Die Alarmmeldungsrate im Experiment liegt damit deutlich über der des realen \gls{marc}-Systems: Im Experiment werden bei 50 Alarmanlagen und einem Sendeintervall von 5\,s etwa 10 Alarmmeldungen pro Sekunde gesendet, im realen \gls{marc} durchschnittlich etwa $13.000 / 86.400\,\text{s} \approx 0{,}15$ Alarmmeldungen pro Sekunde. Dieses Vorgehen ist als Stresstest zulässig: Die Delivery-Garantien müssen unabhängig von der Last gelten, und eine höhere Rate erhöht die Wahrscheinlichkeit, dass sich Alarmmeldungen überlappend verarbeiten lassen und kritische Konstellationen auftreten.
 
     \item $R_{\text{bg}}$: Entspricht dem Wert aus~\citep{rast22}.
 
@@ -487,7 +489,7 @@ Entscheidend für die \textit{Exactly-Once-Delivery} ist jedoch nicht, wie oft e
     \end{tabular}
 \end{table}
 
-Die Fehlerbedingung $F$ trat bei 22{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Damit wurde genau die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt.
+Die Fehlerbedingung $F$ trat bei 22{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Der Anteil liegt damit nahe am angestrebten Wert von etwa 20\,\% (siehe Abschnitt~\ref{sub-sub:exp-alps-phase-4}), und im Mittel trat $F$ etwa $142.950 / 59 \approx 2.400$-mal pro Durchlauf auf. Das bedeutet, dass die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt wurde und die \textit{Exactly-Once-Delivery} in \gls{alps} trotzdem eingehalten wurde ($N_{\text{dup}} = 0$ in allen 59 Durchläufen).
 
 \subsubsection{Limitationen der Experimente}
 \label{sub-sub:exp-alps-limitationen}
@@ -497,7 +499,7 @@ Die folgenden Aspekte werden in den Experimenten nicht betrachtet:
 \begin{itemize}
     \item \textbf{\gls{amqp}-Broker}: Es wird ein einzelner Broker ohne Cluster verwendet, und es werden keine Broker-Ausfälle simuliert. Die Ausfallsicherheit liegt in der Verantwortung des Brokers, da gängige Broker wie \textit{RabbitMQ} Hochverfügbarkeit durch replizierte Queues bieten. Vorausgesetzt wird, dass der Broker akzeptierte Alarmmeldungen dauerhaft speichert und nicht verliert.
 
-    \item \textbf{\gls{alpone}}: Es werden weder \gls{alpone}-Ausfälle noch \gls{tcp}-Fehler vor \gls{alpone} oder zwischen \gls{alpone} und dem Broker simuliert. Netzwerkfehler oder hohe Latenzen auf dieser Strecke können weiterhin dazu führen, dass Alarmmeldungen in der falschen Reihenfolge im Broker landen (siehe Abbildung~\ref{fig:in-order-diagram} in Abschnitt~\ref{sec:design-smells}, wobei \gls{marc} durch \gls{alpone}, \textit{Datenbank} durch den Broker und \textit{Mitarbeiter} durch \gls{alptwo} ersetzt werden). Aus diesem Grund beschränkt sich die Einhaltung der \textit{In-Order-Delivery} nur noch auf den Pfad: \textit{Broker $\rightarrow$ \gls{alptwo} $\rightarrow$ \gls{srvt}}.
+    \item \textbf{\gls{alpone}}: Es werden weder \gls{alpone}-Ausfälle noch \gls{tcp}-Fehler vor \gls{alpone} oder zwischen \gls{alpone} und dem Broker simuliert. Netzwerkfehler oder hohe Latenzen auf dieser Strecke können weiterhin dazu führen, dass Alarmmeldungen in der falschen Reihenfolge im Broker landen (siehe Abbildung~\ref{fig:in-order-diagram} in Abschnitt~\ref{sec:design-smells}, wobei \gls{marc} durch \gls{alpone}, \textit{Datenbank} durch den Broker und \textit{Mitarbeitende} durch \gls{alptwo} ersetzt werden). Aus diesem Grund beschränkt sich die Einhaltung der \textit{In-Order-Delivery} nur noch auf den Pfad: \textit{Broker $\rightarrow$ \gls{alptwo} $\rightarrow$ \gls{srvt}}.
 
     \item \textbf{\gls{alptwo}}: Es werden keine \gls{alptwo}-Ausfälle simuliert. Die \gls{alptwo}-Instanzen sind zustandslos (\textit{stateless}) und werden bei einem Ausfall automatisch neu gestartet. Außerdem hat ein \gls{alptwo}-Ausfall auf die Delivery-Garantien dieselbe Wirkung wie ein \gls{tcp}-Fehler zwischen Broker und \gls{alptwo}: Der Broker erkennt den Verbindungsverlust und aktiviert einen anderen Consumer. Dieser Fall wird durch die \gls{tcp}-Fehler im Experiment bereits abgedeckt.
 
