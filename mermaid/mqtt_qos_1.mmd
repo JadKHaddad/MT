@@ -12,7 +12,7 @@ sequenceDiagram
         Note over Client,Broker: Netzwerkfehler
         Broker--xClient: Kein PUBACK
         Note over Client: Timeout
-        Client->>Broker: PUBLISH (erneute Übertagung)
+        Client->>Broker: PUBLISH (erneute Übertragung)
         Note over Broker: Duplikat
         Broker-->>Client: PUBACK
     end

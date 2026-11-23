@@ -14,7 +14,7 @@ sequenceDiagram
         Note over Client,Broker: Netzwerkfehler
         Client--xBroker: Kein PUBREL
         Note over Client: Timeout
-        Client->>Broker: PUBREL (erneute Übertagung)
+        Client->>Broker: PUBREL (erneute Übertragung)
         Note over Broker: Duplikat
         Broker-->>Client: PUBCOMP
     end
