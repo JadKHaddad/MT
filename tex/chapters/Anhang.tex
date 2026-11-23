@@ -122,6 +122,34 @@ server:
 
 \newpage
 
+\begin{yamlcode}[title={Allgemeiner Teil}]
+# Server-Simulator
+server:
+  # (optional) Fehlerproxy vor dem Server
+  tcp_proxy:
+    # Adresse des Proxys
+    socket_addr: 0.0.0.0:9000
+    connection:
+      # Wahrscheinlichkeit eines künstlichen Verbindungsfehlers
+      failure_rate: 0.1
+      # Maximale Dauer einer Verbindung vor erzwungener Trennung
+      max_up_duration: 10s
+      # (optional) Minimale Dauer einer Verbindung
+      min_up_duration: 1s
+      # (optional) Künstliche Latenz per Byte
+      latency:
+        # (optional) Maximale Verzögerung in Upstream-Richtung
+        max_upstream_latency: 10ms
+        # (optional) Minimale Verzögerung in Upstream-Richtung
+        min_upstream_latency: 10ms
+        # (optional) Maximale Verzögerung in Downstream-Richtung
+        max_downstream_latency: 10ms
+        # (optional) Minimale Verzögerung in Downstream-Richtung
+        min_downstream_latency: 10ms
+\end{yamlcode}
+
+\newpage
+
 \begin{yamlcode}[title={ALPS-spezifischer Teil}]
 amqp:
   # Anzahl der Broker-Queues
@@ -138,20 +166,28 @@ amqp:
     reconnect_duration: 500ms
     # (optional) Fehlerproxy zwischen ALP II und Broker
     amqp_proxy:
-      # Adresse des Fehlerproxys
       socket_addr: "0.0.0.0:5673"
-      # Wahrscheinlichkeit eines künstlichen Verbindungsfehlers
-      failure_rate: 0.1
-      # Maximale Dauer einer Verbindung vor erzwungener Trennung
-      max_up_duration: 10s
-      # (optional) Minimale Dauer einer Verbindung
-      min_up_duration: 1s
+      connection:
+        failure_rate: 0.1
+        max_up_duration: 10s
+        min_up_duration: 1s
+        latency:
+          max_upstream_latency: 10ms
+          min_upstream_latency: 10ms
+          max_downstream_latency: 10ms
+          min_downstream_latency: 10ms
     # (optional) Fehlerproxy zwischen ALP II und Server
     server_proxy:
       socket_addr: "0.0.0.0:3001"
-      failure_rate: 0.1
-      max_up_duration: 10s
-      min_up_duration: 1s
+      connection:
+        failure_rate: 0.1
+        max_up_duration: 10s
+        min_up_duration: 1s
+        latency:
+          max_upstream_latency: 10ms
+          min_upstream_latency: 10ms
+          max_downstream_latency: 10ms
+          min_downstream_latency: 10ms
 \end{yamlcode}
 
 \newpage
@@ -169,9 +205,15 @@ mqtt:
     # (optional) Fehlerproxy zwischen LP II und Broker
     mqtt_proxy:
       socket_addr: "0.0.0.0:1884"
-      failure_rate: 0.1
-      max_up_duration: 10s
-      min_up_duration: 1s
+      connection:
+        failure_rate: 0.1
+        max_up_duration: 10s
+        min_up_duration: 1s
+        latency:
+          max_upstream_latency: 10ms
+          min_upstream_latency: 10ms
+          max_downstream_latency: 10ms
+          min_downstream_latency: 10ms
 \end{yamlcode}
 
 \newpage
