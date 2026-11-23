@@ -84,7 +84,7 @@ Für die Implementierung von \gls{alps} wird \textit{RabbitMQ}~\citep{rabbitmq_b
     \item \texttt{prefetch\_count}
 \end{itemize}
 
-Die verwendeten Mechanismen sind zwar Erweiterungen von \textit{RabbitMQ}, lassen sich funktional jedoch auch auf andere gängige Message Broker wie beispielsweise \textit{Apache ActiveMQ Artemis} oder \textit{LavinMQ} übertragen, wie im Abschnitt~\ref{sub:grundlagen-amqp} erwähnt wurde. Als eine verteilte Datenbank in \gls{alpdedup} wird \textit{Mnesia} verwendet.
+Die verwendeten Mechanismen sind zwar Erweiterungen von \textit{RabbitMQ}, die verwendeten Konzepte sind jedoch nicht auf \textit{RabbitMQ} beschränkt. Andere Message Broker bieten vergleichbare Funktionen an. Dadurch wird ein starker \textit{Vendor-Lock-in} vermieden. So unterstützt beispielsweise \textit{LavinMQ}~\citep{lavinmq_broker} ebenfalls \textit{Consistent-Hash-Routing}~\citep{lavinmq_consistent_hash} und \textit{Single Active Consumer}~\citep{lavinmq_single_active_consumer}. \textit{Apache ActiveMQ Artemis}~\citep{artemis_broker} bietet mit \textit{Message Grouping}~\citep{artemis_message_grouping} eine vergleichbare Funktion zum \textit{Consistent-Hash-Routing} und setzt das Prinzip des \textit{Single Active Consumers} mit \textit{Exclusive Queues}~\citep{artemis_exclusive_queues} um.
 
 \subsection{Advanced Legacy Proxy I}
 \label{sub-sec:alpone}
