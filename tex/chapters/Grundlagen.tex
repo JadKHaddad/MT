@@ -9,6 +9,8 @@ Dieses Kapitel stellt die Konzepte vor, die für die Fallstudie in Kapitel~\ref{
 
 Design Smells bezeichnen strukturelle Probleme in einem Softwaresystem, die dessen Qualität verschlechtern~\citep{software_design_smell_detection}. Sie führen nicht unbedingt zu Fehlern beim Kompilieren oder Ausführen, ein System kann also trotz Design Smells korrekt funktionieren. Sie erschweren jedoch das Verstehen, Testen, Erweitern und Warten des Systems~\citep{software_design_smell_detection}. Sind beispielsweise Abhängigkeiten zwischen Komponenten schwer erkennbar, lässt sich keine Änderung sicher umsetzen, ohne unbeabsichtigt anderes Verhalten zu beeinflussen. Design Smells treten auf zwei Ebenen auf: auf Code-Ebene, etwa bei einer zu langen Methode, und auf Architektur-Ebene, wo sie mehrere Komponenten gleichzeitig betreffen. Letztere werden als \textit{Architektur-Smells} bezeichnet~\citep{refactoring_for_software_architecture_smells}. In dieser Masterarbeit sind mit Design Smells im Folgenden Architektur-Smells gemeint. In verteilten Legacy-Systemen entstehen sie häufig dadurch, wie Services miteinander kommunizieren und redundant betrieben werden. Beispiele dafür sind \textit{synchrone Request-Response-Ketten}~\citep{tiwari_unveiling_2024, liebig_2025_architectural_refactoring} und \textit{heterogene Redundanzmodi}~\citep{choudhary_rajesh_high_2025, liebig_2025_architectural_refactoring}. Da sich Architektur-Smells über die Kommunikationspfade, Abhängigkeiten und Betriebsmodi mehrerer Services verteilen, reicht ein lokales Code-Refactoring oft nicht aus. Stattdessen wird eine Veränderung auf Architekturebene notwendig.
 
+\newpage
+
 Zur Behebung von Design Smells dienen \textit{Refactoring} und \textit{Reengineering}. \textit{Refactoring} bezeichnet die Umstrukturierung von bestehendem Code, bei der die interne Struktur verbessert wird, ohne das externe Verhalten des Systems zu verändern~\citep{laguna_systematic_2013}. Neben diesem \textit{Code-Refactoring} gibt es \textit{Architectural Refactoring}, das statt einzelner Codeabschnitte die Architektur eines Systems betrifft, beispielsweise Kommunikationspfade oder Betriebsmodi. \textit{Reengineering} ist weiter gefasst und bezeichnet die Untersuchung und Veränderung eines bestehenden Systems, um es in eine neue Form zu überführen~\citep{laguna_systematic_2013}. Es ist besonders für Legacy-Systeme relevant, die weiterhin betrieben werden, deren Änderung aber ihre Funktion oder Verfügbarkeit beeinträchtigen kann~\citep{stevens_systems_1998}. In dieser Masterarbeit wird ein \textit{Architektur-Reengineering} betrachtet. Den Code des Legacy-Systems zu ändern ist hier nicht möglich, da die Codebasis kaum dokumentiert ist und die ursprünglichen Entwickler nicht mehr zur Verfügung stehen. Stattdessen wird die Art verändert, wie die Komponenten des Systems miteinander interagieren. Dadurch werden die Auswirkungen der Design Smells reduziert, ohne die bestehende Funktionalität zu verändern.
 
 \section{Asynchrone Messaging-Protokolle}
@@ -19,11 +21,17 @@ Asynchrone Messaging-Protokolle bilden die Grundlage sowohl des bestehenden \gls
 \subsection{Message Queuing Telemetry Transport}
 \label{sub:grundlagen-mqtt}
 
-\gls{mqtt} wurde ursprünglich für Umgebungen mit eingeschränkter Bandbreite und instabilen Netzwerken entwickelt~\citep{thangavel2014performance}. \gls{lps} verwendet die Protokollversion \gls{mqtt}~5.0 und stützt sich dabei auf die \gls{qos}-Stufe~2 und auf \textit{Shared Subscriptions}, die in diesem Abschnitt vorgestellt werden. \gls{mqtt}~5.0 erweitert frühere Versionen unter anderem um ein verbessertes Session-Management und detaillierte Fehlercodes~\citep{oasis2019mqtt, hivemq_mqtt5_essentials}. Die Kommunikation zwischen den Teilnehmern folgt einer \textit{Client-Broker-Architektur}: Clients kommunizieren nie direkt miteinander, sondern ausschließlich über den Broker und sind dadurch räumlich voneinander entkoppelt~\citep{eugster2003many, oasis2019mqtt}. Die Clients treten dabei als \textit{Publisher} oder \textit{Subscriber} auf. Das Routing der Nachrichten basiert auf einer hierarchischen \textit{Topic-Struktur}: Publisher senden Nachrichten an \textit{Topics}, und Subscriber abonnieren die \textit{Topics}, deren Nachrichten sie empfangen möchten~\citep{oasis2019mqtt, eugster2003many}. Ein zentrales Merkmal von \gls{mqtt} sind die \gls{qos}-Stufen, die das Zustellverhalten von Nachrichten festlegen~\citep{oasis2019mqtt}. Eine \gls{qos}-Stufe gilt dabei jeweils nur für die Übertragung zwischen zwei direkt verbundenen Teilnehmern, also zwischen Publisher und Broker bzw.~zwischen Broker und Subscriber. Die Spezifikation unterscheidet drei Stufen, die jeweils einen unterschiedlichen Kompromiss zwischen Protokoll-Overhead und Zuverlässigkeit darstellen.
+\gls{mqtt} wurde ursprünglich für Umgebungen mit eingeschränkter Bandbreite und instabilen Netzwerken entwickelt~\citep{thangavel2014performance}. \gls{lps} verwendet die Protokollversion \gls{mqtt}~5.0 und stützt sich dabei auf die \gls{qos}-Stufe~2 und auf \textit{Shared Subscriptions}, die in diesem Abschnitt vorgestellt werden. \gls{mqtt}~5.0 erweitert frühere Versionen unter anderem um ein verbessertes Session-Management und detaillierte Fehlercodes~\citep{oasis2019mqtt, hivemq_mqtt5_essentials}. Die Kommunikation zwischen den Teilnehmern folgt einer \textit{Client-Broker-Architektur}: Clients kommunizieren nie direkt miteinander, sondern ausschließlich über den Broker und sind dadurch räumlich voneinander entkoppelt~\citep{eugster2003many, oasis2019mqtt}. Die Clients treten dabei als \textit{Publisher} oder \textit{Subscriber} auf. Das Routing der Nachrichten basiert auf einer hierarchischen \textit{Topic-Struktur}: Publisher senden Nachrichten an \textit{Topics}, und Subscriber abonnieren die \textit{Topics}, deren Nachrichten sie empfangen möchten~\citep{oasis2019mqtt, eugster2003many}.
+
+\newpage
+
+Ein zentrales Merkmal von \gls{mqtt} sind die \gls{qos}-Stufen, die das Zustellverhalten von Nachrichten festlegen~\citep{oasis2019mqtt}. Eine \gls{qos}-Stufe gilt dabei jeweils nur für die Übertragung zwischen zwei direkt verbundenen Teilnehmern, also zwischen Publisher und Broker bzw.~zwischen Broker und Subscriber. Die Spezifikation unterscheidet drei Stufen, die jeweils einen unterschiedlichen Kompromiss zwischen Protokoll-Overhead und Zuverlässigkeit darstellen.
 
 \subsubsection{QoS~0 (At-Most-Once)}
 
 Bei \gls{qos}~0 wird eine Nachricht ohne Bestätigung nach dem \textit{Best-Effort}-Prinzip zugestellt. Der Sender speichert die Nachricht nicht und überträgt sie auch nicht erneut. Ob die Nachricht ankommt, hängt somit ausschließlich von der zugrunde liegenden \gls{tcp}-Verbindung ab. Da keine Bestätigungen ausgetauscht werden, besitzt \gls{qos}~0 den geringsten Protokoll-Overhead und die geringste Latenz~\citep{oasis2019mqtt, hivemq_mqtt5_essentials}. Diese Stufe eignet sich daher für Daten, bei denen der Verlust einzelner Nachrichten unkritisch ist, etwa regelmäßig gesendete Messwerte.
+
+\newpage
 
 \subsubsection{QoS~1 (At-Least-Once)}
 
@@ -38,7 +46,11 @@ Bei \gls{qos}~1 wird garantiert, dass eine Nachricht mindestens einmal zugestell
 
 \subsubsection{QoS~2 (Exactly-Once)}
 
-\gls{qos}~2 ist die höchste Stufe und garantiert, dass eine Nachricht genau einmal zugestellt wird. Zur Duplikatvermeidung wird ein zweiphasiger Handshake aus insgesamt vier Paketen verwendet. Zunächst sendet der Sender das \texttt{PUBLISH}-Paket, dessen Erhalt der Empfänger mit dem \texttt{PUBREC}-Paket bestätigt. Danach sendet der Sender ein \texttt{PUBREL}-Paket, das der Empfänger abschließend mit dem \texttt{PUBCOMP}-Paket bestätigt~\citep{oasis2019mqtt}. Bis zum Empfang des \texttt{PUBREL}-Pakets speichert der Empfänger die Paket-\gls{id} der Nachricht. Wird dieselbe Nachricht aufgrund eines Netzwerkfehlers erneut übertragen, erkennt der Empfänger sie anhand der gespeicherten Paket-\gls{id} als bereits empfangen und leitet sie nicht ein zweites Mal weiter. Durch diesen zusätzlichen Koordinationsaufwand steigen jedoch sowohl das übertragene Datenvolumen als auch die Latenz deutlich an~\citep{thangavel2014performance}. Abbildung~\ref{fig:mqtt-qos-2} zeigt den Ablauf dieses Handshakes zur Duplikatvermeidung.
+\gls{qos}~2 ist die höchste Stufe und garantiert, dass eine Nachricht genau einmal zugestellt wird. Zur Duplikatvermeidung wird ein zweiphasiger Handshake aus insgesamt vier Paketen verwendet. Zunächst sendet der Sender das \texttt{PUBLISH}-Paket, dessen Erhalt der Empfänger mit dem \texttt{PUBREC}-Paket bestätigt. Danach sendet der Sender ein \texttt{PUBREL}-Paket, das der Empfänger abschließend mit dem \texttt{PUBCOMP}-Paket bestätigt~\citep{oasis2019mqtt}. Bis zum Empfang des \texttt{PUBREL}-Pakets speichert der Empfänger die Paket-\gls{id} der Nachricht.
+
+\newpage
+
+Wird dieselbe Nachricht aufgrund eines Netzwerkfehlers erneut übertragen, erkennt der Empfänger sie anhand der gespeicherten Paket-\gls{id} als bereits empfangen und leitet sie nicht ein zweites Mal weiter. Durch diesen zusätzlichen Koordinationsaufwand steigen jedoch sowohl das übertragene Datenvolumen als auch die Latenz deutlich an~\citep{thangavel2014performance}. Abbildung~\ref{fig:mqtt-qos-2} zeigt den Ablauf dieses Handshakes zur Duplikatvermeidung.
 
 \begin{figure}[H]
     \centering
@@ -70,7 +82,11 @@ Im Gegensatz zu \gls{mqtt}, bei dem Publisher Nachrichten an Topics senden, verw
 
 \subsubsection{Exchange-Typen}
 
-Die Exchange-Typen legen fest, nach welcher Regel ein Exchange entscheidet, an welche Queues er eine Nachricht weiterleitet. Das Routing zwischen Exchange und Queue basiert auf zwei Schlüsseln: Dem \textit{Routing Key}, der vom Producer an die Nachricht angehängt wird, und dem \textit{Binding Key}, der festgelegt wird, wenn eine Queue an einen \textit{Exchange} gebunden wird. Wie die beiden Schlüssel miteinander verglichen werden, hängt vom Typ des \textit{Exchanges} ab. Die wichtigsten Typen sind~\citep{amqp091}:
+Die Exchange-Typen legen fest, nach welcher Regel ein Exchange entscheidet, an welche Queues er eine Nachricht weiterleitet. Das Routing zwischen Exchange und Queue basiert auf zwei Schlüsseln: Dem \textit{Routing Key}, der vom Producer an die Nachricht angehängt wird, und dem \textit{Binding Key}, der festgelegt wird, wenn eine Queue an einen \textit{Exchange} gebunden wird.
+
+\newpage
+
+Wie die beiden Schlüssel miteinander verglichen werden, hängt vom Typ des \textit{Exchanges} ab. Die wichtigsten Typen sind~\citep{amqp091}:
 
 \begin{itemize}
     \item \textbf{Direct Exchange}~\citep{rabbitmq_exchange_direct}: Eine Nachricht wird nur an die Queues weitergeleitet, deren Binding Key genau dem Routing Key der Nachricht entspricht. Dadurch lassen sich Nachrichten gezielt an bestimmte Consumer verteilen~\citep{rabbitmq_tut_work_queues, eip_competing_consumers}.
@@ -83,6 +99,8 @@ Die Exchange-Typen legen fest, nach welcher Regel ein Exchange entscheidet, an w
 \subsubsection{Bestätigungen und Flusskontrolle}
 
 Zur Bestätigung der Verarbeitung und zur Vermeidung von Nachrichtenverlust können Consumer sogenannte \textit{Consumer-\gls{ack}} verwenden. Verwendet ein Consumer Acknowledgments, löscht der Broker eine Nachricht erst dann aus der Queue, wenn der Consumer ihre erfolgreiche Verarbeitung mit einem \gls{amqp}-\gls{ack} bestätigt hat. Kann der Consumer eine Nachricht nicht verarbeiten, sendet er ein \gls{amqp}-\gls{nack}~\citep{rabbitmq_confirms}. Ist dabei der Parameter \texttt{requeue = true} gesetzt, legt der Broker die Nachricht zurück in die Queue, damit sie erneut zugestellt werden kann~\citep{rabbitmq_confirms}. Bricht die Verbindung zum Consumer ab, bevor er eine Nachricht bestätigt hat, legt der Broker diese Nachricht automatisch zurück in die Queue~\citep{amqp091}. Wie viele unbestätigte Nachrichten ein Consumer gleichzeitig vom Broker erhalten darf, legt der Parameter \texttt{prefetch\_count} fest und steuert damit die Flusskontrolle. Ein \texttt{prefetch\_count} von~1 erzwingt eine \textit{Stop-and-Wait-Semantik}\footnote{Stop-and-Wait-Semantik bezeichnet ein Kommunikationsverfahren, bei dem der Sender nach dem Versand einer Nachricht wartet und erst nach Erhalt einer expliziten Bestätigung die nächste Nachricht übermittelt~\citep{tanenbaum2011computer}.}: Der Broker liefert die nächste Nachricht erst aus, wenn die vorherige bestätigt wurde.
+
+\newpage
 
 \subsubsection{Reihenfolge und Partitionierung}
 
@@ -99,6 +117,8 @@ Zur Bestätigung der Verarbeitung und zur Vermeidung von Nachrichtenverlust kön
 
 \textit{Erlang} ist eine funktionale Programmiersprache, die ursprünglich für ne\-ben\-läu\-fi\-ge, verteilte und fehlertolerante Telekommunikationssysteme entwickelt wurde~\citep{armstrong2003making, virding1996concurrent}. Erlang-Programme werden auf der virtuellen Maschine \gls{beam} ausgeführt~\citep{stenman2015erlang, beam_vm}. In dieser Masterarbeit wird Erlang für die Implementierung einer verteilten Deduplizierungskomponente verwendet, da viele Eigenschaften, die ein verteiltes und fehlertolerantes System benötigt, bereits in der Sprache und ihrer Laufzeitumgebung enthalten sind.
 
+\newpage
+
 \subsection{Prozessmodell}
 \label{sub:grundlagen-erlang-prozessmodell}
 
@@ -113,6 +133,8 @@ Das Prozessmodell von Erlang setzt das \textit{Actor-Modell}~\citep{agha1986acto
 \end{itemize}
 
 Mehrere \gls{beam}-Instanzen, sogenannte Knoten (\textit{Nodes}), können zu einem Cluster verbunden werden. Prozesse auf unterschiedlichen Knoten kommunizieren dabei auf die gleiche Weise wie Prozesse auf demselben Knoten~\citep{armstrong2003making}.
+
+\newpage
 
 \subsection{Fehlertoleranz mit OTP}
 \label{sub:grundlagen-otp}
@@ -131,5 +153,7 @@ Die Fehlertoleranz von Erlang-Systemen wird durch das Framework \gls{otp} unters
 
     \item \textbf{\texttt{disc\_only\_copies}}: Die Daten werden nur auf dem Festspeicher gehalten. Dadurch wird wenig \gls{ram} benötigt, allerdings sind die Zugriffe deutlich langsamer.
 \end{itemize}
+
+\newpage
 
 Nach dem \gls{cap}-Theorem kann ein verteiltes System bei einer Netzwerkpartitionierung nicht gleichzeitig Konsistenz und Verfügbarkeit garantieren~\citep{gilbert2002}. \textit{Mnesia} verhält sich in diesem Fall wie ein \gls{ap}-System und bevorzugt die Verfügbarkeit. Die Knoten in den getrennten Teilnetzen akzeptieren weiterhin Schreibzugriffe auf ihre lokalen Datenkopien. Dadurch entstehen voneinander abweichende Datenbestände. Dieser Zustand wird als \textit{Split-Brain-Szenario} bezeichnet\footnote{Erlang-Knoten können nicht zuverlässig unterscheiden, ob ein anderer Knoten abgestürzt ist oder nur die Netzwerkverbindung unterbrochen wurde. Daher arbeitet jedes Teilnetz unabhängig auf seiner lokalen Datenkopie weiter~\citep{cesarini2015designing}.}. \textit{Mnesia} löst die daraus entstehenden Konflikte nicht automatisch. Nach der Wiederherstellung der Verbindung erzeugt \textit{Mnesia} lediglich ein \texttt{inconsistent\_database}-Event. Mit welcher Strategie der Cluster wieder in einen konsistenten Zustand gebracht wird, muss der Entwickler selbst festlegen~\citep{mnesia}.

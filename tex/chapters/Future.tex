@@ -8,6 +8,8 @@ Die in dieser Masterarbeit durchgeführte Evaluation von \gls{alps} konzentriert
 
 Alle Experimente in dieser Masterarbeit wurden mithilfe von \textit{Docker Compose} auf jeweils einem einzelnen Host durchgeführt. Netzwerkfehler wurden durch \gls{tcp}-Proxies simuliert, die Verbindungen trennen. Paketverlust wurde hingegen nicht simuliert, und die Services \gls{srv}~1, \gls{srv}~2 und \gls{srv}~3 wurden durch simulierte Services nachgebildet. Das reale \gls{marc}-System ist jedoch über drei Rechenzentren repliziert, sodass die Komponenten von \gls{alps} in einem produktiven Einsatz über mehrere Standorte verteilt wären. Eine zukünftige Arbeit sollte \gls{alps} daher in einer verteilten Umgebung evaluieren, die der realen Infrastruktur von \gls{marc} entspricht. Dabei sollten insbesondere Ausfälle weiterer Komponenten betrachtet werden, da in dieser Masterarbeit weder Ausfälle des Brokers noch Ausfälle von \gls{alpone} simuliert wurden. Zudem sollte der Broker als Cluster mit replizierten Queues betrieben und das Verhalten von \gls{alps} bei Broker-Ausfällen untersucht werden, da diese potenziell zu einem Verlust von Alarmmeldungen führen können. Ebenso sollten \gls{tcp}-Fehler zwischen \gls{alpone} und dem Broker betrachtet werden, da die \textit{In-Order-Delivery} derzeit nur auf dem Pfad \textit{Broker $\rightarrow$ \gls{alptwo} $\rightarrow$ \gls{srvt}} gewährleistet wird.
 
+\newpage
+
 \section{Validierung des Mnesia-Clusterings unter Netzwerkpartitionierung}
 \label{sec:ausblick-mnesia}
 
