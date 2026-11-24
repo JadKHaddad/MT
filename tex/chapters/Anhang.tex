@@ -15,28 +15,40 @@ Die in Abschnitt~\ref{sub-sec:lps-experimente} und Abschnitt~\ref{sub-sec:alps-e
   \item Installiertes Docker Compose~\citep{docker_compose}.
 \end{itemize}
 
-\subsection{Docker-Images laden}
+\subsection{Docker-Images vorbereiten}
 
-Die folgenden Befehle laden alle benötigten Docker-Images.
+Die folgenden Befehle bauen bzw. laden alle benötigten Docker-Images im Root-Verzeichnis.
+
+\begin{bashcode}[title={Docker-Images bauen}]
+# Simulation-Runner, Kernkomponenten von ALPS (ALP I, ALP II)
+# und Hilfsservices (Alarmanlagen-Simulator, Server-Simulator, Validator, TCP-Proxy)
+docker build -t lps-rs:0.1.0 -f lps-rust/Dockerfile lps-rust
+
+# ALP Dedup
+docker build -t lps-gleam:0.1.0 -f lps-gleam/lps_3/Dockerfile lps-gleam/lps_3
+
+# Auswertungsskripte zur Plot-Erzeugung
+docker build -t lps-scripts:0.1.0 -f scripts/Dockerfile scripts
+
+# Kernkomponenten von LPS (LP I, LP II) und Vertreter der Legacy-Services
+# (SRV 1 PROXY, SRV 2 PROXY)
+docker build -t lps-mqtt-python:0.1.0 -f legacy-proxy-system-docker/Dockerfile.python legacy-proxy-system
+\end{bashcode}
+
+\begin{bashcode}[title={Docker-Images bauen}]
+# HiveMQ-Broker mit den verwendeten Plugins
+docker build -t lps-mqtt-hivemq:0.1.0 -f legacy-proxy-system-docker/Dockerfile.hivemq legacy-proxy-system
+\end{bashcode}
+
 
 \begin{bashcode}[title={Docker-Images laden}]
 # RabbitMQ-Broker
 docker pull rabbitmq:4.3.6-management
+
 # Mosquitto-Broker
 docker pull eclipse-mosquitto:2.1.2-alpine
-# Simulation-Runner, Kernkomponenten von ALPS (ALP I, ALP II)
-# und Hilfsservices (Alarmanlagen-Simulator, Server-Simulator, Validator, TCP-Proxy)
-docker pull jadkhaddad/lps-rs:0.1.0
-# ALP Dedup
-docker pull jadkhaddad/lps-gleam:0.1.0
-# Auswertungsskripte zur Plot-Erzeugung
-docker pull jadkhaddad/lps-scripts:0.1.0
-# Kernkomponenten von LPS (LP I, LP II) und Vertreter der Legacy-Services
-# (SRV 1 PROXY, SRV 2 PROXY)
-docker pull jadkhaddad/lps-mqtt-python:0.1.0
-# HiveMQ-Broker mit den verwendeten Plugins
-docker pull jadkhaddad/lps-mqtt-hivemq:0.1.0
 \end{bashcode}
+
 
 \newpage
 
@@ -51,15 +63,15 @@ simulation_dir: "simulation"
 simulation_docker_network: "lps-simulation-net"
 
 # Image für Simulation-Runner, Kernkomponenten von ALPS und Hilfsservices
-lps_rust_image: "jadkhaddad/lps-rs:0.1.0"
+lps_rust_image: "lps-rs:0.1.0"
 # Image für die Auswertungsskripte
-lps_scripts_image: "jadkhaddad/lps-scripts:0.1.0"
+lps_scripts_image: "lps-scripts:0.1.0"
 # Image für ALP Dedup
-lps_gleam_image: "jadkhaddad/lps-gleam:0.1.0"
+lps_gleam_image: "lps-gleam:0.1.0"
 # Image für die Kernkomponenten von LPS
-lps_mqtt_python_image: "jadkhaddad/lps-mqtt-python:0.1.0"
+lps_mqtt_python_image: "lps-mqtt-python:0.1.0"
 # Image für den HiveMQ-Broker
-lps_mqtt_hivemq_image: "jadkhaddad/lps-mqtt-hivemq:0.1.0"
+lps_mqtt_hivemq_image: "lps-mqtt-hivemq:0.1.0"
 
 # (optional) Seed des Pseudozufallszahlengenerators
 seed: 1
