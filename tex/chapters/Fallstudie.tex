@@ -31,6 +31,8 @@ Wie im vorherigen Abschnitt beschrieben, bildet die \gls{ars} die zentrale Kompo
 	\label{fig:marc-architektur}
 \end{figure}
 
+\newpage
+
 \section{Design Smells im MARC}
 \label{sec:design-smells}
 
@@ -56,6 +58,8 @@ Abbildung~\ref{fig:exactly-once-diagram} zeigt einen beispielhaften Kommunikatio
 	\caption{Sequenzdiagramm eines beispielhaften Kommunikationsablaufs, der zu einer Verletzung der \textit{Exactly-Once-Delivery} im \acrshort{marc}-System führt.}
 	\label{fig:exactly-once-diagram}
 \end{figure}
+
+\newpage
 
 Abbildung~\ref{fig:in-order-diagram} zeigt einen beispielhaften Kommunikationsablauf, der zu einer Verletzung der \textit{In-Order-Delivery} führt: Eine später erzeugte Alarmmeldung wird vor einer früheren Alarmmeldung verarbeitet, da variable Netzwerklatenzen die Reihenfolge verändern können.
 
@@ -90,7 +94,13 @@ In der Proof-of-Concept-Implementierung der Arbeit~\citep{liebig_2025_architectu
 	\label{fig:lps-normalfluss}
 \end{figure}
 
-Um die strengen Delivery-Garantien des Legacy-Systems einzuhalten, kombiniert \gls{lps} mehrere Mechanismen. Die Kommunikation zwischen \gls{lpone}, Broker und \gls{lptwo} erfolgt über \gls{mqtt} \gls{qos}~2, was eine \textit{Exactly-Once-Delivery} auf diesem Teilpfad garantiert. Um die \textit{In-Order-Delivery} der Alarmmeldungen zu gewährleisten, werden die \gls{lptwo}-Instanzen so konfiguriert, dass Alarmmeldungen innerhalb derselben Instanz anhand von \texttt{max\_\allowbreak inflight\_\allowbreak messages = 1} sequentiell verarbeitet werden. Für Fehlerfälle wie Netzwerkfehler oder negative Bestätigungen der nachgelagerten Services, die hinter \gls{lptwo} auftreten, wird ein \textit{Retry}-Mechanismus~\footnote{Retry bezeichnet das erneute Zustellen einer zuvor fehlgeschlagenen Nachricht.} eingeführt. Bei fehlgeschlagener Über\-tra\-gung einer Alarmmeldung an die nachgelagerten Services wird diese Alarmmeldung auf ein separates Topic, das im Folgenden als Retry-Topic bezeichnet wird, publiziert. Der Retry-Mechanismus wird durch eine Broker-Erweiterung (Plugin) umgesetzt, die Alarmmeldungen aus dem Retry-Topic strikt priorisiert. Sobald sich Alarmmeldungen im Retry-Topic befinden, wird die Auslieferung regulärer Alarmmeldungen aus dem Main-Topic temporär pausiert. Erst nach der erfolgreichen Verarbeitung der Alarmmeldungen aus dem Retry-Topic wird der reguläre Fluss fortgesetzt. Dies verhindert, dass neuere Alarmmeldungen eine ältere, zuvor fehlgeschlagene Alarmmeldung überholen, und dadurch wird die Reihenfolge eingehalten. Der Ablauf dieses Mechanismus gestaltet sich wie folgt:
+\newpage
+
+Um die strengen Delivery-Garantien des Legacy-Systems einzuhalten, kombiniert \gls{lps} mehrere Mechanismen. Die Kommunikation zwischen \gls{lpone}, Broker und \gls{lptwo} erfolgt über \gls{mqtt} \gls{qos}~2, was eine \textit{Exactly-Once-Delivery} auf diesem Teilpfad garantiert. Um die \textit{In-Order-Delivery} der Alarmmeldungen zu gewährleisten, werden die \gls{lptwo}-Instanzen so konfiguriert, dass Alarmmeldungen innerhalb derselben Instanz anhand von \texttt{max\_\allowbreak inflight\_\allowbreak messages = 1} sequentiell verarbeitet werden. Für Fehlerfälle wie Netzwerkfehler oder negative Bestätigungen der nachgelagerten Services, die hinter \gls{lptwo} auftreten, wird ein \textit{Retry}-Mechanismus~\footnote{Retry bezeichnet das erneute Zustellen einer zuvor fehlgeschlagenen Nachricht.} eingeführt. Bei fehlgeschlagener Über\-tra\-gung einer Alarmmeldung an die nachgelagerten Services wird diese Alarmmeldung auf ein separates Topic, das im Folgenden als Retry-Topic bezeichnet wird, publiziert. Der Retry-Mechanismus wird durch eine Broker-Erweiterung (Plugin) umgesetzt, die Alarmmeldungen aus dem Retry-Topic strikt priorisiert. Sobald sich Alarmmeldungen im Retry-Topic befinden, wird die Auslieferung regulärer Alarmmeldungen aus dem Main-Topic temporär pausiert. Erst nach der erfolgreichen Verarbeitung der Alarmmeldungen aus dem Retry-Topic wird der reguläre Fluss fortgesetzt. Dies verhindert, dass neuere Alarmmeldungen eine ältere, zuvor fehlgeschlagene Alarmmeldung überholen, und dadurch wird die Reihenfolge eingehalten.
+
+\newpage
+
+Der Ablauf dieses Mechanismus gestaltet sich wie folgt:
 
 \begin{enumerate}
 	\item \gls{lpone} publiziert eine Alarmmeldung in das Main-Topic.
@@ -202,7 +212,7 @@ Im Vergleich zu Abbildung~\ref{fig:lps-architektur} ersetzt der Experimentaufbau
 \subsubsection{Reproduzierbarkeit und Anzahl der Durchläufe}
 \label{sub-sub:lps-methodik}
 
-Die Experimente sind stochastisch, da Verbindungsdauern, Fehler und Latenzen zufällig erzeugt werden. Damit die Experimente reproduzierbar sind, werden alle Zufallswerte von einem Pseudozufallszahlengenerator erzeugt, der mit einem einstellbaren Seed $S$ initialisiert wird. Der Seed wird allen Hilfsservices (siehe Abschnitt~\ref{sub-sec:lps-experimente}) übergeben, die Zufallswerte erzeugen, also dem \textit{Alarmanlagen-Simulator} und dem \textit{\gls{tcp}-Proxy}. Bei gleichem Seed erzeugen diese Services in jedem Durchlauf dieselbe Folge von Zufallswerten. Der Seed legt jedoch nicht das gesamte zeitliche Verhalten des Systems fest: Das Scheduling durch das \gls{os}, der Verbindungsaufbau sowie die Verarbeitungszeiten des Brokers und der \gls{lps}-Komponenten werden nicht durch den Seed gesteuert. Daher können sich Durchläufe mit demselben Seed in ihren Ergebnissen unterscheiden. Aus dem Ergebnis eines einzelnen Durchlaufs lässt sich somit keine belastbare Aussage ableiten. Aus diesem Grund wird jedes Experiment mit demselben Seed mehrfach wiederholt. Die Anzahl der benötigten Wiederholungen $n$ wird nach dem \textit{Success-Run-Theorem}~\citep{joshi2023, kececioglu1992} bestimmt:
+Die Experimente sind stochastisch, da Verbindungsdauern, Fehler und Latenzen zufällig erzeugt werden. Damit die Experimente reproduzierbar sind, werden alle Zufallswerte von einem Pseudozufallszahlengenerator erzeugt, der mit einem einstellbaren Seed $S$ initialisiert wird. Der Seed wird allen Hilfsservices (siehe Abschnitt~\ref{sub-sec:lps-experimente}) übergeben, die Zufallswerte erzeugen, also dem \textit{Alarmanlagen-Simulator} und dem \textit{\gls{tcp}-Proxy}. Bei gleichem Seed erzeugen diese Services in jedem Durchlauf dieselbe Zufallsfolge. Der Seed legt jedoch nicht das gesamte zeitliche Verhalten des Systems fest: Das Scheduling durch das \gls{os}, der Verbindungsaufbau sowie die Verarbeitungszeiten des Brokers und der \gls{lps}-Komponenten werden nicht durch den Seed gesteuert. Daher können sich Durchläufe mit demselben Seed in ihren Ergebnissen unterscheiden. Da ein einzelner Durchlauf keine belastbare Aussage erlaubt, wird jedes Experiment mit demselben Seed mehrfach wiederholt. Die Anzahl der benötigten Wiederholungen $n$ wird nach dem \textit{Success-Run-Theorem}~\citep{joshi2023, kececioglu1992} bestimmt:
 
 \begin{equation}
 	n = \frac{\ln(1 - C)}{\ln(R)}
@@ -216,7 +226,7 @@ Dabei ist $R$ die Zuverlässigkeit (\textit{Reliability}): Die minimale Wahrsche
 	\label{eq:success-run-n}
 \end{equation}
 
-Jedes Experiment wird somit 59-mal wiederholt. Erfüllen alle 59 Durchläufe das Erfolgskriterium, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein einzelner Durchlauf das Erfolgskriterium mit einer Wahrscheinlichkeit von mindestens 95\,\% erfüllt. Verfehlt hingegen mindestens ein Durchlauf das Erfolgskriterium, kann diese Aussage nicht getroffen werden. In den folgenden Experimenten zu \gls{lps} gilt ein Durchlauf als erfolgreich, wenn die jeweils untersuchte Delivery-Garantie verletzt wird. Dadurch wird gezeigt, dass die Verletzung nicht nur zufällig in einem einzelnen Durchlauf auftritt, sondern sich mit dem gewählten Seed reproduzierbar provozieren lässt. Der Seed wird für jedes Experiment wie folgt bestimmt: Das Experiment wird mit verschiedenen Seeds ausgeführt, bis ein Seed gefunden wird, mit dem die untersuchte Verletzung konsistent auftritt. Anschließend wird das Experiment mit diesem Seed 59-mal wiederholt. Die gezielte Auswahl des Seeds ist zulässig, da die Experimente nicht die Häufigkeit einer Verletzung unter beliebigen Bedingungen messen, sondern zeigen sollen, dass \gls{lps} die Delivery-Garantien unter bestimmten Fehlerbedingungen verletzt. Der Seed legt diese Fehlerbedingungen fest und macht sie reproduzierbar.
+Jedes Experiment wird somit 59-mal wiederholt. Erfüllen alle 59 Durchläufe das Erfolgskriterium, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein einzelner Durchlauf das Erfolgskriterium mit einer Wahrscheinlichkeit von mindestens 95\,\% erfüllt. Verfehlt hingegen mindestens ein Durchlauf das Erfolgskriterium, kann diese Aussage nicht getroffen werden. In den folgenden Experimenten zu \gls{lps} gilt ein Durchlauf als erfolgreich, wenn die jeweils untersuchte Delivery-Garantie verletzt wird. Dadurch wird gezeigt, dass die Verletzung nicht nur zufällig in einem einzelnen Durchlauf auftritt, sondern sich mit dem gewählten Seed reproduzierbar provozieren lässt. Der Seed wird bestimmt, indem das Experiment mit verschiedenen Seeds ausgeführt wird, bis die untersuchte Verletzung konsistent auftritt. Anschließend wird das Experiment mit diesem Seed 59-mal wiederholt. Die gezielte Auswahl des Seeds ist zulässig, da die Experimente nicht die Häufigkeit einer Verletzung unter beliebigen Bedingungen messen, sondern zeigen sollen, dass \gls{lps} die Delivery-Garantien unter bestimmten Fehlerbedingungen verletzt. Der Seed legt diese Fehlerbedingungen fest und macht sie reproduzierbar.
 
 \subsubsection{Verletzung der Exactly-Once-Delivery}
 \label{sub-sub:lps-verletzung-eod}
@@ -225,7 +235,7 @@ In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzu
 
 \begin{table}[H]
 	\centering
-	\renewcommand{\arraystretch}{1.4}
+	\renewcommand{\arraystretch}{1.2}
 	\caption{Konfiguration des Experiments zur Verletzung der Exactly-Once-Delivery in \acrshort{lps}.}
 	\label{tab:exp-lps-eod-config}
 	\begin{tabular}{|l|l|l|}
@@ -253,7 +263,7 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
 	\item $L_{\text{min,down}}^{\text{srv}}$, $L_{\text{max,down}}^{\text{srv}}$: Die Downstream-Latenz im $P_{\text{srv}}$ verzögert die Antwort des \textit{\gls{srv}~2 PROXY} an \gls{lptwo}. Bei einer Antwortgröße von 189\,Bytes und $L_{\text{max,down}}^{\text{srv}} = 27$\,ms/Byte ergibt sich eine maximale Verzögerung von $189 \cdot 27\,\text{ms} = 5{,}103$\,s.
 
-	\item $T_{\text{min,tcp}}^{\text{mqtt}}$, $T_{\text{max,tcp}}^{\text{mqtt}}$: Die maximale Verbindungsdauer im $P_{\text{mqtt}}$ liegt mit 4\,s unter der maximalen Verzögerung von 5{,}103\,s. Dadurch kann die Verbindung zum Broker getrennt werden, während \gls{lptwo} auf die Antwort wartet. Dabei stellen $L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{max,tcp}}^{\text{mqtt}}$ lediglich Obergrenzen dar. Die tatsächliche Latenz sowie die tatsächliche Verbindungsdauer werden jeweils zufällig zwischen dem entsprechenden Minimalwert (jeweils 0) und dem entsprechenden Maximalwert bestimmt. Wären die Werte fest, also $L_{\text{min,down}}^{\text{srv}} = L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{min,tcp}}^{\text{mqtt}} = T_{\text{max,tcp}}^{\text{mqtt}}$ (also genau 5{,}103\,s Verzögerung und 4\,s Verbindung), würde jede Verbindung zum Broker getrennt, bevor die Antwort bei \gls{lptwo} ankommt, sodass \gls{lptwo} die Alarmmeldung nie bestätigen könnte. Der Broker würde sie daher endlos erneut zustellen und das Experiment würde nicht terminieren. Durch die Zufälligkeit kommt die Antwort hingegen irgendwann innerhalb der Verbindungsdauer an, die Alarmmeldung wird bestätigt und das Experiment anschließend beendet.
+	\item $T_{\text{min,tcp}}^{\text{mqtt}}$, $T_{\text{max,tcp}}^{\text{mqtt}}$: Die maximale Verbindungsdauer im $P_{\text{mqtt}}$ liegt mit 4\,s unter der maximalen Verzögerung von 5{,}103\,s, sodass die Verbindung zum Broker getrennt werden kann, während \gls{lptwo} auf die Antwort wartet. $L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{max,tcp}}^{\text{mqtt}}$ sind lediglich Obergrenzen: Latenz und Verbindungsdauer werden jeweils zufällig zwischen 0 und dem Maximalwert bestimmt. Wären die Werte fest ($L_{\text{min,down}}^{\text{srv}} = L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{min,tcp}}^{\text{mqtt}} = T_{\text{max,tcp}}^{\text{mqtt}}$, also genau 5{,}103\,s Verzögerung und 4\,s Verbindung), würde jede Verbindung getrennt, bevor die Antwort bei \gls{lptwo} ankommt. \gls{lptwo} könnte die Alarmmeldung nie bestätigen, der Broker würde sie endlos erneut zustellen und das Experiment nicht terminieren. Durch die Zufälligkeit kommt die Antwort hingegen irgendwann innerhalb der Verbindungsdauer an, die Alarmmeldung wird bestätigt und das Experiment endet.
 
 	\item $S$: Mit dem Seed $S = 6$ tritt die Verletzung konsistent auf (siehe Abschnitt~\ref{sub-sub:lps-methodik}).
 \end{itemize}
@@ -293,10 +303,9 @@ In allen 59 Durchläufen wurde die \textit{Exactly-Once-Delivery} verletzt. Eine
 \label{sub-sub:lps-verletzung-iod}
 
 In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzung der \textit{In-Order-Delivery}-Garantie in \gls{lps} provoziert. Es wird gezeigt, dass die parallele Verarbeitung von Alarmmeldungen durch mehrere \gls{lptwo}-Instanzen zu einer Verletzung der \textit{In-Order-Delivery} führen kann. Der Aufbau des Experiments entspricht Abbildung~\ref{fig:exp-setup}. Ursprünglich wurde \textit{HiveMQ CE} in Version \textit{2025.5} als Message Broker verwendet. Jedoch ist das Experiment aufgrund eines ungelösten Bugs~\citep{hivemq_issue_558} in \textit{HiveMQ CE} gescheitert. Der Bug verhindert die parallele Verarbeitung von \gls{mqtt}-Nachrichten durch mehrere Consumer einer einzelnen \textit{Shared Subscription}. Dieser Bug scheint auch in älteren Versionen von \textit{HiveMQ CE} zu existieren~\citep{hivemq_issue_558}. Daher wurde auf \textit{HiveMQ CE} verzichtet und stattdessen \textit{Mosquitto}~\citep{mosquitto} in Version \textit{2.1.2} als Message Broker verwendet. Die Verwendung eines anderen Brokers ist dadurch gerechtfertigt, dass \gls{lps} standardisierte \gls{mqtt}~v5-Features verwendet, die von allen \gls{mqtt}~v5-kompatiblen Brokern unterstützt werden. Außerdem ist dieses Experiment so aufgebaut, dass weder fehlerhafte Verarbeitungen der Alarmmeldungen noch Netzwerkfehler auftreten. Dadurch publizieren die \gls{lptwo}-Instanzen keine Alarmmeldungen auf das Retry-Topic, und das \textit{HiveMQ}-spezifische Plugin des Retry-Mechanismus kommt nicht zum Einsatz. Die für das Experiment ausgewählten Parameter werden in Tabelle~\ref{tab:exp-lps-iod-config} dargestellt.
-
 \begin{table}[H]
 	\centering
-	\renewcommand{\arraystretch}{1.4}
+	\renewcommand{\arraystretch}{1.2}
 	\caption{Konfiguration des Experiments zur Verletzung der In-Order-Delivery in \acrshort{lps}.}
 	\label{tab:exp-lps-iod-config}
 	\begin{tabular}{|l|l|l|}
@@ -364,6 +373,8 @@ In allen 59 Durchläufen wurde die \textit{In-Order-Delivery} verletzt. Eine mö
 \label{sub-sub:lps-execution}
 
 Alle Experimente in diesem Abschnitt wurden mithilfe von \textit{Docker Compose}~\citep{docker_compose} durchgeführt und sind anhand von Konfigurationsdateien und der angegebenen Seeds reproduzierbar. Weitere Informationen zum Ausführen der Experimente werden in Abschnitt~\ref{sec:appendix-reproducibility} erläutert. Die Experimente erfolgten auf einem System mit einer \textit{Intel(R) Core(TM) i5-9600K} CPU~\citep{intel_i5_9600k}, 16\,GB \gls{ram} und \textit{Ubuntu} 24.04.4~\citep{ubuntu_24_04}.
+
+\newpage
 
 \section{Limitationen}
 \label{sec:lps-limitationen}

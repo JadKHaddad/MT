@@ -9,12 +9,12 @@ Die identifizierten Limitationen von \gls{lps} in Abschnitt~\ref{sec:lps-limitat
 Die Anforderungen an \gls{alps} lassen sich direkt aus den Vorteilen und Limitationen von \gls{lps} ableiten:
 
 \begin{itemize}
-      \item \textbf{Asynchrone Entkopplung beibehalten}: Das asynchrone Design von \gls{lps} soll beibehalten werden, da es sich positiv auf die Antwortzeiten des Systems auswirkt, wie in Abschnitt~\ref{sub-sec:lps-auswirkungen} beschrieben wurde.
-      \item \textbf{Transparenz zum Legacy-System beibehalten}: Es soll möglich sein, \gls{alps} in das bestehende Legacy-System transparent zu integrieren.
-      \item \textbf{Nachrichtenverlust verhindern}: Alarmmeldungen dürfen nicht verloren gehen.
-      \item \textbf{Exactly-Once-Delivery garantieren}: Alarmmeldungen dürfen nicht mehrfach verarbeitet werden.
-      \item \textbf{In-Order-Delivery pro Alarmanlage garantieren}: Alarmmeldungen einzelner Alarmanlagen sollen in der richtigen Reihenfolge verarbeitet werden.
-      \item \textbf{Broker-Neutralität}: \gls{alps} soll nicht von einem bestimmten Message-Broker abhängig sein, um die Portabilität und Flexibilität von \gls{alps} zu ge\-währ\-leis\-ten.
+    \item \textbf{Asynchrone Entkopplung beibehalten}: Das asynchrone Design von \gls{lps} soll beibehalten werden, da es sich positiv auf die Antwortzeiten des Systems auswirkt, wie in Abschnitt~\ref{sub-sec:lps-auswirkungen} beschrieben wurde.
+    \item \textbf{Transparenz zum Legacy-System beibehalten}: Es soll möglich sein, \gls{alps} in das bestehende Legacy-System transparent zu integrieren.
+    \item \textbf{Nachrichtenverlust verhindern}: Alarmmeldungen dürfen nicht verloren gehen.
+    \item \textbf{Exactly-Once-Delivery garantieren}: Alarmmeldungen dürfen nicht mehrfach verarbeitet werden.
+    \item \textbf{In-Order-Delivery pro Alarmanlage garantieren}: Alarmmeldungen einzelner Alarmanlagen sollen in der richtigen Reihenfolge verarbeitet werden.
+    \item \textbf{Broker-Neutralität}: \gls{alps} soll nicht von einem bestimmten Message-Broker abhängig sein, um die Portabilität und Flexibilität von \gls{alps} zu ge\-währ\-leis\-ten.
 \end{itemize}
 
 \section{Architektur}
@@ -23,10 +23,10 @@ Die Anforderungen an \gls{alps} lassen sich direkt aus den Vorteilen und Limitat
 Die Erfüllung der beschriebenen Anforderungen erfordert Modifikationen an der bestehenden Architektur von \gls{lps}. Dafür übernimmt \gls{alps} die gleiche asynchrone Architektur von \gls{lps} mit Modifikationen an den benutzten Technologien sowie Transportprotokollen, um Kontrolle über den Fluss der Alarmmeldungen zu gewährleisten und Koordination zwischen den Komponenten zu ermöglichen. Zusätzlich werden fehlende Funktionalitäten bei \gls{lps} wie \textit{Idempotenz} durch weitere Komponenten ergänzt. Als Resultat ergibt sich eine neue modifizierte Architektur, die aus vier Kernkomponenten besteht:
 
 \begin{itemize}
-      \item \textbf{\gls{alpone}}: Übernimmt die Aufgaben von \gls{lpone}. Wird hinter \gls{srv}~1 positioniert. Empfängt Alarmmeldungen von \gls{srv}~1 und leitet sie an den Message Broker weiter. Im Unterschied zu \gls{lpone} wird dafür \gls{amqp} statt \gls{mqtt} verwendet, und die Alarmmeldungen werden anhand der \texttt{device\_id} auf Queues verteilt (siehe Abschnitt~\ref{sub-sec:alpone}).
-      \item \textbf{Message Broker}: Speichert die eingehenden Alarmmeldungen zwischen und verteilt sie an \acrshort{alptwo}.
-      \item \textbf{\gls{alptwo}}: Übernimmt die Aufgaben von \gls{lptwo}. Wird vor \gls{srv}~2 positioniert. Konsumiert Alarmmeldungen vom Message Broker und leitet sie an \gls{srv}~2 weiter. Im Unterschied zu \gls{lptwo} konsumiert \gls{alptwo} über \gls{amqp} aus einer fest zugeordneten Queue, und fehlgeschlagene Alarmmeldungen werden durch negative Bestätigungen statt über ein Retry-Topic erneut zugestellt (siehe Abschnitt~\ref{sub-sec:alptwo}).
-      \item \textbf{\gls{alpdedup}}: Implementiert die Deduplizierungslogik von Alarmmeldungen. Wird unmittelbar vor dem letzten Service in der Verarbeitungskette positioniert (\gls{srv}~3 im \gls{marc}-System), der im Folgenden als \gls{srvt} bezeichnet wird. Empfängt Alarmmeldungen von vorgelagerten Services und leitet nur die eindeutigen Alarmmeldungen an \gls{srvt} weiter.
+    \item \textbf{\gls{alpone}}: Übernimmt die Aufgaben von \gls{lpone}. Wird hinter \gls{srv}~1 positioniert. Empfängt Alarmmeldungen von \gls{srv}~1 und leitet sie an den Message Broker weiter. Im Unterschied zu \gls{lpone} wird dafür \gls{amqp} statt \gls{mqtt} verwendet, und die Alarmmeldungen werden anhand der \texttt{device\_id} auf Queues verteilt (siehe Abschnitt~\ref{sub-sec:alpone}).
+    \item \textbf{Message Broker}: Speichert die eingehenden Alarmmeldungen zwischen und verteilt sie an \acrshort{alptwo}.
+    \item \textbf{\gls{alptwo}}: Übernimmt die Aufgaben von \gls{lptwo}. Wird vor \gls{srv}~2 positioniert. Konsumiert Alarmmeldungen vom Message Broker und leitet sie an \gls{srv}~2 weiter. Im Unterschied zu \gls{lptwo} konsumiert \gls{alptwo} über \gls{amqp} aus einer fest zugeordneten Queue, und fehlgeschlagene Alarmmeldungen werden durch negative Bestätigungen statt über ein Retry-Topic erneut zugestellt (siehe Abschnitt~\ref{sub-sec:alptwo}).
+    \item \textbf{\gls{alpdedup}}: Implementiert die Deduplizierungslogik von Alarmmeldungen. Wird unmittelbar vor dem letzten Service in der Verarbeitungskette positioniert (\gls{srv}~3 im \gls{marc}-System), der im Folgenden als \gls{srvt} bezeichnet wird. Empfängt Alarmmeldungen von vorgelagerten Services und leitet nur die eindeutigen Alarmmeldungen an \gls{srvt} weiter.
 \end{itemize}
 
 Als Transportprotokoll zwischen den Komponenten wird \gls{amqp} verwendet, da \gls{amqp} die benötigten Mechanismen bietet, die die Kontrolle über den Fluss der Nachrichten bzw.~Alarmmeldungen und die Koordination zwischen den Komponenten ermöglichen. Die benötigten Mechanismen und ihr Einsatz in \gls{alps} werden in Abschnitt~\ref{sec:alps-implementierung} im Detail beschrieben.
@@ -37,13 +37,13 @@ Als Transportprotokoll zwischen den Komponenten wird \gls{amqp} verwendet, da \g
 Um die \textit{In-Order-Delivery} zu garantieren, sollen mithilfe von \gls{amqp} Mechanismen folgende Anforderungen erfüllt werden:
 
 \begin{itemize}
-      \item \textbf{A~1}: Alarmmeldungen sollen von \gls{alptwo} immer in der Reihenfolge verarbeitet werden, in der sie von \gls{alpone} empfangen wurden.
+    \item \textbf{A~1}: Alarmmeldungen sollen von \gls{alptwo} immer in der Reihenfolge verarbeitet werden, in der sie von \gls{alpone} empfangen wurden.
 
-      \item \textbf{A~2}: Alarmmeldungen pro Alarmanlage sollen immer von einer bestimmten \gls{alptwo}-Instanz verarbeitet werden: Beliebige Verteilung von Alarmmeldungen auf beliebige \gls{alptwo}-Instanzen soll unterbunden werden.
+    \item \textbf{A~2}: Alarmmeldungen pro Alarmanlage sollen immer von einer bestimmten \gls{alptwo}-Instanz verarbeitet werden: Beliebige Verteilung von Alarmmeldungen auf beliebige \gls{alptwo}-Instanzen soll unterbunden werden.
 
-      \item \textbf{A~3}: Alarmmeldungen pro Alarmanlage sollen immer sequentiell von einer einzigen \gls{alptwo}-Instanz verarbeitet werden: Parallele Verarbeitung von Alarmmeldungen einer einzelnen Alarmanlage soll unterbunden werden. Jedoch ist die parallele Verarbeitung von Alarmmeldungen verschiedener Alarmanlagen weiterhin erlaubt.
+    \item \textbf{A~3}: Alarmmeldungen pro Alarmanlage sollen immer sequentiell von einer einzigen \gls{alptwo}-Instanz verarbeitet werden: Parallele Verarbeitung von Alarmmeldungen einer einzelnen Alarmanlage soll unterbunden werden. Jedoch ist die parallele Verarbeitung von Alarmmeldungen verschiedener Alarmanlagen weiterhin erlaubt.
 
-      \item \textbf{A~4}: Netzwerkfehler und fehlgeschlagene Verarbeitungen in \gls{alptwo}-In\-stan\-zen sollen nicht zu einem Verlust führen: Alarmmeldungen, die von einer \gls{alptwo}-Instanz nicht verarbeitet werden können, sollen erneut zugestellt werden, bis sie erfolgreich verarbeitet wurden. Dabei soll die Reihenfolge der Alarmmeldungen pro Alarmanlage beibehalten werden.
+    \item \textbf{A~4}: Netzwerkfehler und fehlgeschlagene Verarbeitungen in \gls{alptwo}-In\-stan\-zen sollen nicht zu einem Verlust führen: Alarmmeldungen, die von einer \gls{alptwo}-Instanz nicht verarbeitet werden können, sollen erneut zugestellt werden, bis sie erfolgreich verarbeitet wurden. Dabei soll die Reihenfolge der Alarmmeldungen pro Alarmanlage beibehalten werden.
 \end{itemize}
 
 Die Erfüllung dieser Anforderungen garantiert die \textit{In-Order-Delivery} pro Alarmanlage.
@@ -55,10 +55,10 @@ Die \textit{Exactly-Once-Delivery} zu garantieren, erfordert die Einführung von
 Der optimale Einsatz von \gls{alpdedup} erfordert, dass \gls{alpdedup} unmittelbar vor \gls{srvt} positioniert wird, da Netzwerkfehler zwischen \gls{alpdedup} und \gls{srvt} zur Verletzung der \textit{Idempotenz} führen können. Ein beispielhafter Verarbeitungsablauf einer Alarmmeldung, der zur Verletzung der \textit{Idempotenz} führt, könnte wie folgt aussehen: \gls{alpdedup} empfängt eine noch nicht verarbeitete Alarmmeldung und leitet sie an \gls{srvt} weiter. Während \gls{alpdedup} auf eine Antwort von \gls{srvt} wartet, wird die Verbindung aufgrund von einem Netzwerkfehler zwischen \gls{alpdedup} und \gls{srvt} getrennt und \gls{alpdedup} bekommt keine positive Bestätigung von \gls{srvt}. Deshalb wird die Alarmmeldung als nicht verarbeitet betrachtet und nicht in der Datenbank gespeichert. Danach antwortet \gls{alpdedup} mit einer negativen Bestätigung, was die vorgelagerten Services zu einer erneuten Übertragung der Alarmmeldung bringt. Die wiederholte Alarmmeldung wird erneut von \gls{alpdedup} empfangen und als nicht verarbeitet betrachtet und an \gls{srvt} weitergeleitet. Dadurch wird die \textit{Idempotenz} verletzt. Abbildung~\ref{fig:alp-dedup-exactly-once-delivery-violation-sequence} veranschaulicht diesen Verarbeitungsablauf als ein Sequenzdiagramm. Dadurch wird gezeigt, dass Netzwerkfehler zwischen \gls{alpdedup} und \gls{srvt} zur Verletzung der \textit{Idempotenz} führen können. Daher soll \gls{alpdedup} so nah wie möglich vor \gls{srvt} positioniert werden, um die Gefahr von Verletzungen der \textit{Idempotenz} zu minimieren.
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=0.479\textwidth]{./img/mermaid/a_lps_dedup_exactly_once_delivery_violation_sequence.pdf}
-      \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Idempotenz in \acrshort{alpdedup}.}
-      \label{fig:alp-dedup-exactly-once-delivery-violation-sequence}
+    \centering
+    \includegraphics[width=0.479\textwidth]{./img/mermaid/a_lps_dedup_exactly_once_delivery_violation_sequence.pdf}
+    \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Idempotenz in \acrshort{alpdedup}.}
+    \label{fig:alp-dedup-exactly-once-delivery-violation-sequence}
 \end{figure}
 
 \section{Integration}
@@ -67,10 +67,10 @@ Der optimale Einsatz von \gls{alpdedup} erfordert, dass \gls{alpdedup} unmittelb
 Analog zu \gls{lps} wird \gls{alps} transparent in das bestehende Legacy-System zwischen den Komponenten integriert. \gls{alpone} wird hinter \gls{srv}~1 positioniert. Er empfängt Alarmmeldungen von \gls{srv}~1 und leitet sie an den Broker weiter. \gls{alptwo} wird vor \gls{srv}~2 positioniert. Er empfängt Alarmmeldungen vom Broker und leitet sie an \gls{srv}~2 weiter. \gls{alpdedup} wird unmittelbar vor \gls{srv}~3 positioniert. Er empfängt Alarmmeldungen von \gls{srv}~2 und leitet nur die eindeutigen Alarmmeldungen an \gls{srv}~3 weiter. Analog zu \gls{lps} wird die synchrone Kopplung durch die Kette \textit{\gls{alpone} $\rightarrow$ Broker $\rightarrow$ \gls{alptwo}} ersetzt und die bestehende Legacy-Schnittstelle bleibt nach außen unverändert. Abbildung~\ref{fig:alps-architektur} zeigt die transparente Integration von \gls{alps} in \gls{marc}. Anstelle von \gls{mqtt} wird \gls{amqp} als Transportprotokoll verwendet. Zusätzlich macht die Abbildung die Positionierung von \gls{alpdedup} unmittelbar vor \gls{srv}~3 deutlich.
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=\textwidth]{./img/drawio/a_lps.pdf}
-      \caption{Gesamtarchitektur von \acrshort{marc} nach der Integration von \acrshort{alps}.}
-      \label{fig:alps-architektur}
+    \centering
+    \includegraphics[width=\textwidth]{./img/drawio/a_lps.pdf}
+    \caption{Gesamtarchitektur von \acrshort{marc} nach der Integration von \acrshort{alps}.}
+    \label{fig:alps-architektur}
 \end{figure}
 
 \section{Implementierung}
@@ -79,9 +79,9 @@ Analog zu \gls{lps} wird \gls{alps} transparent in das bestehende Legacy-System 
 Für die Implementierung von \gls{alps} wird \textit{RabbitMQ}~\citep{rabbitmq_broker} als Message Broker verwendet und es werden folgende \gls{amqp}-Mechanismen in \gls{alpone} und \gls{alptwo} verwendet, um die Anforderung in Abschnitt~\ref{sec:alps-anforderungen} zu erfüllen:
 
 \begin{itemize}
-      \item \texttt{x-consistent-hash}
-      \item \texttt{x-single-active-consumer}
-      \item \texttt{prefetch\_count}
+    \item \texttt{x-consistent-hash}
+    \item \texttt{x-single-active-consumer}
+    \item \texttt{prefetch\_count}
 \end{itemize}
 
 Die verwendeten Mechanismen sind zwar Erweiterungen von \textit{RabbitMQ}, die verwendeten Konzepte sind jedoch nicht auf \textit{RabbitMQ} beschränkt. Andere Message Broker bieten vergleichbare Funktionen an. Dadurch wird ein \textit{Vendor-Lock-in} (siehe Abschnitt~\ref{sec:lps-limitationen}) vermieden. So unterstützt beispielsweise \textit{LavinMQ}~\citep{lavinmq_broker} ebenfalls \textit{Consistent-Hash-Routing}~\citep{lavinmq_consistent_hash} und \textit{Single Active Consumer}~\citep{lavinmq_single_active_consumer}. \textit{Apache ActiveMQ Artemis}~\citep{artemis_broker} bietet mit \textit{Message Grouping}~\citep{artemis_message_grouping} eine vergleichbare Funktion zum \textit{Consistent-Hash-Routing} und setzt das Prinzip des \textit{Single Active Consumers} mit \textit{Exclusive Queues}~\citep{artemis_exclusive_queues} um.
@@ -97,28 +97,28 @@ Die Implementierung von \gls{alpone} setzt voraus, dass die Alarmmeldungen minde
 Die Implementierung von \gls{alptwo} besteht aus $N$ \gls{amqp}-Consumern, die beim Starten jeweils mit einer der $N$ Queues verbunden werden. Jeder Consumer konsumiert Alarmmeldungen mit der \texttt{prefetch\_count = 1} Eigenschaft aus der Queue. Dadurch wird garantiert, dass zu jeder Zeit nur eine Alarmmeldung pro Consumer verarbeitet wird. Außerdem sind die Queues mit der \texttt{x-single-active-consumer} Eigenschaft verbunden. Dadurch erlaubt der Broker, dass nur ein einzelner Consumer pro Queue aktiv ist. Falls ein Consumer ausfällt oder dessen Verbindung zum Broker abbricht, wird der Broker automatisch einen anderen Consumer aktivieren. Die Kombination aus \texttt{x-single-active-consumer}, \texttt{x-consistent-hash} und \texttt{prefetch\_count = 1} garantiert, dass Alarmmeldungen einer einzelnen Alarmanlage immer von einer einzigen \gls{alptwo}-Instanz bzw.~einem einzigen Consumer innerhalb von \gls{alptwo} verarbeitet werden. Somit werden die Anforderung \textbf{A~2}, dass Alarmmeldungen einer Alarmanlage immer von einer bestimmten \gls{alptwo}-Instanz verarbeitet werden, und die Anforderung \textbf{A~3}, dass sie dabei sequentiell und nicht parallel verarbeitet werden, erfüllt. Wenn ein Consumer eine Alarmmeldung aus der Queue konsumiert, leitet er sie an \gls{srv}~2 weiter. Nach erfolgreicher Verarbeitung der Alarmmeldung durch \gls{srv}~2 wird die Alarmmeldung vom Consumer als erfolgreich verarbeitet betrachtet, positiv bestätigt und aus der Queue entfernt. Falls die Verarbeitung der Alarmmeldung durch \gls{srv}~2 fehlschlägt, wird die Alarmmeldung als fehlgeschlagen betrachtet und negativ mit \texttt{requeue = true} an die Queue bestätigt. Dadurch wird die Alarmmeldung erneut in dieselbe Queue in deren originalen Position zurückgestellt. Danach schließt der Consumer seinen \gls{amqp}-Channel, wodurch er sich beim Broker als Consumer der Queue abmeldet. Die zugrunde liegende \gls{tcp}-Verbindung zum Broker bleibt dabei bestehen. Anschließend öffnet der Consumer einen neuen Channel auf derselben Verbindung und registriert sich erneut an der Queue. Aufgrund der \texttt{x-single-active-consumer} Eigenschaft aktiviert der Broker automatisch einen anderen, bereits wartenden Consumer für die Queue, während sich der neu registrierte Consumer hinten in die Warteliste einreiht. Wartet kein anderer Consumer auf die Queue, etwa weil nur eine einzige \gls{alptwo}-Instanz betrieben wird, wird der neu registrierte Consumer selbst wieder aktiviert. Der aktivierte Consumer konsumiert die zuvor fehlgeschlagene Alarmmeldung erneut aus der Queue und leitet sie an \gls{srv}~2 weiter. Dieser Prozess wiederholt sich, bis die Alarmmeldung erfolgreich verarbeitet wurde. Bricht hingegen die Verbindung zwischen \gls{alptwo} und dem Broker ab, baut \gls{alptwo} eine neue Verbindung auf und registriert seine Consumer erneut an den Queues. Dadurch wird die Anforderung \textbf{A~4}, die Wiederholung fehlgeschlagener Alarmmeldungen unter Beibehaltung der Reihenfolge, erfüllt und somit die \textit{In-Order-Delivery} pro Alarmanlage garantiert. Abbildung~\ref{fig:alps-normal-sequence} visualisiert einen beispielhaften Verarbeitungsablauf von Alarmmeldungen zweier verschiedener Alarmanlagen \textit{A} und \textit{B} innerhalb von \gls{alptwo} im Zusammenhang mit \gls{srv}~2 als ein Sequenzdiagramm. Die Abbildung verdeutlicht, dass Alarmmeldungen verschiedener Alarmanlagen von verschiedenen \gls{alptwo}-Instanzen parallel verarbeitet werden können.
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=\textwidth]{./img/mermaid/alps_normal_sequence.pdf}
-      \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen in \acrshort{alps}.}
-      \label{fig:alps-normal-sequence}
+    \centering
+    \includegraphics[width=\textwidth]{./img/mermaid/alps_normal_sequence.pdf}
+    \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen in \acrshort{alps}.}
+    \label{fig:alps-normal-sequence}
 \end{figure}
 
 Abbildung~\ref{fig:alps-retry-sequence} zeigt die Verarbeitungslogik von Alarmmeldungen innerhalb von \gls{alptwo} im Falle einer negativen Bestätigung von \gls{srv}~2 als ein Sequenzdiagramm. Die Abbildung verdeutlicht, dass eine fehlgeschlagene Alarmmeldung von einer anderen \gls{alptwo}-Instanz übernommen und erneut an \gls{srv}~2 weitergeleitet wird.
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=0.826\textwidth]{./img/mermaid/alps_retry_sequence.pdf}
-      \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen in \acrshort{alps} beim Auftreten von Fehlern.}
-      \label{fig:alps-retry-sequence}
+    \centering
+    \includegraphics[width=0.826\textwidth]{./img/mermaid/alps_retry_sequence.pdf}
+    \caption{Sequenzdiagramm eines Verarbeitungsablaufs von Alarmmeldungen in \acrshort{alps} beim Auftreten von Fehlern.}
+    \label{fig:alps-retry-sequence}
 \end{figure}
 
 Jedoch sind die benutzten \gls{amqp}-Mechanismen und die Verarbeitungslogik von Alarmmeldungen innerhalb \gls{alptwo} nicht ausreichend, um die \textit{Exactly-Once-Delivery} zu garantieren. Falls die Verbindung zwischen \gls{alptwo} und dem Broker abbricht, nachdem eine Alarmmeldung an \gls{srv}~2 weitergeleitet wurde, und während auf eine Antwort gewartet wird, merkt der Broker diesen Ausfall und aktiviert einen anderen Consumer für die Queue. Der neue Consumer würde die gleiche Alarmmeldung konsumieren und erneut an \gls{srv}~2 weiterleiten, obwohl die Alarmmeldung bereits verarbeitet wurde. Dadurch wird die \textit{Exactly-Once-Delivery} verletzt. Abbildung~\ref{fig:alps-exactly-once-delivery-violation-sequence} visualisiert dieses Szenario als ein Sequenzdiagramm. Aufgrund dessen wird die Einführung von \gls{alpdedup} motiviert, um die \textit{Exactly-Once-Delivery} zu garantieren.
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=0.653\textwidth]{./img/mermaid/a_lps_exactly_once_delivery_dup.pdf}
-      \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Exactly-Once-Delivery in \acrshort{alps}.}
-      \label{fig:alps-exactly-once-delivery-violation-sequence}
+    \centering
+    \includegraphics[width=0.653\textwidth]{./img/mermaid/a_lps_exactly_once_delivery_dup.pdf}
+    \caption{Sequenzdiagramm eines Verarbeitungsablaufs einer Alarmmeldung zur Verletzung der Exactly-Once-Delivery in \acrshort{alps}.}
+    \label{fig:alps-exactly-once-delivery-violation-sequence}
 \end{figure}
 
 \subsection{Advanced Legacy Proxy Deduplication}
@@ -141,34 +141,34 @@ In \textit{Phase~1} und \textit{Phase~2} wird derselbe Seed wie in den Experimen
 In diesem Abschnitt wird die Einhaltung der \textit{Exactly-Once-Delivery} geprüft. Dazu werden die gleichen Fehlerbedingungen aus Abschnitt~\ref{sub-sub:lps-verletzung-eod} provoziert und die gleichen vier Hilfsservices verwendet (\textit{Alarmanlagen-Simulator}, \textit{\gls{tcp}-Proxy}, \textit{Server-Simulator} und \textit{Validator}). Der Aufbau des Experiments entspricht Abbildung~\ref{fig:exp-setup}, wobei \gls{lpone} und \gls{lptwo} durch \gls{alpone} und \gls{alptwo} ersetzt werden, $P_{\text{mqtt}}$ durch $P_{\text{amqp}}$ ersetzt wird und \gls{alpdedup} unmittelbar vor dem \textit{Server-Simulator} positioniert wird. Als Broker wird in allen Phasen \textit{RabbitMQ} in Version \textit{4.3.6} verwendet. Die für das Experiment ausgewählten Parameter werden in Tabelle~\ref{tab:exp-alps-eod-config} dargestellt.
 
 \begin{table}[H]
-      \centering
-      \renewcommand{\arraystretch}{1.4}
-      \caption{Konfiguration des Experiments zur Einhaltung der Exactly-Once-Delivery in \acrshort{alps}.}
-      \label{tab:exp-alps-eod-config}
-      \begin{tabular}{|l|l|l|}
-            \hline
-            \textbf{Parameter}                 & \textbf{Beschreibung}                          & \textbf{Wert} \\
-            \hline
-            $N_{\text{alp~1}}$                 & Anzahl \gls{alpone}-Instanzen                  & 1             \\
-            $N_{\text{alp~2}}$                 & Anzahl \gls{alptwo}-Instanzen                  & 1             \\
-            $N_{\text{queue}}$                 & Anzahl \gls{amqp}-Queues                       & 1             \\
-            $N_{\text{device}}$                & Anzahl Alarmanlagen                            & 1             \\
-            $N_{\text{alarm}}$                 & Anzahl Alarmmeldungen pro Alarmanlage          & 1             \\
-            $T_{\text{idle}}$                  & Server-Idle-Zeit                               & 20\,s         \\
-            $T_{\text{min,tcp}}^{\text{amqp}}$ & Minimale Verbindungsdauer im $P_{\text{amqp}}$ & 0\,s          \\
-            $T_{\text{max,tcp}}^{\text{amqp}}$ & Maximale Verbindungsdauer im $P_{\text{amqp}}$ & 4\,s          \\
-            $L_{\text{min,down}}^{\text{srv}}$ & Minimale Downstream-Latenz im $P_{\text{srv}}$ & 0\,ms/Byte    \\
-            $L_{\text{max,down}}^{\text{srv}}$ & Maximale Downstream-Latenz im $P_{\text{srv}}$ & 27\,ms/Byte   \\
-            $S$                                & Seed des Pseudozufallszahlengenerators         & 6             \\
-            \hline
-      \end{tabular}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Konfiguration des Experiments zur Einhaltung der Exactly-Once-Delivery in \acrshort{alps}.}
+    \label{tab:exp-alps-eod-config}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Parameter}                 & \textbf{Beschreibung}                          & \textbf{Wert} \\
+        \hline
+        $N_{\text{alp~1}}$                 & Anzahl \gls{alpone}-Instanzen                  & 1             \\
+        $N_{\text{alp~2}}$                 & Anzahl \gls{alptwo}-Instanzen                  & 1             \\
+        $N_{\text{queue}}$                 & Anzahl \gls{amqp}-Queues                       & 1             \\
+        $N_{\text{device}}$                & Anzahl Alarmanlagen                            & 1             \\
+        $N_{\text{alarm}}$                 & Anzahl Alarmmeldungen pro Alarmanlage          & 1             \\
+        $T_{\text{idle}}$                  & Server-Idle-Zeit                               & 20\,s         \\
+        $T_{\text{min,tcp}}^{\text{amqp}}$ & Minimale Verbindungsdauer im $P_{\text{amqp}}$ & 0\,s          \\
+        $T_{\text{max,tcp}}^{\text{amqp}}$ & Maximale Verbindungsdauer im $P_{\text{amqp}}$ & 4\,s          \\
+        $L_{\text{min,down}}^{\text{srv}}$ & Minimale Downstream-Latenz im $P_{\text{srv}}$ & 0\,ms/Byte    \\
+        $L_{\text{max,down}}^{\text{srv}}$ & Maximale Downstream-Latenz im $P_{\text{srv}}$ & 27\,ms/Byte   \\
+        $S$                                & Seed des Pseudozufallszahlengenerators         & 6             \\
+        \hline
+    \end{tabular}
 \end{table}
 
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-      \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen $N_{\text{lp~1}}$ und $N_{\text{lp~2}}$ in Abschnitt~\ref{sub-sub:lps-verletzung-eod}, damit die Ergebnisse mit denen von \gls{lps} vergleichbar sind.
-      \item $N_{\text{queue}}$: Da nur eine Alarmanlage simuliert wird, wird nur eine Queue benötigt. Weitere Queues würden von keiner Alarmmeldung genutzt werden.
+    \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen $N_{\text{lp~1}}$ und $N_{\text{lp~2}}$ in Abschnitt~\ref{sub-sub:lps-verletzung-eod}, damit die Ergebnisse mit denen von \gls{lps} vergleichbar sind.
+    \item $N_{\text{queue}}$: Da nur eine Alarmanlage simuliert wird, wird nur eine Queue benötigt. Weitere Queues würden von keiner Alarmmeldung genutzt werden.
 \end{itemize}
 
 Alle übrigen Parameter, einschließlich des Seeds, entsprechen denen in Abschnitt~\ref{sub-sub:lps-verletzung-eod}. Da auch die Antwortgröße des \textit{\gls{srv}~2 PROXY} mit 189\,Bytes der in \gls{lps} entspricht, ergibt sich dieselbe maximale Verzögerung von 5{,}103\,s. Da der Seed nicht das gesamte zeitliche Verhalten des Systems festlegt (siehe Abschnitt~\ref{sub-sub:lps-methodik}), ist jedoch nicht garantiert, dass die Fehlerbedingung, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf eintritt. Daher wird ihr Eintreten zusätzlich geprüft.
@@ -178,21 +178,21 @@ In diesem Experiment gilt ein Durchlauf erst dann als erfolgreich, wenn keine Al
 \paragraph{Ergebnisse} Die Fehlerbedingung $F$ ist in allen 59 Durchläufen eingetreten, sodass kein Durchlauf ausgeschlossen werden musste. Die Ergebnisse der 59 Durchläufe werden in Tabelle~\ref{tab:exp-alps-eod-results} zusammengefasst.
 
 \begin{table}[H]
-      \centering
-      \caption{Ergebnisse des Experiments zur Einhaltung der Exactly-Once-Delivery in \acrshort{alps}.}
-      \label{tab:exp-alps-eod-results}
-      \begin{tabular}{|l|l|l|l|}
-            \hline
-            \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
-            \hline
-            $N_{\text{sent}}$     & 1                           & 59                     & 100{,}0\,\%   \\
-            $N_{\text{received}}$ & 1                           & 59                     & 100{,}0\,\%   \\
-            $N_{\text{unique}}$   & 1                           & 59                     & 100{,}0\,\%   \\
-            $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
-            $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-            $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-            \hline
-      \end{tabular}
+    \centering
+    \caption{Ergebnisse des Experiments zur Einhaltung der Exactly-Once-Delivery in \acrshort{alps}.}
+    \label{tab:exp-alps-eod-results}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
+        \hline
+        $N_{\text{sent}}$     & 1                           & 59                     & 100{,}0\,\%   \\
+        $N_{\text{received}}$ & 1                           & 59                     & 100{,}0\,\%   \\
+        $N_{\text{unique}}$   & 1                           & 59                     & 100{,}0\,\%   \\
+        $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        \hline
+    \end{tabular}
 \end{table}
 
 In allen 59 Durchläufen gilt $N_{\text{dup}} = 0$; es wurde also keine Alarmmeldung mehrfach beim \textit{Server-Simulator} empfangen. Da in allen 59 Durchläufen die Fehlerbedingung $F$ eingetreten ist, wurde die Alarmmeldung nach dem Verbindungsabbruch erneut an \gls{alptwo} zugestellt und weitergeleitet. Dass sie dennoch nur einmal beim \textit{Server-Simulator} ankommt, ist auf die Deduplizierungslogik von \gls{alpdedup} zurückzuführen, die eine erneut zugestellte Alarmmeldung erkennt und nicht ein zweites Mal an den \textit{Server-Simulator} weiterleitet. Da in allen 59 Durchläufen das Erfolgskriterium erfüllt wurde, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein Durchlauf unter den geprüften Fehlerbedingungen die \textit{Exactly-Once-Delivery} mit einer Wahrscheinlichkeit von mindestens 95\,\% einhält.
@@ -203,34 +203,34 @@ In allen 59 Durchläufen gilt $N_{\text{dup}} = 0$; es wurde also keine Alarmmel
 In diesem Abschnitt wird die Einhaltung der \textit{In-Order-Delivery} geprüft. Der Aufbau des Experiments entspricht dem von \textit{Phase~1}. Analog zu \textit{Phase~1} (Abschnitt~\ref{sub-sub:exp-alps-phase-1}) werden die gleichen Parameter ausgewählt, die zur Verletzung der \textit{In-Order-Delivery} in \gls{lps} im Abschnitt~\ref{sub-sub:lps-verletzung-iod} geführt haben. Konkret werden die Parameter in Tabelle~\ref{tab:exp-alps-iod-config} ausgewählt.
 
 \begin{table}[H]
-      \centering
-      \renewcommand{\arraystretch}{1.4}
-      \caption{Konfiguration des Experiments zur Einhaltung der In-Order-Delivery in \acrshort{alps}.}
-      \label{tab:exp-alps-iod-config}
-      \begin{tabular}{|l|l|l|}
-            \hline
-            \textbf{Parameter}               & \textbf{Beschreibung}                        & \textbf{Wert} \\
-            \hline
-            $N_{\text{alp~1}}$               & Anzahl \gls{alpone}-Instanzen                & 1             \\
-            $N_{\text{alp~2}}$               & Anzahl \gls{alptwo}-Instanzen                & 2             \\
-            $N_{\text{queue}}$               & Anzahl \gls{amqp}-Queues                     & 2             \\
-            $N_{\text{device}}$              & Anzahl Alarmanlagen                          & 1             \\
-            $N_{\text{alarm}}$               & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
-            $I_{\text{alarm}}$               & Sendeintervall pro Alarmanlage               & 1\,s          \\
-            $T_{\text{idle}}$                & Server-Idle-Zeit                             & 20\,s         \\
-            $T_{\text{tcp}}^{\text{amqp}}$   & Verbindungsdauer im $P_{\text{amqp}}$        & $\infty$      \\
-            $L_{\text{min,up}}^{\text{srv}}$ & Minimale Upstream-Latenz im $P_{\text{srv}}$ & 0\,ms/Byte    \\
-            $L_{\text{max,up}}^{\text{srv}}$ & Maximale Upstream-Latenz im $P_{\text{srv}}$ & 10\,ms/Byte   \\
-            $S$                              & Seed des Pseudozufallszahlengenerators       & 6             \\
-            \hline
-      \end{tabular}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Konfiguration des Experiments zur Einhaltung der In-Order-Delivery in \acrshort{alps}.}
+    \label{tab:exp-alps-iod-config}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Parameter}               & \textbf{Beschreibung}                        & \textbf{Wert} \\
+        \hline
+        $N_{\text{alp~1}}$               & Anzahl \gls{alpone}-Instanzen                & 1             \\
+        $N_{\text{alp~2}}$               & Anzahl \gls{alptwo}-Instanzen                & 2             \\
+        $N_{\text{queue}}$               & Anzahl \gls{amqp}-Queues                     & 2             \\
+        $N_{\text{device}}$              & Anzahl Alarmanlagen                          & 1             \\
+        $N_{\text{alarm}}$               & Anzahl Alarmmeldungen pro Alarmanlage        & 2             \\
+        $I_{\text{alarm}}$               & Sendeintervall pro Alarmanlage               & 1\,s          \\
+        $T_{\text{idle}}$                & Server-Idle-Zeit                             & 20\,s         \\
+        $T_{\text{tcp}}^{\text{amqp}}$   & Verbindungsdauer im $P_{\text{amqp}}$        & $\infty$      \\
+        $L_{\text{min,up}}^{\text{srv}}$ & Minimale Upstream-Latenz im $P_{\text{srv}}$ & 0\,ms/Byte    \\
+        $L_{\text{max,up}}^{\text{srv}}$ & Maximale Upstream-Latenz im $P_{\text{srv}}$ & 10\,ms/Byte   \\
+        $S$                              & Seed des Pseudozufallszahlengenerators       & 6             \\
+        \hline
+    \end{tabular}
 \end{table}
 
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-      \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen $N_{\text{lp~1}}$ und $N_{\text{lp~2}}$ in Abschnitt~\ref{sub-sub:lps-verletzung-iod}, damit die Ergebnisse mit denen von \gls{lps} vergleichbar sind.
-      \item $N_{\text{queue}}$: Minimale Anzahl an Queues, die die parallele Verarbeitung von Alarmmeldungen durch zwei \gls{alptwo}-Instanzen erlaubt.
+    \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen $N_{\text{lp~1}}$ und $N_{\text{lp~2}}$ in Abschnitt~\ref{sub-sub:lps-verletzung-iod}, damit die Ergebnisse mit denen von \gls{lps} vergleichbar sind.
+    \item $N_{\text{queue}}$: Minimale Anzahl an Queues, die die parallele Verarbeitung von Alarmmeldungen durch zwei \gls{alptwo}-Instanzen erlaubt.
 \end{itemize}
 
 Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:lps-verletzung-iod}. Da auch die Requestgröße mit 411\,Bytes der in \gls{lps} entspricht, ergibt sich dieselbe maximale Verzögerung von 4{,}11\,s. Für dieses Experiment gilt ein Durchlauf als erfolgreich, wenn $N_{\text{loss}} = 0$ und $N_{\text{ooo}} = 0$. Im Gegensatz zu \textit{Phase~1} ist keine zusätzliche Prüfung der Fehlerbedingung erforderlich. In \textit{Phase~1} hängt das Eintreten der Fehlerbedingung vom zeitlichen Verlauf ab und kann in einzelnen Durchläufen ausbleiben. Die Fehlerbedingung, unter der \gls{lps} die \textit{In-Order-Delivery} verletzt hat, ist hingegen vollständig durch die Konfiguration festgelegt: Zwei \gls{alptwo}-Instanzen stehen für die Verarbeitung bereit, und die zufällige Upstream-Latenz im $P_{\text{srv}}$ kann die Weiterleitung einer Alarmmeldung um bis zu 4{,}11\,s und damit deutlich länger als $I_{\text{alarm}}$ verzögern. Diese Bedingung liegt somit in jedem Durchlauf vor.
@@ -238,21 +238,21 @@ Alle übrigen Parameter entsprechen denen in Abschnitt~\ref{sub-sub:lps-verletzu
 \paragraph{Ergebnisse} Die Ergebnisse der 59 Durchläufe werden in Tabelle~\ref{tab:exp-alps-iod-results} zusammengefasst.
 
 \begin{table}[H]
-      \centering
-      \caption{Ergebnisse des Experiments zur Einhaltung der In-Order-Delivery in \acrshort{alps}.}
-      \label{tab:exp-alps-iod-results}
-      \begin{tabular}{|l|l|l|l|}
-            \hline
-            \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
-            \hline
-            $N_{\text{sent}}$     & 2                           & 118                    & 100{,}0\,\%   \\
-            $N_{\text{received}}$ & 2                           & 118                    & 100{,}0\,\%   \\
-            $N_{\text{unique}}$   & 2                           & 118                    & 100{,}0\,\%   \\
-            $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
-            $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-            $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-            \hline
-      \end{tabular}
+    \centering
+    \caption{Ergebnisse des Experiments zur Einhaltung der In-Order-Delivery in \acrshort{alps}.}
+    \label{tab:exp-alps-iod-results}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
+        \hline
+        $N_{\text{sent}}$     & 2                           & 118                    & 100{,}0\,\%   \\
+        $N_{\text{received}}$ & 2                           & 118                    & 100{,}0\,\%   \\
+        $N_{\text{unique}}$   & 2                           & 118                    & 100{,}0\,\%   \\
+        $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        \hline
+    \end{tabular}
 \end{table}
 
 In allen 59 Durchläufen gelten $N_{\text{loss}} = 0$ und $N_{\text{ooo}} = 0$; es wurden also alle Alarmmeldungen empfangen und in der richtigen Reihenfolge verarbeitet. Dies ist auf das Zusammenspiel von \texttt{x-consistent-hash}, \texttt{prefetch\_count = 1} und \texttt{x-single-active-\allowbreak consumer} zurückzuführen, das sicherstellt, dass Alarmmeldungen einer einzelnen Alarmanlage stets sequentiell von derselben \gls{alptwo}-Instanz verarbeitet werden. Da in allen 59 Durchläufen das Erfolgskriterium erfüllt wurde, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein Durchlauf unter den geprüften Fehlerbedingungen die \textit{In-Order-Delivery} mit einer Wahrscheinlichkeit von mindestens 95\,\% einhält.
@@ -265,10 +265,10 @@ In dieser Phase wird \gls{alps} unter realitätsnahen Bedingungen im Normalbetri
 \paragraph{Aufbau}
 
 \begin{figure}[H]
-      \centering
-      \includegraphics[width=\textwidth]{./img/drawio/exp_alps.pdf}
-      \caption{Architektur der realitätsnahen Experimente zur Einhaltung der Delivery-Garantien in \acrshort{alps} und die Kommunikationspfade der beteiligten Komponenten.}
-      \label{fig:alps-exp-setup}
+    \centering
+    \includegraphics[width=\textwidth]{./img/drawio/exp_alps.pdf}
+    \caption{Architektur der realitätsnahen Experimente zur Einhaltung der Delivery-Garantien in \acrshort{alps} und die Kommunikationspfade der beteiligten Komponenten.}
+    \label{fig:alps-exp-setup}
 \end{figure}
 
 Abbildung~\ref{fig:alps-exp-setup} veranschaulicht die Architektur der realitätsnahen Experimente in \textit{Phase~3} und \textit{Phase~4} sowie die Interaktionen der einzelnen Komponenten. Der \textit{Alarmanlagen-Simulator} generiert periodisch Alarmmeldungen und sendet sie an \gls{alpone} über den \textit{\gls{srv}~1 PROXY}. \gls{alpone} nimmt die Alarmmeldungen entgegen und publiziert sie anhand der \texttt{device\_id} an den Broker. Die \textit{\gls{alptwo}}-Instanzen verbinden sich über den $P_{\text{amqp}}$ mit dem Broker und konsumieren die Alarmmeldungen. Nach dem Konsumieren einer Alarmmeldung leitet \gls{alptwo} sie über den $P_{\text{srv}}$ an den \textit{\gls{srv}~2 PROXY} weiter, der sie wiederum über den $P_{\text{server}}$ weiterleitet. Anschließend wird die Alarmmeldung an \gls{alpdedup} übergeben, welche unmittelbar vor dem \textit{Server-Simulator} positioniert ist und bereits verarbeitete Alarmmeldungen anhand des Tupels \texttt{(device\_id, triggertime)} erkennt und verwirft, sodass nur eindeutige Alarmmeldungen an den \textit{Server-Simulator} weitergeleitet werden. Der \textit{Server-Simulator} über\-nimmt dabei, wie schon im Experiment zu \gls{lps}, die Rolle des ursprünglichen Services \gls{srv}~3 von \gls{marc}, verarbeitet die Alarmmeldungen anhand der durch das Vorhersagemodell bestimmten Verarbeitungszeit und speichert sie abschließend ab.
@@ -280,9 +280,9 @@ Die Komponenten kommunizieren über drei \textit{\gls{tcp}-Proxies}. Der $P_{\te
 Die Verarbeitungszeiten von \gls{marc} werden mithilfe eines trainierten Vorhersagemodells nachgebildet, das nach dem \gls{rast}-Ansatz erstellt wurde~\citep{rast22, rast25}. Das Modell wurde mit Regressionsverfahren aus den Request-Logs von \gls{marc} trainiert. Diese Logs enthalten für jeden Request den Typ sowie die Zeitstempel für Beginn und Ende der Verarbeitung. Aus mehreren Regressionsverfahren wurde das mit dem besten Score ausgewählt. Das Training selbst ist nicht Teil dieser Masterarbeit und wird in~\citep{rast22, rast25} im Detail beschrieben. Das Modell erwartet drei Eingabewerte:
 
 \begin{itemize}
-      \item \texttt{PR1N}: Anzahl paralleler Requests zu Beginn des Requests
-      \item \texttt{PR2N}: Anzahl paralleler Requests, die während der Verarbeitung abgeschlossen wurden
-      \item \texttt{CMD}: Request-Typ
+    \item \texttt{PR1N}: Anzahl paralleler Requests zu Beginn des Requests
+    \item \texttt{PR2N}: Anzahl paralleler Requests, die während der Verarbeitung abgeschlossen wurden
+    \item \texttt{CMD}: Request-Typ
 \end{itemize}
 
 Die Ausgabe des Modells ist ein einzelner Zahlenwert: die vorhergesagte Verarbeitungszeit eines Requests. Sie beschreibt, wie lange \gls{marc} für den Request voraussichtlich braucht. Die Netzwerklatenz ist darin nicht enthalten. Um das Modell ins Experiment zu integrieren, wird der \textit{Server-Simulator} so modifiziert, dass die Parameter \texttt{PR1N} und \texttt{PR2N} für jeden Request berechnet werden. Der Request-Typ \texttt{CMD} gibt an, welche Art von Anfrage ein Request an \gls{marc} stellt. In den Request-Logs von \gls{marc} kommen 347 verschiedene Typen vor. Da die Häufigkeit der Request-Typen nicht bekannt ist, wird \texttt{CMD} bei jedem eingehenden Request zufällig aus diesen 347 Request-Typen gezogen. Anschließend werden die drei Parameter dem Modell übergeben, und der \textit{Server-Simulator} verzögert seinen Response gemäß der vorhergesagten Verarbeitungszeit. Zusätzlich wird wie in~\citep{rast22} eine konstante Hintergrundlast von 70 Requests pro Sekunde erzeugt. Sie entspricht dem höchsten Wert im Lastmuster von \gls{marc}, stellt die Requests an die übrigen Services von \gls{marc} dar und fließt ebenfalls in \texttt{PR1N} und \texttt{PR2N} des Vorhersagemodells ein.
@@ -292,45 +292,45 @@ Die Ausgabe des Modells ist ein einzelner Zahlenwert: die vorhergesagte Verarbei
 Die Parameter des Experiments sind in Tabelle~\ref{tab:exp-alps-normal-config} zusammengefasst.
 
 \begin{table}[H]
-      \centering
-      \renewcommand{\arraystretch}{1.4}
-      \caption{Konfiguration des realitätsnahen Experiments im Normalbetrieb in \acrshort{alps}.}
-      \label{tab:exp-alps-normal-config}
-      \begin{tabular}{|l|l|l|}
-            \hline
-            \textbf{Parameter}  & \textbf{Beschreibung}                                                               & \textbf{Wert} \\
-            \hline
-            $N_{\text{alp~1}}$  & Anzahl \gls{alpone}-Instanzen                                                       & 3             \\
-            $N_{\text{alp~2}}$  & Anzahl \gls{alptwo}-Instanzen                                                       & 3             \\
-            $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                                                            & 3             \\
-            $N_{\text{device}}$ & Anzahl Alarmanlagen                                                                 & 50            \\
-            $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage                                               & 60            \\
-            $I_{\text{alarm}}$  & Sendeintervall pro Alarmanlage                                                      & 5\,s          \\
-            $T_{\text{idle}}$   & Server-Idle-Zeit                                                                    & 20\,s         \\
-            $R_{\text{bg}}$     & Hintergrundlast                                                                     & 70\,s$^{-1}$  \\
-            $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$ & 0{,}0\,\%     \\
-            $T_{\text{tcp}}$    & Verbindungsdauer in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$     & $\infty$      \\
-            $L_{\text{up}}$     & Upstream-Latenz in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$      & 0\,ms/Byte    \\
-            $L_{\text{down}}$   & Downstream-Latenz in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$    & 0\,ms/Byte    \\
-            $S$                 & Seed des Pseudozufallszahlengenerators                                              & $-$           \\
-            \hline
-      \end{tabular}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Konfiguration des realitätsnahen Experiments im Normalbetrieb in \acrshort{alps}.}
+    \label{tab:exp-alps-normal-config}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Parameter}  & \textbf{Beschreibung}                                                               & \textbf{Wert} \\
+        \hline
+        $N_{\text{alp~1}}$  & Anzahl \gls{alpone}-Instanzen                                                       & 3             \\
+        $N_{\text{alp~2}}$  & Anzahl \gls{alptwo}-Instanzen                                                       & 3             \\
+        $N_{\text{queue}}$  & Anzahl \gls{amqp}-Queues                                                            & 3             \\
+        $N_{\text{device}}$ & Anzahl Alarmanlagen                                                                 & 50            \\
+        $N_{\text{alarm}}$  & Anzahl Alarmmeldungen pro Alarmanlage                                               & 60            \\
+        $I_{\text{alarm}}$  & Sendeintervall pro Alarmanlage                                                      & 5\,s          \\
+        $T_{\text{idle}}$   & Server-Idle-Zeit                                                                    & 20\,s         \\
+        $R_{\text{bg}}$     & Hintergrundlast                                                                     & 70\,s$^{-1}$  \\
+        $E_{\text{tcp}}$    & \gls{tcp}-Fehlerrate in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$ & 0{,}0\,\%     \\
+        $T_{\text{tcp}}$    & Verbindungsdauer in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$     & $\infty$      \\
+        $L_{\text{up}}$     & Upstream-Latenz in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$      & 0\,ms/Byte    \\
+        $L_{\text{down}}$   & Downstream-Latenz in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$    & 0\,ms/Byte    \\
+        $S$                 & Seed des Pseudozufallszahlengenerators                                              & $-$           \\
+        \hline
+    \end{tabular}
 \end{table}
 
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-      \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen der Anzahl der \gls{srv}~1 und \gls{srv}~2-Instanzen in \gls{marc}.
+    \item $N_{\text{alp~1}}$, $N_{\text{alp~2}}$: Entsprechen der Anzahl der \gls{srv}~1 und \gls{srv}~2-Instanzen in \gls{marc}.
 
-      \item $N_{\text{queue}}$: Minimale Anzahl an Queues, bei der jede \gls{alptwo}-Instanz eine Queue aktiv verarbeiten kann.
+    \item $N_{\text{queue}}$: Minimale Anzahl an Queues, bei der jede \gls{alptwo}-Instanz eine Queue aktiv verarbeiten kann.
 
-      \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: Laut~\citep{rast22} verarbeitet \gls{marc} etwa 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. Würde das Experiment diese Last in Echtzeit nachbilden, dauerte ein Durchlauf 24 Stunden, und 59 Wiederholungen bräuchten 59 Tage. Das ist im zeitlichen Rahmen dieser Masterarbeit nicht möglich. Stattdessen werden die Parameter so gewählt, dass ein Durchlauf etwa 5 Minuten dauert und alle 59 Durchläufe zusammen etwa 5 Stunden benötigen. Die Anzahl der Alarmanlagen 50 ist groß genug, damit die Alarmmeldungen über den \texttt{x-consistent-hash} Exchange auf alle drei Queues verteilt werden. Pro Alarmanlage werden 60 Alarmmeldungen gesendet, damit die Reihenfolge über aufeinanderfolgende Alarmmeldungen einer Alarmanlage geprüft wird. Die Alarmmeldungsrate im Experiment liegt damit deutlich über der des realen \gls{marc}-Systems: Im Experiment werden bei 50 Alarmanlagen und einem Sendeintervall von 5\,s etwa 10 Alarmmeldungen pro Sekunde gesendet, im realen \gls{marc} durchschnittlich etwa $13.000 / 86.400\,\text{s} \approx 0{,}15$ Alarmmeldungen pro Sekunde. Dieses Vorgehen ist als Stresstest zulässig: Die Delivery-Garantien müssen unabhängig von der Last gelten, und eine höhere Rate erhöht die Wahrscheinlichkeit, dass sich Alarmmeldungen überlappend verarbeiten lassen und kritische Konstellationen auftreten.
+    \item $N_{\text{device}}$, $N_{\text{alarm}}$, $I_{\text{alarm}}$: Laut~\citep{rast22} verarbeitet \gls{marc} etwa 13.000 Alarmmeldungen pro Tag von insgesamt 82.000 Alarmanlagen. Würde das Experiment diese Last in Echtzeit nachbilden, dauerte ein Durchlauf 24 Stunden, und 59 Wiederholungen bräuchten 59 Tage. Das ist im zeitlichen Rahmen dieser Masterarbeit nicht möglich. Stattdessen werden die Parameter so gewählt, dass ein Durchlauf etwa 5 Minuten dauert und alle 59 Durchläufe zusammen etwa 5 Stunden benötigen. Die Anzahl der Alarmanlagen 50 ist groß genug, damit die Alarmmeldungen über den \texttt{x-consistent-hash} Exchange auf alle drei Queues verteilt werden. Pro Alarmanlage werden 60 Alarmmeldungen gesendet, damit die Reihenfolge über aufeinanderfolgende Alarmmeldungen einer Alarmanlage geprüft wird. Die Alarmmeldungsrate im Experiment liegt damit deutlich über der des realen \gls{marc}-Systems: Im Experiment werden bei 50 Alarmanlagen und einem Sendeintervall von 5\,s etwa 10 Alarmmeldungen pro Sekunde gesendet, im realen \gls{marc} durchschnittlich etwa $13.000 / 86.400\,\text{s} \approx 0{,}15$ Alarmmeldungen pro Sekunde. Dieses Vorgehen ist als Stresstest zulässig: Die Delivery-Garantien müssen unabhängig von der Last gelten, und eine höhere Rate erhöht die Wahrscheinlichkeit, dass sich Alarmmeldungen überlappend verarbeiten lassen und kritische Konstellationen auftreten.
 
-      \item $R_{\text{bg}}$: Entspricht dem Wert aus~\citep{rast22}.
+    \item $R_{\text{bg}}$: Entspricht dem Wert aus~\citep{rast22}.
 
-      \item $E_{\text{tcp}}$, $T_{\text{tcp}}$, $L_{\text{up}}$ und $L_{\text{down}}$: Im Normalbetrieb werden keine Netzwerkfehler provoziert. Die Verbindungen in allen Proxies bleiben daher unbegrenzt bestehen, und der Datenverkehr wird nicht zusätzlich verzögert.
+    \item $E_{\text{tcp}}$, $T_{\text{tcp}}$, $L_{\text{up}}$ und $L_{\text{down}}$: Im Normalbetrieb werden keine Netzwerkfehler provoziert. Die Verbindungen in allen Proxies bleiben daher unbegrenzt bestehen, und der Datenverkehr wird nicht zusätzlich verzögert.
 
-      \item $S$: Es wird kein Seed festgelegt, damit sich die Durchläufe unabhängig voneinander unterscheiden (siehe Abschnitt~\ref{sub-sec:alps-experimentelle-evaluation}).
+    \item $S$: Es wird kein Seed festgelegt, damit sich die Durchläufe unabhängig voneinander unterscheiden (siehe Abschnitt~\ref{sub-sec:alps-experimentelle-evaluation}).
 \end{itemize}
 
 Ein Durchlauf gilt als erfolgreich, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$.
@@ -338,21 +338,21 @@ Ein Durchlauf gilt als erfolgreich, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} 
 \paragraph{Ergebnisse} Die Ergebnisse der 59 Durchläufe werden in Tabelle~\ref{tab:exp-alps-normal-results} zusammengefasst.
 
 \begin{table}[H]
-      \centering
-      \caption{Ergebnisse des realitätsnahen Experiments im Normalbetrieb in \acrshort{alps}.}
-      \label{tab:exp-alps-normal-results}
-      \begin{tabular}{|l|l|l|l|}
-            \hline
-            \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
-            \hline
-            $N_{\text{sent}}$     & 3000                        & 177000                 & 100{,}0\,\%   \\
-            $N_{\text{received}}$ & 3000                        & 177000                 & 100{,}0\,\%   \\
-            $N_{\text{unique}}$   & 3000                        & 177000                 & 100{,}0\,\%   \\
-            $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
-            $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-            $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-            \hline
-      \end{tabular}
+    \centering
+    \caption{Ergebnisse des realitätsnahen Experiments im Normalbetrieb in \acrshort{alps}.}
+    \label{tab:exp-alps-normal-results}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
+        \hline
+        $N_{\text{sent}}$     & 3000                        & 177000                 & 100{,}0\,\%   \\
+        $N_{\text{received}}$ & 3000                        & 177000                 & 100{,}0\,\%   \\
+        $N_{\text{unique}}$   & 3000                        & 177000                 & 100{,}0\,\%   \\
+        $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        \hline
+    \end{tabular}
 \end{table}
 
 In allen 59 Durchläufen gelten $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$; es wurden also alle 177.000 Alarmmeldungen genau einmal und in der richtigen Reihenfolge verarbeitet. Im Gegensatz zu \textit{Phase~1} und \textit{Phase~2} wurden hier mehrere \gls{alpone}- und \gls{alptwo}-Instanzen gleichzeitig betrieben, und die Alarmmeldungen von 50 Alarmanlagen wurden über den \texttt{x-consistent-hash} Exchange auf drei Queues verteilt. Die Kombination aus \texttt{x-single-active-\allowbreak consumer} und \texttt{prefetch\_count = 1} sorgt dabei dafür, dass jede Queue zu jeder Zeit nur von einer einzigen \gls{alptwo}-Instanz verarbeitet wird und diese \gls{alptwo}-Instanz immer nur eine Alarmmeldung gleichzeitig verarbeitet. Dadurch werden Alarmmeldungen verschiedener Alarmanlagen parallel von verschiedenen \gls{alptwo}-Instanzen verarbeitet, während Alarmmeldungen einer einzelnen Alarmanlage weiterhin sequentiell von derselben \gls{alptwo}-Instanz verarbeitet werden. Die Ergebnisse zeigen, dass die Delivery-Garantien auch bei paralleler Verarbeitung und realitätsnaher Last erhalten bleiben. Da in allen 59 Durchläufen das Erfolgskriterium erfüllt wurde, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein Durchlauf im Normalbetrieb unter realitätsnaher Last die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} mit einer Wahrscheinlichkeit von mindestens 95\,\% einhält.
@@ -369,37 +369,37 @@ In dieser Phase wird \gls{alps} unter realitätsnaher Last und provozierten Netz
 Tabelle~\ref{tab:exp-alps-realistic-config} fasst die Parameter zusammen, die sich gegenüber \textit{Phase~3} ändern oder hinzukommen. Alle übrigen Parameter entsprechen Tabelle~\ref{tab:exp-alps-normal-config}.
 
 \begin{table}[H]
-      \centering
-      \renewcommand{\arraystretch}{1.4}
-      \caption{Geänderte und zusätzliche Parameter des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps} gegenüber \textit{Phase~3}.}
-      \label{tab:exp-alps-realistic-config}
-      \begin{tabular}{|l|l|l|}
-            \hline
-            \textbf{Parameter}               & \textbf{Beschreibung}                                                     & \textbf{Wert} \\
-            \hline
-            $T_{\text{P80}}$                 & 80.~Perzentil der Antwortzeit aus Sicht von \gls{alptwo}                  & 84\,ms        \\
-            $E_{\text{tcp}}$                 & Fehlerrate in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$ & 20{,}0\,\%    \\
-            $T_{\text{tcp}}^{\text{srv}}$    & Verbindungsdauer im $P_{\text{srv}}$                                      & 84\,ms        \\
-            $T_{\text{tcp}}^{\text{server}}$ & Verbindungsdauer im $P_{\text{server}}$                                   & 84\,ms        \\
-            $T_{\text{tcp}}^{\text{amqp}}$   & Verbindungsdauer im $P_{\text{amqp}}$                                     & 105\,ms       \\
-            \hline
-      \end{tabular}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Geänderte und zusätzliche Parameter des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps} gegenüber \textit{Phase~3}.}
+    \label{tab:exp-alps-realistic-config}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Parameter}               & \textbf{Beschreibung}                                                     & \textbf{Wert} \\
+        \hline
+        $T_{\text{P80}}$                 & 80.~Perzentil der Antwortzeit aus Sicht von \gls{alptwo}                  & 84\,ms        \\
+        $E_{\text{tcp}}$                 & Fehlerrate in $P_{\text{amqp}}$, $P_{\text{srv}}$ und $P_{\text{server}}$ & 20{,}0\,\%    \\
+        $T_{\text{tcp}}^{\text{srv}}$    & Verbindungsdauer im $P_{\text{srv}}$                                      & 84\,ms        \\
+        $T_{\text{tcp}}^{\text{server}}$ & Verbindungsdauer im $P_{\text{server}}$                                   & 84\,ms        \\
+        $T_{\text{tcp}}^{\text{amqp}}$   & Verbindungsdauer im $P_{\text{amqp}}$                                     & 105\,ms       \\
+        \hline
+    \end{tabular}
 \end{table}
 
 Die Auswahl der Parameter begründet sich wie folgt:
 
 \begin{itemize}
-      \item $T_{\text{P80}}$: In \textit{Phase~3} bestimmtes 80.~Perzentil der Antwortzeit aus Sicht der \gls{alptwo}-Instanzen (siehe Abschnitt~\ref{sub-sub:exp-alps-phase-3}). Es dient als Referenzwert für die Kalibrierung der \textit{\gls{tcp}-Proxies}.
+    \item $T_{\text{P80}}$: In \textit{Phase~3} bestimmtes 80.~Perzentil der Antwortzeit aus Sicht der \gls{alptwo}-Instanzen (siehe Abschnitt~\ref{sub-sub:exp-alps-phase-3}). Es dient als Referenzwert für die Kalibrierung der \textit{\gls{tcp}-Proxies}.
 
-      \item $E_{\text{tcp}}$: Laut den Messungen von \textit{Cloudflare} enden weltweit etwa 20\,\% der neuen \gls{tcp}-Verbindungen innerhalb der ersten 10 Pakete durch einen Reset oder Timeout~\citep{valenta2024}. Da keine Informationen über die Häufigkeit von Netzwerkfehlern in \gls{marc} vorliegen, wird dieser Wert einheitlich für alle \textit{\gls{tcp}-Proxies} als \textit{pessimistische Obergrenze} verwendet. Er stammt aus Internet-Verbindungen und ist keine realistische Rate für \gls{marc}. Da die Delivery-Garantien unabhängig von der Fehlerrate gelten müssen, bestimmt die Rate nur, wie oft kritische Fehlerbedingungen auftreten.
+    \item $E_{\text{tcp}}$: Laut den Messungen von \textit{Cloudflare} enden weltweit etwa 20\,\% der neuen \gls{tcp}-Verbindungen innerhalb der ersten 10 Pakete durch einen Reset oder Timeout~\citep{valenta2024}. Da keine Informationen über die Häufigkeit von Netzwerkfehlern in \gls{marc} vorliegen, wird dieser Wert einheitlich für alle \textit{\gls{tcp}-Proxies} als \textit{pessimistische Obergrenze} verwendet. Er stammt aus Internet-Verbindungen und ist keine realistische Rate für \gls{marc}. Da die Delivery-Garantien unabhängig von der Fehlerrate gelten müssen, bestimmt die Rate nur, wie oft kritische Fehlerbedingungen auftreten.
 
-      \item $T_{\text{tcp}}^{\text{srv}}$ und $T_{\text{tcp}}^{\text{server}}$: Die Verbindungsdauern in $P_{\text{srv}}$ und $P_{\text{server}}$ entsprechen $T_{\text{P80}}$. Da die Verbindungen für mehrere Requests wiederverwendet werden (siehe \textit{Auswertung der Netzwerkfehler} weiter unten), liegt die Verbindungsdauer damit in der Größenordnung der Antwortzeit, sodass regelmäßig Verbindungen getrennt werden, während eine Alarmmeldung verarbeitet wird.
+    \item $T_{\text{tcp}}^{\text{srv}}$ und $T_{\text{tcp}}^{\text{server}}$: Die Verbindungsdauern in $P_{\text{srv}}$ und $P_{\text{server}}$ entsprechen $T_{\text{P80}}$. Da die Verbindungen für mehrere Requests wiederverwendet werden (siehe \textit{Auswertung der Netzwerkfehler} weiter unten), liegt die Verbindungsdauer damit in der Größenordnung der Antwortzeit, sodass regelmäßig Verbindungen getrennt werden, während eine Alarmmeldung verarbeitet wird.
 
-      \item $T_{\text{tcp}}^{\text{amqp}}$: Die Verbindungsdauer im $P_{\text{amqp}}$ wird heuristisch so gewählt, dass $T_{\text{P80}}$ 80\,\% davon entspricht:
-            \begin{equation}
-                  T_{\text{tcp}}^{\text{amqp}} = \frac{T_{\text{P80}}}{0{,}8} = \frac{5}{4} \cdot T_{\text{P80}} = 105\,\text{ms}
-            \end{equation}
-            Ziel ist, dass die \gls{amqp}-Verbindung zwischen \gls{alptwo} und dem Broker bei etwa 20\,\% der Übertragungsversuche getrennt wird, während \gls{alptwo} auf eine Antwort des \textit{\gls{srv}~2 PROXY} wartet. Ob dieses Ziel erreicht wird, wird nach dem Experiment anhand der tatsächlichen Trennungszeitpunkte geprüft (siehe Tabelle~\ref{tab:exp-alps-realistic-f}).
+    \item $T_{\text{tcp}}^{\text{amqp}}$: Die Verbindungsdauer im $P_{\text{amqp}}$ wird heuristisch so gewählt, dass $T_{\text{P80}}$ 80\,\% davon entspricht:
+          \begin{equation}
+              T_{\text{tcp}}^{\text{amqp}} = \frac{T_{\text{P80}}}{0{,}8} = \frac{5}{4} \cdot T_{\text{P80}} = 105\,\text{ms}
+          \end{equation}
+          Ziel ist, dass die \gls{amqp}-Verbindung zwischen \gls{alptwo} und dem Broker bei etwa 20\,\% der Übertragungsversuche getrennt wird, während \gls{alptwo} auf eine Antwort des \textit{\gls{srv}~2 PROXY} wartet. Ob dieses Ziel erreicht wird, wird nach dem Experiment anhand der tatsächlichen Trennungszeitpunkte geprüft (siehe Tabelle~\ref{tab:exp-alps-realistic-f}).
 \end{itemize}
 
 Analog zu \textit{Phase~3} gilt ein Durchlauf als erfolgreich, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$.
@@ -407,29 +407,29 @@ Analog zu \textit{Phase~3} gilt ein Durchlauf als erfolgreich, wenn $N_{\text{lo
 \paragraph{Ergebnisse} Die Ergebnisse der 59 Durchläufe werden in Tabelle~\ref{tab:exp-alps-realistic-results} zusammengefasst.
 
 \begin{table}[H]
-      \centering
-      \caption{Ergebnisse des realitätsnahen Experiments zur Einhaltung der Delivery-Ga\-ran\-ti\-en unter Fehlerbedingungen in \acrshort{alps}.}
-      \label{tab:exp-alps-realistic-results}
-      \begin{tabular}{|l|l|l|l|}
-            \hline
-            \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
-            \hline
-            $N_{\text{sent}}$     & 3000                        & 177000                 & 100{,}0\,\%   \\
-            $N_{\text{received}}$ & 3000                        & 177000                 & 100{,}0\,\%   \\
-            $N_{\text{unique}}$   & 3000                        & 177000                 & 100{,}0\,\%   \\
-            $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
-            $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-            $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
-            \hline
-      \end{tabular}
+    \centering
+    \caption{Ergebnisse des realitätsnahen Experiments zur Einhaltung der Delivery-Ga\-ran\-ti\-en unter Fehlerbedingungen in \acrshort{alps}.}
+    \label{tab:exp-alps-realistic-results}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
+        \hline
+        $N_{\text{sent}}$     & 3000                        & 177000                 & 100{,}0\,\%   \\
+        $N_{\text{received}}$ & 3000                        & 177000                 & 100{,}0\,\%   \\
+        $N_{\text{unique}}$   & 3000                        & 177000                 & 100{,}0\,\%   \\
+        $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
+        \hline
+    \end{tabular}
 \end{table}
 
 In allen 59 Durchläufen gelten $N_{\text{loss}} = 0$, $N_{\text{ooo}} = 0$ und $N_{\text{dup}} = 0$; es wurde also trotz der provozierten Netzwerkfehler keine Alarmmeldung verloren, mehrfach verarbeitet oder in der falschen Reihenfolge empfangen. Die Ergebnisse sind damit identisch mit denen aus \textit{Phase~3}. Die provozierten Netzwerkfehler haben keinen Einfluss auf die Delivery-Garantien. Dies lässt sich anhand der beiden Fehlerarten erklären:
 
 \begin{itemize}
-      \item \textbf{Fehler in $P_{\text{srv}}$ und $P_{\text{server}}$}: Bricht die Verbindung zwischen \gls{alptwo} und dem \textit{\gls{srv}~2 PROXY} bzw.~zwischen dem \textit{\gls{srv}~2 PROXY} und \gls{alpdedup} ab, bekommt \gls{alptwo} keine positive Bestätigung. Daher wird die Alarmmeldung mit \texttt{requeue = true} negativ bestätigt und an ihre originale Position in der Queue zurückgestellt. Danach wird, sofern vorhanden, ein anderer wartender Consumer aktiviert, der die Alarmmeldung erneut weiterleitet. Dadurch geht keine Alarmmeldung verloren und die Reihenfolge bleibt erhalten. Falls die Alarmmeldung vor dem Verbindungsabbruch bereits verarbeitet wurde, erkennt \gls{alpdedup} die wiederholte Alarmmeldung und leitet sie nicht erneut weiter.
+    \item \textbf{Fehler in $P_{\text{srv}}$ und $P_{\text{server}}$}: Bricht die Verbindung zwischen \gls{alptwo} und dem \textit{\gls{srv}~2 PROXY} bzw.~zwischen dem \textit{\gls{srv}~2 PROXY} und \gls{alpdedup} ab, bekommt \gls{alptwo} keine positive Bestätigung. Daher wird die Alarmmeldung mit \texttt{requeue = true} negativ bestätigt und an ihre originale Position in der Queue zurückgestellt. Danach wird, sofern vorhanden, ein anderer wartender Consumer aktiviert, der die Alarmmeldung erneut weiterleitet. Dadurch geht keine Alarmmeldung verloren und die Reihenfolge bleibt erhalten. Falls die Alarmmeldung vor dem Verbindungsabbruch bereits verarbeitet wurde, erkennt \gls{alpdedup} die wiederholte Alarmmeldung und leitet sie nicht erneut weiter.
 
-      \item \textbf{Fehler im $P_{\text{amqp}}$}: Bricht die Verbindung zwischen \gls{alptwo} und dem Broker ab, erkennt der Broker den Verbindungsabbruch und aktiviert einen anderen Consumer in einer anderen \gls{alptwo}-Instanz für die Queue. Dieser konsumiert die noch nicht bestätigte Alarmmeldung erneut und leitet sie weiter. Dies entspricht der Fehlerbedingung $F$ aus \textit{Phase~1}. Auch hier verhindert \gls{alpdedup}, dass eine wiederholte Alarmmeldung erneut an den \textit{Server-Simulator} weitergeleitet wird.
+    \item \textbf{Fehler im $P_{\text{amqp}}$}: Bricht die Verbindung zwischen \gls{alptwo} und dem Broker ab, erkennt der Broker den Verbindungsabbruch und aktiviert einen anderen Consumer in einer anderen \gls{alptwo}-Instanz für die Queue. Dieser konsumiert die noch nicht bestätigte Alarmmeldung erneut und leitet sie weiter. Dies entspricht der Fehlerbedingung $F$ aus \textit{Phase~1}. Auch hier verhindert \gls{alpdedup}, dass eine wiederholte Alarmmeldung erneut an den \textit{Server-Simulator} weitergeleitet wird.
 \end{itemize}
 
 Da in allen 59 Durchläufen das Erfolgskriterium erfüllt wurde, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein Durchlauf unter realitätsnaher Last und Netzwerkfehlern die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} mit einer Wahrscheinlichkeit von mindestens 95\,\% einhält. Diese Aussage gilt unter den in Abschnitt~\ref{sub-sub:exp-alps-limitationen} beschriebenen Limitationen, insbesondere ohne Ausfälle von \gls{alpone}, des Brokers und von \gls{alpdedup}.
@@ -439,52 +439,52 @@ Da in allen 59 Durchläufen das Erfolgskriterium erfüllt wurde, kann mit einer 
 Damit die Ergebnisse aussagekräftig sind, muss geprüft werden, ob die \textit{\gls{tcp}-Proxies} tatsächlich Netzwerkfehler erzeugt haben. Dazu wird ausgewertet, wie viele Verbindungen jeder Proxy über alle 59 Durchläufe akzeptiert, abgelehnt und getrennt hat. Tabelle~\ref{tab:exp-alps-realistic-connections} fasst die Werte zusammen.
 
 \begin{table}[H]
-      \centering
-      \caption{Verbindungen pro \textit{\gls{tcp}-Proxy} über alle Durchläufe des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps}.}
-      \label{tab:exp-alps-realistic-connections}
-      \begin{tabular}{|l|r|r|r|}
-            \hline
-            \textbf{Proxy}      & \textbf{Akzeptiert} & \textbf{Abgelehnt}  & \textbf{Getrennt}     \\
-            \hline
-            $P_{\text{amqp}}$   & 246.793             & 61.742 (20{,}0\,\%) & 246.698 (100{,}0\,\%) \\
-            $P_{\text{srv}}$    & 314.933             & 79.159 (20{,}1\,\%) & 314.925 (100{,}0\,\%) \\
-            $P_{\text{server}}$ & 287.364             & 71.939 (20{,}0\,\%) & 287.353 (100{,}0\,\%) \\
-            \hline
-      \end{tabular}
+    \centering
+    \caption{Verbindungen pro \textit{\gls{tcp}-Proxy} über alle Durchläufe des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps}.}
+    \label{tab:exp-alps-realistic-connections}
+    \begin{tabular}{|l|r|r|r|}
+        \hline
+        \textbf{Proxy}      & \textbf{Akzeptiert} & \textbf{Abgelehnt}  & \textbf{Getrennt}     \\
+        \hline
+        $P_{\text{amqp}}$   & 246.793             & 61.742 (20{,}0\,\%) & 246.698 (100{,}0\,\%) \\
+        $P_{\text{srv}}$    & 314.933             & 79.159 (20{,}1\,\%) & 314.925 (100{,}0\,\%) \\
+        $P_{\text{server}}$ & 287.364             & 71.939 (20{,}0\,\%) & 287.353 (100{,}0\,\%) \\
+        \hline
+    \end{tabular}
 \end{table}
 
 Die Spalten bedeuten:
 
 \begin{itemize}
-      \item \textbf{Akzeptiert}: Verbindungen, die der Proxy angenommen und weitergeleitet hat.
-      \item \textbf{Abgelehnt}: Verbindungsversuche, die der Proxy direkt abgelehnt hat.
-      \item \textbf{Getrennt}: Akzeptierte Verbindungen, die der Proxy nach Ablauf der Verbindungsdauer $T_{\text{tcp}}$ getrennt hat.
+    \item \textbf{Akzeptiert}: Verbindungen, die der Proxy angenommen und weitergeleitet hat.
+    \item \textbf{Abgelehnt}: Verbindungsversuche, die der Proxy direkt abgelehnt hat.
+    \item \textbf{Getrennt}: Akzeptierte Verbindungen, die der Proxy nach Ablauf der Verbindungsdauer $T_{\text{tcp}}$ getrennt hat.
 \end{itemize}
 
 Die Ablehnungsrate liegt bei allen drei Proxies bei etwa 20\,\% und entspricht damit der konfigurierten Fehlerrate $E_{\text{tcp}}$. Auch die Trennungsrate liegt bei allen drei Proxies bei nahezu 100{,}0\,\%. Das bedeutet, dass fast keine akzeptierte Verbindung von \gls{alptwo} oder dem \textit{\gls{srv}~2 PROXY} selbst beendet wird, sondern nahezu jede Verbindung so lange besteht, bis der Proxy sie nach Ablauf von $T_{\text{tcp}}$ trennt. Dies lässt sich wie folgt erklären:
 
 \begin{itemize}
-      \item \textbf{$P_{\text{amqp}}$}: Die \gls{amqp}-Verbindungen zwischen \gls{alptwo} und dem Broker sind langlebig und bleiben über viele Alarmmeldungen hinweg bestehen. Bei fehlgeschlagenen Requests schließt \gls{alptwo} lediglich den betroffenen Channel, nicht jedoch die \gls{tcp}-Verbindung (siehe Abschnitt~\ref{sub-sec:alptwo}). Die Verbindungen enden daher fast immer erst, wenn der Proxy sie trennt. Danach baut \gls{alptwo} eine neue Verbindung auf. Deshalb werden nahezu alle Verbindungen durch den Proxy getrennt.
+    \item \textbf{$P_{\text{amqp}}$}: Die \gls{amqp}-Verbindungen zwischen \gls{alptwo} und dem Broker sind langlebig und bleiben über viele Alarmmeldungen hinweg bestehen. Bei fehlgeschlagenen Requests schließt \gls{alptwo} lediglich den betroffenen Channel, nicht jedoch die \gls{tcp}-Verbindung (siehe Abschnitt~\ref{sub-sec:alptwo}). Die Verbindungen enden daher fast immer erst, wenn der Proxy sie trennt. Danach baut \gls{alptwo} eine neue Verbindung auf. Deshalb werden nahezu alle Verbindungen durch den Proxy getrennt.
 
-      \item \textbf{$P_{\text{srv}}$} und \textbf{$P_{\text{server}}$}: Sowohl \gls{alptwo} als auch der \textit{\gls{srv}~2 PROXY} verwenden persistente \gls{tcp}-Verbindungen (\textit{Keep-Alive}) zum Versenden von \gls{http}-Requests und verwenden sie für mehrere Requests wieder. Auch hier werden nahezu alle Verbindungen durch den Proxy getrennt.
+    \item \textbf{$P_{\text{srv}}$} und \textbf{$P_{\text{server}}$}: Sowohl \gls{alptwo} als auch der \textit{\gls{srv}~2 PROXY} verwenden persistente \gls{tcp}-Verbindungen (\textit{Keep-Alive}) zum Versenden von \gls{http}-Requests und verwenden sie für mehrere Requests wieder. Auch hier werden nahezu alle Verbindungen durch den Proxy getrennt.
 \end{itemize}
 
 Entscheidend für die \textit{Exactly-Once-Delivery} ist jedoch nicht, wie oft eine Verbindung getrennt wird, sondern wann: Die Fehlerbedingung $F$ aus \textit{Phase~1} liegt nur vor, wenn die Verbindung zwischen \gls{alptwo} und dem Broker getrennt wird, während \gls{alptwo} auf eine Antwort des \textit{\gls{srv}~2 PROXY} wartet. Um das zu prüfen, werden die Zeitpunkte der Trennungen im $P_{\text{amqp}}$ mit den Wartezeiträumen der \gls{alptwo}-Instanzen verglichen. Ein Wartezeitraum beginnt mit der Weiterleitung einer Alarmmeldung an den \textit{\gls{srv}~2 PROXY} und endet mit dem Empfang der Antwort. Tabelle~\ref{tab:exp-alps-realistic-f} zeigt das Ergebnis.
 
 \begin{table}[H]
-      \centering
-      \caption{Auftreten der Fehlerbedingung $F$ über alle Durchläufe des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps}.}
-      \label{tab:exp-alps-realistic-f}
-      \begin{tabular}{|l|r|}
-            \hline
-            \textbf{Kennzahl}                                            & \textbf{Wert} \\
-            \hline
-            Übertragungsversuche von \gls{alptwo} (inkl.~Wiederholungen) & 638.762       \\
-            Trennungen im $P_{\text{amqp}}$ während des Wartens ($F$)    & 142.950       \\
-            Anteil von $F$ an allen Übertragungsversuchen                & 22{,}4\,\%    \\
-            Durchläufe mit mindestens einem Auftreten von $F$            & 59/59         \\
-            \hline
-      \end{tabular}
+    \centering
+    \caption{Auftreten der Fehlerbedingung $F$ über alle Durchläufe des realitätsnahen Experiments unter Fehlerbedingungen in \acrshort{alps}.}
+    \label{tab:exp-alps-realistic-f}
+    \begin{tabular}{|l|r|}
+        \hline
+        \textbf{Kennzahl}                                            & \textbf{Wert} \\
+        \hline
+        Übertragungsversuche von \gls{alptwo} (inkl.~Wiederholungen) & 638.762       \\
+        Trennungen im $P_{\text{amqp}}$ während des Wartens ($F$)    & 142.950       \\
+        Anteil von $F$ an allen Übertragungsversuchen                & 22{,}4\,\%    \\
+        Durchläufe mit mindestens einem Auftreten von $F$            & 59/59         \\
+        \hline
+    \end{tabular}
 \end{table}
 
 Die Fehlerbedingung $F$ trat bei 22{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Der Anteil liegt damit nahe am angestrebten Wert von etwa 20\,\% (siehe Abschnitt~\ref{sub-sub:exp-alps-phase-4}), und im Mittel trat $F$ etwa $142.950 / 59 \approx 2.400$-mal pro Durchlauf auf. Das bedeutet, dass die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt wurde und die \textit{Exactly-Once-Delivery} in \gls{alps} trotzdem eingehalten wurde ($N_{\text{dup}} = 0$ in allen 59 Durchläufen).
@@ -495,15 +495,15 @@ Die Fehlerbedingung $F$ trat bei 22{,}4\,\% aller Übertragungsversuche auf, und
 Die folgenden Aspekte werden in den Experimenten nicht betrachtet:
 
 \begin{itemize}
-      \item \textbf{\gls{amqp}-Broker}: Es wird ein einzelner Broker ohne Cluster verwendet, und es werden keine Broker-Ausfälle simuliert. Die Ausfallsicherheit liegt in der Verantwortung des Brokers, da gängige Broker wie \textit{RabbitMQ} Hochverfügbarkeit durch replizierte Queues bieten. Vorausgesetzt wird, dass der Broker akzeptierte Alarmmeldungen dauerhaft speichert und nicht verliert.
+    \item \textbf{\gls{amqp}-Broker}: Es wird ein einzelner Broker ohne Cluster verwendet, und es werden keine Broker-Ausfälle simuliert. Die Ausfallsicherheit liegt in der Verantwortung des Brokers, da gängige Broker wie \textit{RabbitMQ} Hochverfügbarkeit durch replizierte Queues bieten. Vorausgesetzt wird, dass der Broker akzeptierte Alarmmeldungen dauerhaft speichert und nicht verliert.
 
-      \item \textbf{\gls{alpone}}: Es werden weder \gls{alpone}-Ausfälle noch \gls{tcp}-Fehler vor \gls{alpone} oder zwischen \gls{alpone} und dem Broker simuliert. Netzwerkfehler oder hohe Latenzen auf dieser Strecke können weiterhin dazu führen, dass Alarmmeldungen in der falschen Reihenfolge im Broker landen (siehe Abbildung~\ref{fig:in-order-diagram} in Abschnitt~\ref{sec:design-smells}, wobei \gls{marc} durch \gls{alpone}, \textit{Datenbank} durch den Broker und \textit{Mitarbeitende} durch \gls{alptwo} ersetzt werden). Aus diesem Grund beschränkt sich die Einhaltung der \textit{In-Order-Delivery} nur noch auf den Pfad: \textit{Broker $\rightarrow$ \gls{alptwo} $\rightarrow$ \gls{srvt}}.
+    \item \textbf{\gls{alpone}}: Es werden weder \gls{alpone}-Ausfälle noch \gls{tcp}-Fehler vor \gls{alpone} oder zwischen \gls{alpone} und dem Broker simuliert. Netzwerkfehler oder hohe Latenzen auf dieser Strecke können weiterhin dazu führen, dass Alarmmeldungen in der falschen Reihenfolge im Broker landen (siehe Abbildung~\ref{fig:in-order-diagram} in Abschnitt~\ref{sec:design-smells}, wobei \gls{marc} durch \gls{alpone}, \textit{Datenbank} durch den Broker und \textit{Mitarbeitende} durch \gls{alptwo} ersetzt werden). Aus diesem Grund beschränkt sich die Einhaltung der \textit{In-Order-Delivery} nur noch auf den Pfad: \textit{Broker $\rightarrow$ \gls{alptwo} $\rightarrow$ \gls{srvt}}.
 
-      \item \textbf{\gls{alptwo}}: Es werden keine \gls{alptwo}-Ausfälle simuliert. Die \gls{alptwo}-Instanzen sind zustandslos (\textit{stateless}) und werden bei einem Ausfall automatisch neu gestartet. Außerdem hat ein \gls{alptwo}-Ausfall auf die Delivery-Ga\-ran\-ti\-en dieselbe Wirkung wie ein \gls{tcp}-Fehler zwischen Broker und \gls{alptwo}: Der Broker erkennt den Verbindungsabbruch und aktiviert einen anderen Consumer. Dieser Fall wird durch die \gls{tcp}-Fehler im Experiment bereits abgedeckt.
+    \item \textbf{\gls{alptwo}}: Es werden keine \gls{alptwo}-Ausfälle simuliert. Die \gls{alptwo}-Instanzen sind zustandslos (\textit{stateless}) und werden bei einem Ausfall automatisch neu gestartet. Außerdem hat ein \gls{alptwo}-Ausfall auf die Delivery-Ga\-ran\-ti\-en dieselbe Wirkung wie ein \gls{tcp}-Fehler zwischen Broker und \gls{alptwo}: Der Broker erkennt den Verbindungsabbruch und aktiviert einen anderen Consumer. Dieser Fall wird durch die \gls{tcp}-Fehler im Experiment bereits abgedeckt.
 
-      \item \textbf{\gls{alpdedup}}: Es werden weder \gls{alpdedup}-Ausfälle noch \gls{tcp}-Fehler zwischen \gls{alpdedup} und \gls{srvt} simuliert. Da \gls{alpdedup} nach dem \textit{Sidecar-Prinzip} unmittelbar vor \gls{srvt} betrieben wird (siehe Abschnitt~\ref{sub-sec:alpdedup}), ist die Wahrscheinlichkeit solcher Fehler minimal~\citep{burns2018designing}. Ebenso werden innerhalb des \gls{alpdedup}-Clusters weder Ausfälle einzelner \textit{Mnesia}-Knoten noch \gls{tcp}-Fehler zwischen den Knoten und damit auch keine Netzwerkpartitionierungen simuliert. Der Grund dafür ist, dass die Implementierung von \gls{alpdedup} als \textit{Proof of Concept} dient und die \textit{Exactly-Once-Delivery} unter idealisierten Bedingungen zeigen soll (siehe Abschnitt~\ref{sub-sec:alpdedup}). Die Konsistenz der Datenbank bei Partitionierungen ist ein bekanntes, eigenständiges Problem verteilter Datenbanken~\citep{gilbert2002, davidson1985} und wird in dieser Masterarbeit nicht behandelt.
+    \item \textbf{\gls{alpdedup}}: Es werden weder \gls{alpdedup}-Ausfälle noch \gls{tcp}-Fehler zwischen \gls{alpdedup} und \gls{srvt} simuliert. Da \gls{alpdedup} nach dem \textit{Sidecar-Prinzip} unmittelbar vor \gls{srvt} betrieben wird (siehe Abschnitt~\ref{sub-sec:alpdedup}), ist die Wahrscheinlichkeit solcher Fehler minimal~\citep{burns2018designing}. Ebenso werden innerhalb des \gls{alpdedup}-Clusters weder Ausfälle einzelner \textit{Mnesia}-Knoten noch \gls{tcp}-Fehler zwischen den Knoten und damit auch keine Netzwerkpartitionierungen simuliert. Der Grund dafür ist, dass die Implementierung von \gls{alpdedup} als \textit{Proof of Concept} dient und die \textit{Exactly-Once-Delivery} unter idealisierten Bedingungen zeigen soll (siehe Abschnitt~\ref{sub-sec:alpdedup}). Die Konsistenz der Datenbank bei Partitionierungen ist ein bekanntes, eigenständiges Problem verteilter Datenbanken~\citep{gilbert2002, davidson1985} und wird in dieser Masterarbeit nicht behandelt.
 
-      \item \textbf{\gls{tcp}}: Paketverluste werden nicht simuliert. Paketverluste werden von \gls{tcp} durch Neuübertragungen ausgeglichen und wirken sich zunächst nur auf die Verzögerung aus~\citep{rfc9293, rfc6298}. Sie führen erst zu einem Verlust der Verbindung, wenn die Timeouts für Neuübertragungen überschritten werden~\citep{rfc9293, rfc1122}, und diese Konsequenz wird vom \textit{\gls{tcp}-Proxy} direkt provoziert.
+    \item \textbf{\gls{tcp}}: Paketverluste werden nicht simuliert. Paketverluste werden von \gls{tcp} durch Neuübertragungen ausgeglichen und wirken sich zunächst nur auf die Verzögerung aus~\citep{rfc9293, rfc6298}. Sie führen erst zu einem Verlust der Verbindung, wenn die Timeouts für Neuübertragungen überschritten werden~\citep{rfc9293, rfc1122}, und diese Konsequenz wird vom \textit{\gls{tcp}-Proxy} direkt provoziert.
 \end{itemize}
 
 \subsubsection{Ausführung der Experimente}
@@ -512,8 +512,8 @@ Die folgenden Aspekte werden in den Experimenten nicht betrachtet:
 Alle Experimente in diesem Abschnitt wurden mithilfe von \textit{Docker Compose}~\citep{docker_compose} durchgeführt und sind anhand von Konfigurationsdateien reproduzierbar. Weitere Informationen zum Ausführen der Experimente werden im Abschnitt~\ref{sec:appendix-reproducibility} erläutert. Die Experimente erfolgten auf zwei Hosts:
 
 \begin{itemize}
-      \item \textbf{Host~1}: Ein lokaler Host mit einer \textit{Intel(R) Core(TM) i5-9600K} CPU~\citep{intel_i5_9600k}, 16\,GB \gls{ram} und \textit{Ubuntu} 24.04.4~\citep{ubuntu_24_04}.
-      \item \textbf{Host~2}: Eine virtuelle Maschine bei \textit{Contabo}~\citep{contabo} mit 4 geteilten virtuellen CPUs (2{,}0\,GHz), 8\,GB \gls{ram} und \textit{Ubuntu} 24.04.3.
+    \item \textbf{Host~1}: Ein lokaler Host mit einer \textit{Intel(R) Core(TM) i5-9600K} CPU~\citep{intel_i5_9600k}, 16\,GB \gls{ram} und \textit{Ubuntu} 24.04.4~\citep{ubuntu_24_04}.
+    \item \textbf{Host~2}: Eine virtuelle Maschine bei \textit{Contabo}~\citep{contabo} mit 4 geteilten virtuellen CPUs (2{,}0\,GHz), 8\,GB \gls{ram} und \textit{Ubuntu} 24.04.3.
 \end{itemize}
 
 Die in \textit{Phase~3} und \textit{Phase~4} angegebenen absoluten Werte, wie $T_{\text{P80}}$ und die davon abgeleiteten Verbindungsdauern, stammen von \textbf{Host~1}. Auf \textbf{Host~2} ergaben sich andere Werte, die hier nicht gesondert dargestellt werden. Die Ergebnisse hinsichtlich der Delivery-Garantien sind auf beiden Hosts identisch.
