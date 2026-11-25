@@ -242,7 +242,7 @@ Der \textit{Alarmanlagen-Simulator} generiert periodisch Alarmmeldungen und send
 \subsubsection{Reproduzierbarkeit und Anzahl der Durchläufe}
 \label{sub-sub:lps-methodik}
 
-Die Experimente sind stochastisch, da Verbindungsdauern, Fehler und Latenzen zufällig erzeugt werden. Damit die Experimente reproduzierbar sind, werden alle Zufallswerte von einem Pseudozufallszahlengenerator erzeugt, der mit einem einstellbaren Seed $S$ initialisiert wird. Der Seed wird allen Hilfsservices (siehe Abschnitt~\ref{sub-sec:lps-experimente}) übergeben, die Zufallswerte erzeugen, also dem \textit{Alarmanlagen-Simulator} und dem \textit{\gls{tcp}-Proxy}. Bei gleichem Seed erzeugen diese Services in jedem Durchlauf dieselbe Zufallsfolge. Der Seed legt jedoch nicht das gesamte zeitliche Verhalten des Systems fest: Das Scheduling durch das \gls{os}, der Verbindungsaufbau sowie die Verarbeitungszeiten des Brokers und der \gls{lps}-Komponenten werden nicht durch den Seed gesteuert. Daher können sich Durchläufe mit demselben Seed in ihren Ergebnissen unterscheiden. Da ein einzelner Durchlauf keine belastbare Aussage erlaubt, wird jedes Experiment mit demselben Seed mehrfach wiederholt. Die Anzahl der benötigten Wiederholungen $n$ wird nach dem \textit{Success-Run-Theorem}~\citep{joshi2023, kececioglu1992} bestimmt:
+Die Experimente sind stochastisch, da Verbindungsdauern, Fehler und Latenzen zufällig erzeugt werden. Damit die Experimente reproduzierbar sind, werden alle Zufallswerte von einem Pseudozufallszahlengenerator erzeugt, der mit einem einstellbaren Seed $S$ initialisiert wird. Der Seed wird allen Hilfsservices übergeben, die Zufallswerte erzeugen, also dem \textit{Alarmanlagen-Simulator} und dem \textit{\gls{tcp}-Proxy}. Bei gleichem Seed erzeugen diese Services in jedem Durchlauf dieselbe Zufallsfolge. Der Seed legt jedoch nicht das gesamte zeitliche Verhalten des Systems fest: Das Scheduling durch das \gls{os}, der Verbindungsaufbau sowie die Verarbeitungszeiten des Brokers und der \gls{lps}-Komponenten werden nicht durch den Seed gesteuert. Daher können sich Durchläufe mit demselben Seed in ihren Ergebnissen unterscheiden. Da ein einzelner Durchlauf keine belastbare Aussage erlaubt, wird jedes Experiment mit demselben Seed mehrfach wiederholt. Die Anzahl der benötigten Wiederholungen $n$ wird nach dem \textit{Success-Run-Theorem}~\citep{joshi2023, kececioglu1992} bestimmt:
 
 \begin{equation}
 	n = \frac{\ln(1 - C)}{\ln(R)}
@@ -261,7 +261,7 @@ Jedes Experiment wird somit 59-mal wiederholt. Erfüllen alle 59 Durchläufe das
 \subsubsection{Verletzung der Exactly-Once-Delivery}
 \label{sub-sub:lps-verletzung-eod}
 
-In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzung der \textit{Exactly-Once-Delivery}-Garantie in \gls{lps} provoziert. Konkret wird die \gls{tcp}-Verbindung zwischen \gls{lptwo} und dem Broker unterbrochen, während \gls{lptwo} eine Alarmmeldung weitergeleitet hat und auf die Antwort des \textit{\gls{srv}~2 PROXY} wartet. Dadurch wird die gleiche Alarmmeldung mehrfach verarbeitet, was zu einer Verletzung der \textit{Exactly-Once-Delivery} führt. Der Aufbau des Experiments entspricht Abbildung~\ref{fig:exp-setup}. Als Broker wird \textit{HiveMQ CE} in Version \textit{2025.5} verwendet. Die für das Experiment ausgewählten Parameter werden in Tabelle~\ref{tab:exp-lps-eod-config} dargestellt.
+In diesem Abschnitt wird ein Experiment durchgeführt, das gezielt eine Verletzung der \textit{Exactly-Once-Delivery}-Garantie in \gls{lps} provoziert. Konkret wird die \gls{tcp}-Verbindung zwischen \gls{lptwo} und dem Broker unterbrochen, während \gls{lptwo} eine Alarmmeldung weitergeleitet hat und auf die Antwort des \textit{\gls{srv}~2 PROXY} wartet. Dadurch wird die gleiche Alarmmeldung mehrfach verarbeitet, was zu einer Verletzung der \textit{Exactly-Once-Delivery} führt. Der Aufbau des Experiments entspricht Abbildung~\ref{fig:exp-setup}. Als Broker wird \textit{HiveMQ CE}~\citep{hivemq_mqtt5_essentials} in Version \textit{2025.5} verwendet. Die für das Experiment ausgewählten Parameter werden in Tabelle~\ref{tab:exp-lps-eod-config} dargestellt.
 
 \begin{table}[H]
 	\centering
@@ -297,7 +297,7 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
 	\item $T_{\text{min,tcp}}^{\text{mqtt}}$, $T_{\text{max,tcp}}^{\text{mqtt}}$: Die maximale Verbindungsdauer im $P_{\text{mqtt}}$ liegt mit 4\,s unter der maximalen Verzögerung von 5{,}103\,s, sodass die Verbindung zum Broker getrennt werden kann, während \gls{lptwo} auf die Antwort wartet. $L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{max,tcp}}^{\text{mqtt}}$ sind lediglich Obergrenzen: Latenz und Verbindungsdauer werden jeweils zufällig zwischen 0 und dem Maximalwert bestimmt. Wären die Werte fest ($L_{\text{min,down}}^{\text{srv}} = L_{\text{max,down}}^{\text{srv}}$ und $T_{\text{min,tcp}}^{\text{mqtt}} = T_{\text{max,tcp}}^{\text{mqtt}}$, also genau 5{,}103\,s Verzögerung und 4\,s Verbindung), würde jede Verbindung getrennt, bevor die Antwort bei \gls{lptwo} ankommt. \gls{lptwo} könnte die Alarmmeldung nie bestätigen, der Broker würde sie endlos erneut zustellen und das Experiment nicht terminieren. Durch die Zufälligkeit kommt die Antwort hingegen irgendwann innerhalb der Verbindungsdauer an, die Alarmmeldung wird bestätigt und das Experiment endet.
 
-	\item $S$: Mit dem Seed $S = 6$ tritt die Verletzung konsistent auf (siehe Abschnitt~\ref{sub-sub:lps-methodik}).
+	\item $S$: Mit dem Seed $S = 6$ tritt die Verletzung konsistent auf.
 \end{itemize}
 
 Ein Durchlauf gilt als erfolgreich, wenn mindestens eine Alarmmeldung mehrfach beim \textit{Server-Simulator} ankommt, also $N_{\text{dup}} > 0$.
@@ -371,7 +371,7 @@ Die Auswahl der Parameter begründet sich wie folgt:
 
 	\item $T_{\text{tcp}}^{\text{mqtt}}$: Da in diesem Experiment keine Netzwerkfehler auftreten sollen, bleiben die Verbindungen im $P_{\text{mqtt}}$ unbegrenzt bestehen.
 
-	\item $S$: Mit dem Seed $S = 6$ tritt die Verletzung konsistent auf (siehe Abschnitt~\ref{sub-sub:lps-methodik}).
+	\item $S$: Mit dem Seed $S = 6$ tritt die Verletzung konsistent auf.
 \end{itemize}
 
 Ein Durchlauf gilt als erfolgreich, wenn mindestens eine Alarmmeldung als \textit{außerhalb der Reihenfolge} klassifiziert wird, also $N_{\text{ooo}} > 0$.

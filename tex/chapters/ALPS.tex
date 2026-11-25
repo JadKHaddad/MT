@@ -87,7 +87,7 @@ Analog zu \gls{lps} wird \gls{alps} transparent in das bestehende Legacy-System 
 \section{Implementierung}
 \label{sec:alps-implementierung}
 
-Für die Implementierung von \gls{alps} wird \textit{RabbitMQ}~\citep{rabbitmq_broker} als Message Broker verwendet und es werden folgende \gls{amqp}-Mechanismen in \gls{alpone} und \gls{alptwo} verwendet, um die Anforderungen in Abschnitt~\ref{sec:alps-anforderungen} zu erfüllen:
+Für die Implementierung von \gls{alps} wird \textit{RabbitMQ}~\citep{rabbitmq_broker} als Message Broker verwendet und es werden folgende \gls{amqp}-Mechanismen in \gls{alpone} und \gls{alptwo} verwendet, um die Anforderungen in Abschnitt~\ref{sub-sec:alps-in-order-delivery-garantie} zu erfüllen:
 
 \begin{itemize}
     \item \texttt{x-consistent-hash}
@@ -390,9 +390,9 @@ Ein Durchlauf gilt als erfolgreich, wenn $N_{\text{loss}} = 0$, $N_{\text{ooo}} 
         \hline
         \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
         \hline
-        $N_{\text{sent}}$     & 3.000                       & 177.000                & 100{,}0\,\%   \\
-        $N_{\text{received}}$ & 3.000                       & 177.000                & 100{,}0\,\%   \\
-        $N_{\text{unique}}$   & 3.000                       & 177.000                & 100{,}0\,\%   \\
+        $N_{\text{sent}}$     & 3000                        & 177.000                & 100{,}0\,\%   \\
+        $N_{\text{received}}$ & 3000                        & 177.000                & 100{,}0\,\%   \\
+        $N_{\text{unique}}$   & 3000                        & 177.000                & 100{,}0\,\%   \\
         $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
         $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
         $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
@@ -464,9 +464,9 @@ Analog zu \textit{Phase~3} gilt ein Durchlauf als erfolgreich, wenn $N_{\text{lo
         \hline
         \textbf{Metrik}       & \textbf{Wert pro Durchlauf} & \textbf{Gesamter Wert} & \textbf{Rate} \\
         \hline
-        $N_{\text{sent}}$     & 3.000                       & 177.000                & 100{,}0\,\%   \\
-        $N_{\text{received}}$ & 3.000                       & 177.000                & 100{,}0\,\%   \\
-        $N_{\text{unique}}$   & 3.000                       & 177.000                & 100{,}0\,\%   \\
+        $N_{\text{sent}}$     & 3000                        & 177.000                & 100{,}0\,\%   \\
+        $N_{\text{received}}$ & 3000                        & 177.000                & 100{,}0\,\%   \\
+        $N_{\text{unique}}$   & 3000                        & 177.000                & 100{,}0\,\%   \\
         $N_{\text{loss}}$     & 0                           & 0                      & 0{,}0\,\%     \\
         $N_{\text{ooo}}$      & 0                           & 0                      & 0{,}0\,\%     \\
         $N_{\text{dup}}$      & 0                           & 0                      & 0{,}0\,\%     \\
@@ -539,7 +539,7 @@ Entscheidend für die \textit{Exactly-Once-Delivery} ist jedoch nicht, wie oft e
     \end{tabular}
 \end{table}
 
-Die Fehlerbedingung $F$ trat bei 22{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Der Anteil liegt damit nahe am angestrebten Wert von etwa 20\,\% (siehe Tabelle~\ref{tab:exp-alps-realistic-config}), und im Mittel trat $F$ etwa $142.950 / 59 \approx 2.400$-mal pro Durchlauf auf. Das bedeutet, dass die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt wurde und die \textit{Exactly-Once-Delivery} in \gls{alps} trotzdem eingehalten wurde ($N_{\text{dup}} = 0$ in allen 59 Durchläufen).
+Die Fehlerbedingung $F$ trat bei 22{,}4\,\% aller Übertragungsversuche auf, und zwar in jedem der 59 Durchläufe. Der Anteil liegt damit nahe am angestrebten Wert von etwa 20\,\% (siehe Tabelle~\ref{tab:exp-alps-realistic-config}), und im Mittel trat $F$ etwa $142.950 / 59 \approx 2400$-mal pro Durchlauf auf. Das bedeutet, dass die Situation, unter der \gls{lps} die \textit{Exactly-Once-Delivery} verletzt hat, in jedem Durchlauf vielfach herbeigeführt wurde und die \textit{Exactly-Once-Delivery} in \gls{alps} trotzdem eingehalten wurde ($N_{\text{dup}} = 0$ in allen 59 Durchläufen).
 
 \subsubsection{Limitationen der Experimente}
 \label{sub-sub:exp-alps-limitationen}
