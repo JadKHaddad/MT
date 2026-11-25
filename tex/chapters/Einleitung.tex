@@ -26,6 +26,10 @@ Bhola et al.~\citep{bhola} untersuchen die \textit{Exactly-Once-Delivery} in inh
 
 Die Arbeiten von Baldoni et al. und Malekpour et al. garantieren die \textit{In-Order-Delivery} nicht: Baldoni et al. erkennen und markieren Verletzungen lediglich, Malekpour et al. verringern sie nur mit hoher Wahrscheinlichkeit. Beide behandeln weder den Verlust noch Duplikate von Nachrichten und streben keine \textit{Exactly-Once-Delivery} an. Zudem müssen Publisher und Subscriber das jeweilige Verfahren selbst umsetzen, etwa durch das Vergeben und Auswerten von Zeitstempeln oder durch den Umgang mit markierten Nachrichten. In einem Legacy-System ist dies riskant, da das Verfahren in jeden Endpunkt eingebracht werden muss und die Anwendung markierte Nachrichten ohne Änderung des Quellcodes nicht behandeln kann. Bhola et al. erreichen zwar beide Garantien, jedoch nicht bis zu den nachgelagerten Services. Außerdem ist ihr Protokoll in den Brokern selbst implementiert und daher nicht ohne Weiteres mit häufig eingesetzten Message-Brokern umsetzbar. Diese Lücke motiviert das Ziel dieser Masterarbeit.
 
+Aus dieser Lücke ergibt sich die folgende Forschungsfrage, mit der sich diese Masterarbeit beschäftigt:
+
+\paragraph{Forschungsfrage:} Wie kann ein \textit{Architektur-Reengi\-neer\-ing} eines verteilten Legacy-Systems durchgeführt werden, sodass die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} auf dem Pfad vom Message Broker bis zum letzten Service der Verarbeitungskette eingehalten werden?
+
 \newpage
 
 \section{Zielsetzung}
@@ -40,10 +44,6 @@ Ziel dieser Masterarbeit ist, ein \textit{Architektur-Reengineering} für vertei
 
       \item \textbf{Experimentelle Evaluation von \gls{alps}}: Die Einhaltung der Delivery-Garantien und die Vermeidung von Nachrichtenverlust bei \gls{alps} werden sowohl unter Fehlerbedingungen als auch unter realitätsnahen Bedingungen experimentell überprüft.
 \end{itemize}
-
-Diese Masterarbeit beschäftigt sich mit der folgenden Forschungsfrage:
-
-\paragraph{Forschungsfrage:} Wie kann ein \textit{Architektur-Reengi\-neer\-ing} eines verteilten Legacy-Systems durchgeführt werden, sodass die \textit{Exactly-Once-Delivery} und die \textit{In-Order-Delivery} auf dem Pfad vom Message Broker bis zum letzten Service der Verarbeitungskette eingehalten werden?
 
 \newpage
 
