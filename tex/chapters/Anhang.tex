@@ -54,7 +54,7 @@ docker pull eclipse-mosquitto:2.1.2-alpine
 
 \subsection{Konfigurationsdateien anlegen}
 
-Vor dem Start der Experimente werden die benötigten Konfigurationen als \gls{yaml}-Dateien angelegt. Diese Dateien enthalten die Parameter für Last, Fehlerbedingungen und Laufzeit der Experimente. Eine Konfigurationsdatei besteht aus einem allgemeinen Teil und einem szenariospezifischen Teil, entweder für \gls{alps} oder für \gls{lps}. Parameter, die mit \texttt{(optional)} gekennzeichnet sind, können weggelassen werden. Fehlerraten werden als Wahrscheinlichkeit zwischen \texttt{0} und \texttt{1} angegeben. Zeitwerte werden als Dauerangaben angegeben, z.\,B.~\texttt{500ms} oder \texttt{10s}.
+Vor dem Start der Experimente werden die benötigten Konfigurationen als \gls{yaml}-Dateien angelegt. Diese Dateien enthalten die Parameter für Last, Fehlerbedingungen und Laufzeit der Experimente. Eine Konfigurationsdatei besteht aus einem allgemeinen Teil und einem szenariospezifischen Teil, entweder für \gls{alps} oder für \gls{lps}. Parameter, die mit \texttt{(optional)} gekennzeichnet sind, können weggelassen werden. Fehlerraten werden als Wahrscheinlichkeit zwischen \texttt{0} und \texttt{1} angegeben. Zeitwerte werden als Dauer angegeben, z.\,B.~\texttt{500ms} oder \texttt{10s}.
 
 \begin{yamlcode}[title={Allgemeiner Teil}]
 # Zielverzeichnis der erzeugten Simulationsartefakte
@@ -148,7 +148,7 @@ server:
       max_up_duration: 10s
       # (optional) Minimale Dauer einer Verbindung
       min_up_duration: 1s
-      # (optional) Künstliche Latenz per Byte
+      # (optional) Künstliche Latenz pro Byte
       latency:
         # (optional) Maximale Verzögerung in Upstream-Richtung
         max_upstream_latency: 10ms
