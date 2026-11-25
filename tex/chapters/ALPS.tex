@@ -22,7 +22,7 @@ Die Anforderungen an \gls{alps} lassen sich direkt aus den Vorteilen und Limitat
 \section{Architektur}
 \label{sec:alps-architektur}
 
-Die Erfüllung der beschriebenen Anforderungen erfordert Modifikationen an der bestehenden Architektur von \gls{lps}. Dafür übernimmt \gls{alps} die gleiche asynchrone Architektur von \gls{lps} mit Modifikationen an den benutzten Technologien sowie Transportprotokollen, um Kontrolle über den Fluss der Alarmmeldungen zu gewährleisten und Koordination zwischen den Komponenten zu ermöglichen. Zusätzlich werden fehlende Funktionalitäten bei \gls{lps} wie \textit{Idempotenz} durch weitere Komponenten ergänzt. Als Resultat ergibt sich eine neue modifizierte Architektur, die aus vier Kernkomponenten besteht:
+Die Erfüllung der beschriebenen Anforderungen erfordert Modifikationen an der bestehenden Architektur von \gls{lps}. Dafür übernimmt \gls{alps} die gleiche asynchrone Architektur von \gls{lps} mit Modifikationen an den benutzten Technologien sowie Transportprotokollen, um Kontrolle über den Fluss der Alarmmeldungen zu gewährleisten und Koordination zwischen den Komponenten zu ermöglichen. Zusätzlich werden fehlende Funktionalitäten bei \gls{lps} wie \textit{Idempotenz} durch weitere Komponenten ergänzt. Als Resultat ergibt sich eine modifizierte Architektur, die aus vier Kernkomponenten besteht:
 
 \begin{itemize}
     \item \textbf{\gls{alpone}}: Übernimmt die Aufgaben von \gls{lpone}. Wird hinter \gls{srv}~1 positioniert. Empfängt Alarmmeldungen von \gls{srv}~1 und leitet sie an den Message Broker weiter. Im Unterschied zu \gls{lpone} wird dafür \gls{amqp} statt \gls{mqtt} verwendet, und die Alarmmeldungen werden anhand der \texttt{device\_id} auf Queues verteilt (siehe Abschnitt~\ref{sub-sec:alpone}).
@@ -529,7 +529,7 @@ Entscheidend für die \textit{Exactly-Once-Delivery} ist jedoch nicht, wie oft e
     \label{tab:exp-alps-realistic-f}
     \begin{tabular}{|l|r|}
         \hline
-        \textbf{Kennzahl}                                            & \textbf{Wert} \\
+        \textbf{Metrik}                                              & \textbf{Wert} \\
         \hline
         Übertragungsversuche von \gls{alptwo} (inkl.~Wiederholungen) & 638.762       \\
         Trennungen im $P_{\text{amqp}}$ während des Wartens ($F$)    & 142.950       \\
@@ -549,7 +549,7 @@ Die folgenden Aspekte werden in den Experimenten nicht betrachtet:
 \begin{itemize}
     \item \textbf{\gls{amqp}-Broker}: Es wird ein einzelner Broker ohne Cluster verwendet, und es werden keine Broker-Ausfälle simuliert. Die Ausfallsicherheit liegt in der Verantwortung des Brokers, da gängige Broker wie \textit{RabbitMQ} Hochverfügbarkeit durch replizierte Queues bieten. Vorausgesetzt wird, dass der Broker akzeptierte Alarmmeldungen dauerhaft speichert und nicht verliert.
 
-    \item \textbf{\gls{alpone}}: Es werden weder \gls{alpone}-Ausfälle noch \gls{tcp}-Fehler vor \gls{alpone} oder zwischen \gls{alpone} und dem Broker simuliert. Netzwerkfehler oder hohe Latenzen auf dieser Strecke können weiterhin dazu führen, dass Alarmmeldungen in der falschen Reihenfolge im Broker landen (siehe Abbildung~\ref{fig:in-order-diagram} in Abschnitt~\ref{sec:design-smells}, wobei \gls{marc} durch \gls{alpone}, \textit{Datenbank} durch den Broker und \textit{Mitarbeitende} durch \gls{alptwo} ersetzt werden). Aus diesem Grund beschränkt sich die Einhaltung der \textit{In-Order-Delivery} nur noch auf den Pfad: \textit{Broker $\rightarrow$ \gls{alptwo} $\rightarrow$ \gls{srvt}}.
+    \item \textbf{\gls{alpone}}: Es werden weder \gls{alpone}-Ausfälle noch \gls{tcp}-Fehler vor \gls{alpone} oder zwischen \gls{alpone} und dem Broker simuliert. Netzwerkfehler oder hohe Latenzen auf dieser Strecke können weiterhin dazu führen, dass Alarmmeldungen in der falschen Reihenfolge im Broker landen (siehe Abbildung~\ref{fig:in-order-diagram} in Abschnitt~\ref{sec:design-smells}, wobei \gls{marc} durch \gls{alpone}, \textit{Datenbank} durch den Broker und \textit{Mitarbeitende} durch \gls{alptwo} ersetzt werden). Aus diesem Grund beschränkt sich die Einhaltung der \textit{In-Order-Delivery} auf den Pfad: \textit{Broker $\rightarrow$ \gls{alptwo} $\rightarrow$ \gls{srvt}}.
 
     \item \textbf{\gls{alptwo}}: Es werden keine \gls{alptwo}-Ausfälle simuliert. Die \gls{alptwo}-Instanzen sind zustandslos (\textit{stateless}) und werden bei einem Ausfall automatisch neu gestartet. Außerdem hat ein \gls{alptwo}-Ausfall auf die Delivery-Ga\-ran\-ti\-en dieselbe Wirkung wie ein \gls{tcp}-Fehler zwischen Broker und \gls{alptwo}: Der Broker erkennt den Verbindungsabbruch und aktiviert einen anderen Consumer. Dieser Fall wird durch die \gls{tcp}-Fehler im Experiment bereits abgedeckt.
 
