@@ -23,7 +23,7 @@ Die experimentelle Evaluation in Abschnitt~\ref{sub-sec:alps-experimentelle-eval
 \begin{itemize}
     \item \textbf{Overhead durch \gls{alpdedup}}: Jede Alarmmeldung erfordert eine Lese- und eine Schreiboperation in der replizierten Datenbank. Bei einer Replikation über mehrere Rechenzentren kann dies die Verarbeitungszeit erhöhen.
 
-    \item \textbf{Durchsatz unter erhöhter Last}: Durch \texttt{x-single-active-\allowbreak consumer} und \texttt{prefetch\_count = 1} verarbeitet jeder Consumer innerhalb von \gls{alptwo} zu jeder Zeit nur eine Alarmmeldung. Der maximale Durchsatz von \gls{alps} ist somit durch die Anzahl $N$ der Queues begrenzt. Es sollte untersucht werden, wie sich der Durchsatz bei steigender Last und steigendem $N$ verhält.
+    \item \textbf{Durchsatz unter erhöhter Last}: Durch \texttt{x-single-active-\allowbreak consumer} und \texttt{prefetch\_count = 1} verarbeitet jeder Consumer innerhalb \gls{alptwo} zu jeder Zeit nur eine Alarmmeldung. Der maximale Durchsatz von \gls{alps} ist somit durch die Anzahl $N$ der Queues begrenzt. Es sollte untersucht werden, wie sich der Durchsatz bei steigender Last und steigendem $N$ verhält.
 
     \item \textbf{Engpass durch fehlschlagende Alarmmeldungen}: Da fehlgeschlagene Alarmmeldungen in die Queue zurückgestellt werden, blockiert eine wiederholt fehlschlagende Alarmmeldung die gesamte Queue und damit alle Alarmanlagen, die dieser Queue zugeordnet sind. Zukünftige Arbeiten sollten Strategien untersuchen, die diesen Engpass auflösen, ohne die \textit{In-Order-Delivery} pro Alarmanlage zu verletzen.
 
