@@ -15,6 +15,26 @@ Die in Abschnitt~\ref{sub-sec:lps-experimente} und Abschnitt~\ref{sub-sec:alps-e
   \item Installiertes Docker Compose~\citep{docker_compose}.
 \end{itemize}
 
+\subsection{Submodul des LPS-Repositorys laden}
+
+Der folgende Befehl lädt das Submodul des \gls{lps}-Repositorys.
+
+\begin{bashcode}[title={Submodul laden}]
+git submodule update --init
+\end{bashcode}
+
+\subsection{Plugin des Retry-Mechanismus bauen}
+
+Die folgenden Befehle bauen das HiveMQ-Plugin.
+
+\begin{bashcode}[title={Plugin des Retry-Mechanismus bauen}]
+cd legacy-proxy-system/hivemq
+
+./build_retry_extension.sh
+\end{bashcode}
+
+\newpage
+
 \subsection{Docker-Images vorbereiten}
 
 Die folgenden Befehle bauen bzw. laden alle benötigten Docker-Images im Root-Verzeichnis.
@@ -33,9 +53,7 @@ docker build -t lps-scripts -f scripts/Dockerfile scripts
 # Kernkomponenten von LPS (LP I, LP II) und Vertreter der Legacy-Services
 # (SRV 1 PROXY, SRV 2 PROXY)
 docker build -t lps-mqtt-python -f legacy-proxy-system-docker/Dockerfile.python legacy-proxy-system
-\end{bashcode}
 
-\begin{bashcode}[title={Docker-Images bauen}]
 # HiveMQ-Broker mit den verwendeten Plugins
 docker build -t lps-mqtt-hivemq -f legacy-proxy-system-docker/Dockerfile.hivemq legacy-proxy-system
 \end{bashcode}
@@ -244,7 +262,7 @@ Die Simulationen werden aus dem Verzeichnis gestartet, in dem die Konfigurations
 docker run --rm -it \
 -v /var/run/docker.sock:/var/run/docker.sock \
 -v "$(pwd):/app" \
-    jadkhaddad/lps-rs \
+    lps-rs \
     simulation-runner \
     --config-file <amqp-config.yaml> \
     --root-abs-path $(pwd)
@@ -254,7 +272,7 @@ docker run --rm -it \
 docker run --rm -it \
 -v /var/run/docker.sock:/var/run/docker.sock \
 -v "$(pwd):/app" \
-    jadkhaddad/lps-rs \
+    lps-rs \
     mqtt-simulation-runner \
     --config-file <mqtt-config.yaml> \
     --root-abs-path $(pwd)
