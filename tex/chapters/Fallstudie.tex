@@ -322,6 +322,8 @@ Ein Durchlauf gilt als erfolgreich, wenn mindestens eine Alarmmeldung mehrfach b
 	\end{tabular}
 \end{table}
 
+\newpage
+
 In allen 59 Durchläufen wurde die \textit{Exactly-Once-Delivery} verletzt. Eine mög\-li\-che Erklärung ist: \gls{lptwo} konsumiert eine Alarmmeldung aus dem Broker und leitet sie an den \textit{\gls{srv}~2 PROXY} weiter. Während die Alarmmeldung verarbeitet wird, wird die Verbindung zwischen \gls{lptwo} und dem Broker getrennt. \gls{lptwo} baut die Verbindung erneut auf, konsumiert die gleiche Alarmmeldung erneut und leitet sie weiter. Dadurch wird die gleiche Alarmmeldung mehrfach verarbeitet. Jedes Duplikat entspricht somit einem Verarbeitungsversuch, bei dem die Verbindung vor Abschluss der Verarbeitung getrennt wurde. Erst wenn die Verarbeitung innerhalb der Verbindungsdauer abgeschlossen wird, bestätigt \gls{lptwo} die Alarmmeldung und der Broker stellt sie nicht erneut zu. Abbildung~\ref{fig:lps-exactly-once-delivery-violation-sequence} veranschaulicht diese Erklärung als Sequenzdiagramm. Da in allen 59 Durchläufen das Erfolgskriterium erfüllt wurde, kann mit einer Konfidenz von 95\,\% behauptet werden, dass ein Durchlauf mit dem Seed $S = 6$ die Verletzung der \textit{Exactly-Once-Delivery} mit einer Wahrscheinlichkeit von mindestens 95\,\% reproduziert. Damit ist gezeigt, dass \gls{lps} beim Auftreten von Netzwerkfehlern zwischen \gls{lptwo} und dem Broker die \textit{Exactly-Once-Delivery}-Garantie verletzt.
 
 \begin{figure}[H]
